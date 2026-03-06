@@ -13,7 +13,7 @@ ForgeItemSlot < UIItem
 ForgeWindow < MainWindow
   id: forgeWindow
   !text: tr('Forge Item')
-  size: 700 580
+  size: 700 595
   @onEscape: modules.game_forge.toggle()
 
   TabBar
@@ -117,10 +117,12 @@ ForgeClassificationTab < Panel
   UIWidget
     id: classArrow
     image-source: /images/ui/arrow_horizontal
-    size: 24 63
+    height: 63
     anchors.verticalCenter: classSourcePanel.verticalCenter
     anchors.left: classSourcePanel.right
+    anchors.right: classResultPanel.left
     margin-left: 15
+    margin-right: 15
 
   FlatPanel
     id: classResultPanel
@@ -181,7 +183,7 @@ ForgeClassificationTab < Panel
     anchors.top: classSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 185
+    height: 200
     margin-top: 8
 
     Label
@@ -225,10 +227,10 @@ ForgeClassificationTab < Panel
       font: verdana-11px-antialised
       color: #ffcc00
 
-    Button
+    UIButton
       id: classBonusButton
       !text: tr('+20%%')
-      size: 48 50
+      size: 64 66
       image-source: /images/ui/imbue_green
       image-color: #666666
       anchors.top: classCostLabel.bottom
@@ -236,6 +238,7 @@ ForgeClassificationTab < Panel
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
+      text-offset: 0 20
 
       $on:
         image-color: #ffffff
@@ -550,10 +553,12 @@ ForgeToolsTab < Panel
   UIWidget
     id: toolsArrow
     image-source: /images/ui/arrow_horizontal
-    size: 24 63
+    height: 63
     anchors.verticalCenter: toolsSourcePanel.verticalCenter
     anchors.left: toolsSourcePanel.right
+    anchors.right: toolsResultPanel.left
     margin-left: 15
+    margin-right: 15
 
   FlatPanel
     id: toolsResultPanel
@@ -614,7 +619,7 @@ ForgeToolsTab < Panel
     anchors.top: toolsSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 185
+    height: 200
     margin-top: 8
 
     Label
@@ -658,10 +663,10 @@ ForgeToolsTab < Panel
       font: verdana-11px-antialised
       color: #ffcc00
 
-    Button
+    UIButton
       id: toolsBonusButton
       !text: tr('+20%%')
-      size: 48 50
+      size: 64 66
       image-source: /images/ui/imbue_green
       image-color: #666666
       anchors.top: toolsCostLabel.bottom
@@ -669,6 +674,7 @@ ForgeToolsTab < Panel
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
+      text-offset: 0 20
 
       $on:
         image-color: #ffffff
