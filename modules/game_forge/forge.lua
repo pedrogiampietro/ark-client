@@ -7,19 +7,19 @@ FORGE_OPCODE = 51
 local TIER_NAMES = {
   [0] = 'None',
   [1] = 'Common',
-  [2] = 'Rare',
-  [3] = 'Epic',
-  [4] = 'Legendary',
-  [5] = 'Mythical'
+  [2] = 'Uncommon',
+  [3] = 'Rare',
+  [4] = 'Epic',
+  [5] = 'Legendary'
 }
 
 local TIER_COLORS = {
   [0] = '#c0c0c0',
   [1] = '#ffffff',
-  [2] = '#3399ff',
-  [3] = '#cc66ff',
-  [4] = '#ffcc00',
-  [5] = '#ff3333'
+  [2] = '#00cc00',
+  [3] = '#3399ff',
+  [4] = '#cc66ff',
+  [5] = '#ffcc00'
 }
 
 local FORGE_RUNES = {

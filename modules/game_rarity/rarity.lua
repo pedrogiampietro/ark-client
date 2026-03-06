@@ -5,10 +5,10 @@ RARITY_OPCODE = 50
 
 local rarityImages = {
   [1] = '/images/ui/rarity_white',
-  [2] = '/images/ui/rarity_blue',
-  [3] = '/images/ui/rarity_purple',
-  [4] = '/images/ui/rarity_gold',
-  [5] = '/images/ui/rarity_red',
+  [2] = '/images/ui/rarity_green',
+  [3] = '/images/ui/rarity_blue',
+  [4] = '/images/ui/rarity_purple',
+  [5] = '/images/ui/rarity_gold',
 }
 
 -- Storage for rarity tiers
