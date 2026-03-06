@@ -190,11 +190,21 @@ ForgeClassificationTab < Panel
       font: verdana-11px-antialised
       color: #c0c0c0
 
+    Label
+      id: classMaterialLabel
+      text-align: center
+      anchors.top: classChanceLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
     ProgressBar
       id: classProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: classChanceLabel.bottom
+      anchors.top: classMaterialLabel.bottom
       margin-left: 60
       margin-right: 60
       margin-top: 6
@@ -338,12 +348,22 @@ ForgeAttributesTab < Panel
     anchors.top: attrItemPanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 65
+    height: 80
     margin-top: 8
+
+    Label
+      id: attrMaterialLabel
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
 
     ProgressBar
       id: attrProgressBar
-      anchors.top: parent.top
+      anchors.top: attrMaterialLabel.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin-left: 60
@@ -551,11 +571,21 @@ ForgeToolsTab < Panel
       font: verdana-11px-antialised
       color: #c0c0c0
 
+    Label
+      id: toolsMaterialLabel
+      text-align: center
+      anchors.top: toolsChanceLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
     ProgressBar
       id: toolsProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: toolsChanceLabel.bottom
+      anchors.top: toolsMaterialLabel.bottom
       margin-left: 60
       margin-right: 60
       margin-top: 6

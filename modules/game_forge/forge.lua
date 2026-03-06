@@ -22,6 +22,16 @@ local TIER_COLORS = {
   [5] = '#ff3333'
 }
 
+local FORGE_RUNES = {
+  TIER_UP = { id = 2312, name = 'Rune of Tiering' },
+  UPGRADE = { id = 2284, name = 'Rune of Upgrading' },
+  ENCHANT_ADD = { id = 2276, name = 'Rune of Enchanting' },
+  ENCHANT_REROLL_LAST = { id = 2272, name = 'Rune of Rolling' },
+  ENCHANT_REROLL_ALL = { id = 2296, name = 'Rune of Total Rolling' },
+  ENCHANT_REMOVE_LAST = { id = 2270, name = 'Rune of Cleansing' },
+  ENCHANT_REMOVE_ALL = { id = 2298, name = 'Rune of Total Cleansing' },
+}
+
 -- State
 forgeWindow = nil
 local forgeTabBar = nil
@@ -285,6 +295,7 @@ function updateClassInfo(data)
   local nextTier = data.nextTier or 0
   local chance = data.chance or 0
   local canForge = data.canForge or false
+  local hasRune = data.hasRune or false
 
   local tierLabel = tab:recursiveGetChildById('classSourceTierLabel')
   if tierLabel then
@@ -311,8 +322,20 @@ function updateClassInfo(data)
     else chanceLabel:setColor('#ff3333') end
   end
 
+  local matLabel = tab:recursiveGetChildById('classMaterialLabel')
+  if matLabel then
+    local rune = FORGE_RUNES.TIER_UP
+    if hasRune then
+      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [OK]')
+      matLabel:setColor('#00ff00')
+    else
+      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [' .. tr('Missing') .. ']')
+      matLabel:setColor('#ff3333')
+    end
+  end
+
   local forgBtn = tab:recursiveGetChildById('classForgeButton')
-  if forgBtn then forgBtn:setEnabled(canForge and not forging) end
+  if forgBtn then forgBtn:setEnabled(canForge and hasRune and not forging) end
 end
 
 function clearClassInfo()
@@ -329,6 +352,8 @@ function clearClassInfo()
   updatePlaceholder(tab, 'classPlaceholder', false)
   local msg = tab:recursiveGetChildById('classResultMessage')
   if msg then msg:setText('') end
+  local mat = tab:recursiveGetChildById('classMaterialLabel')
+  if mat then mat:setText('') end
 end
 
 -- ==========================================
@@ -379,6 +404,7 @@ function updateAttrInfo(data)
   local tier = data.tier or 0
   local slotsUsed = data.slotsUsed or 0
   local slotsMax = data.slotsMax or 0
+  local runeFlags = data.runeFlags or {}
 
   local itemInfo = tab:recursiveGetChildById('attrItemInfo')
   if itemInfo then
@@ -409,15 +435,41 @@ function updateAttrInfo(data)
   local hasEnchants = slotsUsed > 0
 
   local btnStates = {
-    { id = 'attrAddEnchant',  enabled = hasTier and hasFreeSlots },
-    { id = 'attrRerollLast',  enabled = hasEnchants },
-    { id = 'attrRerollAll',   enabled = hasEnchants },
-    { id = 'attrRemoveLast',  enabled = hasEnchants },
-    { id = 'attrRemoveAll',   enabled = hasEnchants },
+    { id = 'attrAddEnchant',  enabled = hasTier and hasFreeSlots, runeKey = 'hasAdd' },
+    { id = 'attrRerollLast',  enabled = hasEnchants, runeKey = 'hasRerollLast' },
+    { id = 'attrRerollAll',   enabled = hasEnchants, runeKey = 'hasRerollAll' },
+    { id = 'attrRemoveLast',  enabled = hasEnchants, runeKey = 'hasRemoveLast' },
+    { id = 'attrRemoveAll',   enabled = hasEnchants, runeKey = 'hasRemoveAll' },
   }
   for _, bs in ipairs(btnStates) do
     local btn = tab:recursiveGetChildById(bs.id)
-    if btn then btn:setEnabled(bs.enabled and not forging) end
+    if btn then
+      local hasRune = runeFlags[bs.runeKey] or false
+      btn:setEnabled(bs.enabled and hasRune and not forging)
+    end
+  end
+
+  -- Show material summary
+  local matLabel = tab:recursiveGetChildById('attrMaterialLabel')
+  if matLabel then
+    local parts = {}
+    local runeInfo = {
+      { key = 'hasAdd', name = FORGE_RUNES.ENCHANT_ADD.name },
+      { key = 'hasRerollLast', name = FORGE_RUNES.ENCHANT_REROLL_LAST.name },
+      { key = 'hasRemoveLast', name = FORGE_RUNES.ENCHANT_REMOVE_LAST.name },
+    }
+    for _, ri in ipairs(runeInfo) do
+      local has = runeFlags[ri.key] or false
+      local status = has and '[OK]' or '[' .. tr('Missing') .. ']'
+      table.insert(parts, ri.name .. ' ' .. status)
+    end
+    matLabel:setText(table.concat(parts, '  |  '))
+    -- Color based on whether any rune is missing
+    local anyMissing = false
+    for _, v in pairs(runeFlags) do
+      if not v then anyMissing = true break end
+    end
+    matLabel:setColor(anyMissing and '#ffcc00' or '#00ff00')
   end
 end
 
@@ -441,6 +493,8 @@ function clearAttrInfo()
   updatePlaceholder(tab, 'attrPlaceholder', false)
   local msg = tab:recursiveGetChildById('attrResultMessage')
   if msg then msg:setText('') end
+  local mat = tab:recursiveGetChildById('attrMaterialLabel')
+  if mat then mat:setText('') end
 end
 
 -- ==========================================
@@ -472,6 +526,7 @@ function updateToolsInfo(data)
   local maxLevel = data.maxLevel or 9
   local chance = data.chance or 0
   local canForge = data.canForge or false
+  local hasRune = data.hasRune or false
 
   local levelLabel = tab:recursiveGetChildById('toolsSourceLevelLabel')
   if levelLabel then
@@ -497,8 +552,20 @@ function updateToolsInfo(data)
     else chanceLabel:setColor('#ff3333') end
   end
 
+  local matLabel = tab:recursiveGetChildById('toolsMaterialLabel')
+  if matLabel then
+    local rune = FORGE_RUNES.UPGRADE
+    if hasRune then
+      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [OK]')
+      matLabel:setColor('#00ff00')
+    else
+      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [' .. tr('Missing') .. ']')
+      matLabel:setColor('#ff3333')
+    end
+  end
+
   local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
-  if forgBtn then forgBtn:setEnabled(canForge and not forging) end
+  if forgBtn then forgBtn:setEnabled(canForge and hasRune and not forging) end
 end
 
 function clearToolsInfo()
@@ -515,6 +582,8 @@ function clearToolsInfo()
   updatePlaceholder(tab, 'toolsPlaceholder', false)
   local msg = tab:recursiveGetChildById('toolsResultMessage')
   if msg then msg:setText('') end
+  local mat = tab:recursiveGetChildById('toolsMaterialLabel')
+  if mat then mat:setText('') end
 end
 
 -- ==========================================
@@ -524,19 +593,20 @@ end
 function onForgeData(protocol, opcode, buffer)
   if not buffer or #buffer == 0 then return end
 
-  -- CLASS_INFO:currentTier,nextTier,chance,canForge
+  -- CLASS_INFO:currentTier,nextTier,chance,canForge,hasRune
   if buffer:sub(1, 11) == 'CLASS_INFO:' then
     local parts = splitStr(buffer:sub(12), ',')
-    if #parts >= 4 then
+    if #parts >= 5 then
       updateClassInfo({
         currentTier = tonumber(parts[1]) or 0,
         nextTier = tonumber(parts[2]) or 0,
         chance = tonumber(parts[3]) or 0,
-        canForge = parts[4] == '1'
+        canForge = parts[4] == '1',
+        hasRune = parts[5] == '1'
       })
     end
 
-  -- ATTR_INFO:tier,slotsUsed,slotsMax|enchName1=val1|enchName2=val2...
+  -- ATTR_INFO:tier,slotsUsed,slotsMax,hasAdd,hasRerollLast,hasRerollAll,hasRemoveLast,hasRemoveAll|enchName1=val1|...
   elseif buffer:sub(1, 10) == 'ATTR_INFO:' then
     local sections = splitStr(buffer:sub(11), '|')
     if #sections >= 1 then
@@ -555,19 +625,27 @@ function onForgeData(protocol, opcode, buffer)
         tier = tonumber(mainParts[1]) or 0,
         slotsUsed = tonumber(mainParts[2]) or 0,
         slotsMax = tonumber(mainParts[3]) or 0,
+        runeFlags = {
+          hasAdd = mainParts[4] == '1',
+          hasRerollLast = mainParts[5] == '1',
+          hasRerollAll = mainParts[6] == '1',
+          hasRemoveLast = mainParts[7] == '1',
+          hasRemoveAll = mainParts[8] == '1',
+        },
         enchantments = enchantments
       })
     end
 
-  -- TOOLS_INFO:level,maxLevel,chance,canForge
+  -- TOOLS_INFO:level,maxLevel,chance,canForge,hasRune
   elseif buffer:sub(1, 11) == 'TOOLS_INFO:' then
     local parts = splitStr(buffer:sub(12), ',')
-    if #parts >= 4 then
+    if #parts >= 5 then
       updateToolsInfo({
         level = tonumber(parts[1]) or 0,
         maxLevel = tonumber(parts[2]) or 0,
         chance = tonumber(parts[3]) or 0,
-        canForge = parts[4] == '1'
+        canForge = parts[4] == '1',
+        hasRune = parts[5] == '1'
       })
     end
 
@@ -600,5 +678,25 @@ function onForgeData(protocol, opcode, buffer)
   -- FORGE_ERROR:message
   elseif buffer:sub(1, 12) == 'FORGE_ERROR:' then
     stopForgeAnimation()
+    local errorMsg = buffer:sub(13)
+    -- Show error in the active tab's result label
+    if forgeWindow then
+      local labels = {'classResultMessage', 'attrResultMessage', 'toolsResultMessage'}
+      for _, id in ipairs(labels) do
+        local label = forgeWindow:recursiveGetChildById(id)
+        if label then
+          label:setText(errorMsg)
+          label:setColor('#ff3333')
+        end
+      end
+      scheduleEvent(function()
+        if forgeWindow then
+          for _, id in ipairs(labels) do
+            local label = forgeWindow:recursiveGetChildById(id)
+            if label then label:setText('') end
+          end
+        end
+      end, 3000)
+    end
   end
 end
