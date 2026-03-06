@@ -185,7 +185,17 @@ local function setupItemSlot(slot, tabType, tab)
     if not item:isPickupable() then return false end
 
     local srcPos = item:getPosition()
-    self:setItem(Item.create(item:getId(), item:getCountOrSubType()))
+    local itemCopy = Item.create(item:getId(), item:getCountOrSubType())
+    self:setItem(itemCopy)
+
+    -- Mirror item in result panel
+    local resultItemId = ({CLASS = 'classResultItem', TOOLS = 'toolsResultItem'})[tabType]
+    if resultItemId then
+      local resultItem = tab:recursiveGetChildById(resultItemId)
+      if resultItem then
+        resultItem:setItem(Item.create(item:getId(), item:getCountOrSubType()))
+      end
+    end
 
     if tabType == 'CLASS' then
       classSourcePos = srcPos
@@ -259,7 +269,7 @@ local function runForgeAnimation(progressBarId, onComplete)
 end
 
 -- Show result message with color (green for success, red for failure)
-local function showResultMessage(labelId, success, arrowId)
+local function showResultMessage(labelId, success)
   if not forgeWindow then return end
   local label = forgeWindow:recursiveGetChildById(labelId)
   if not label then return end
@@ -272,31 +282,10 @@ local function showResultMessage(labelId, success, arrowId)
     label:setColor('#ff3333')
   end
 
-  -- Update arrow image on result
-  if arrowId then
-    local arrow = forgeWindow:recursiveGetChildById(arrowId)
-    if arrow then
-      if success then
-        arrow:setImageSource('/images/ui/imbue_green')
-        arrow:setSize({width = 48, height = 50})
-      else
-        arrow:setImageSource('/images/ui/clear')
-        arrow:setSize({width = 48, height = 50})
-      end
-    end
-  end
-
-  -- Clear message and reset arrow after 3 seconds
+  -- Clear message after 3 seconds
   scheduleEvent(function()
-    if forgeWindow then
-      if label then label:setText('') end
-      if arrowId then
-        local arrow = forgeWindow:recursiveGetChildById(arrowId)
-        if arrow then
-          arrow:setImageSource('/images/ui/imbue_empty')
-          arrow:setSize({width = 48, height = 24})
-        end
-      end
+    if forgeWindow and label then
+      label:setText('')
     end
   end, 3000)
 end
@@ -315,11 +304,10 @@ function setupClassificationTab(tab)
   if bonusBtn then
     bonusBtn.onClick = function()
       classBonusActive = not classBonusActive
+      bonusBtn:setOn(classBonusActive)
       if classBonusActive then
-        bonusBtn:setColor('#00ff00')
         bonusBtn:setText(tr('+20%% ON'))
       else
-        bonusBtn:setColor('#3399ff')
         bonusBtn:setText(tr('+20%%'))
       end
       -- Update cost display
@@ -444,6 +432,8 @@ function clearClassInfo()
   if not tab then return end
   local slot = tab:recursiveGetChildById('classSourceItem')
   if slot then slot:setItem(nil) end
+  local resultItem = tab:recursiveGetChildById('classResultItem')
+  if resultItem then resultItem:setItem(nil) end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -451,7 +441,7 @@ function clearClassInfo()
   local btn = tab:recursiveGetChildById('classForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   updatePlaceholder(tab, 'classPlaceholder', false)
   local msg = tab:recursiveGetChildById('classResultMessage')
   if msg then msg:setText('') end
@@ -471,8 +461,10 @@ function clearClassSlot()
   if not tab then return end
   local slot = tab:recursiveGetChildById('classSourceItem')
   if slot then slot:setItem(nil) end
+  local resultItem = tab:recursiveGetChildById('classResultItem')
+  if resultItem then resultItem:setItem(nil) end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -685,11 +677,10 @@ function setupToolsTab(tab)
   if bonusBtn then
     bonusBtn.onClick = function()
       toolsBonusActive = not toolsBonusActive
+      bonusBtn:setOn(toolsBonusActive)
       if toolsBonusActive then
-        bonusBtn:setColor('#00ff00')
         bonusBtn:setText(tr('+20%% ON'))
       else
-        bonusBtn:setColor('#3399ff')
         bonusBtn:setText(tr('+20%%'))
       end
       if toolsCostData then
@@ -811,6 +802,8 @@ function clearToolsInfo()
   if not tab then return end
   local slot = tab:recursiveGetChildById('toolsSourceItem')
   if slot then slot:setItem(nil) end
+  local resultItem = tab:recursiveGetChildById('toolsResultItem')
+  if resultItem then resultItem:setItem(nil) end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -818,7 +811,7 @@ function clearToolsInfo()
   local btn = tab:recursiveGetChildById('toolsForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   updatePlaceholder(tab, 'toolsPlaceholder', false)
   local msg = tab:recursiveGetChildById('toolsResultMessage')
   if msg then msg:setText('') end
@@ -838,8 +831,10 @@ function clearToolsSlot()
   if not tab then return end
   local slot = tab:recursiveGetChildById('toolsSourceItem')
   if slot then slot:setItem(nil) end
+  local resultItem = tab:recursiveGetChildById('toolsResultItem')
+  if resultItem then resultItem:setItem(nil) end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -936,13 +931,13 @@ function onForgeData(protocol, opcode, buffer)
 
       -- Show result feedback, then clear slot (preserving result message)
       if tab == 'CLASS' then
-        showResultMessage('classResultMessage', success, 'classArrow')
+        showResultMessage('classResultMessage', success)
         clearClassSlot()
       elseif tab == 'ATTR' then
         showResultMessage('attrResultMessage', success)
         clearAttrSlot()
       elseif tab == 'TOOLS' then
-        showResultMessage('toolsResultMessage', success, 'toolsArrow')
+        showResultMessage('toolsResultMessage', success)
         clearToolsSlot()
       end
     end

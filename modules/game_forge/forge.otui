@@ -13,7 +13,7 @@ ForgeItemSlot < UIItem
 ForgeWindow < MainWindow
   id: forgeWindow
   !text: tr('Forge Item')
-  size: 700 550
+  size: 700 580
   @onEscape: modules.game_forge.toggle()
 
   TabBar
@@ -116,11 +116,11 @@ ForgeClassificationTab < Panel
 
   UIWidget
     id: classArrow
-    image-source: /images/ui/imbue_empty
-    size: 48 24
+    image-source: /images/ui/arrow_horizontal
+    size: 24 63
     anchors.verticalCenter: classSourcePanel.verticalCenter
     anchors.left: classSourcePanel.right
-    margin-left: 10
+    margin-left: 15
 
   FlatPanel
     id: classResultPanel
@@ -140,12 +140,29 @@ ForgeClassificationTab < Panel
       font: verdana-11px-antialised
       color: #dfdfdf
 
+    Panel
+      id: classResultItemContainer
+      size: 36 36
+      anchors.top: classResultTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 8
+      background-color: #ffffff11
+
+      UIItem
+        id: classResultItem
+        size: 34 34
+        anchors.fill: parent
+        padding: 1
+        image-source: /images/ui/slot
+        virtual: true
+
     Label
       id: classResultTierLabel
       text-align: center
-      anchors.verticalCenter: parent.verticalCenter
+      anchors.top: classResultItemContainer.bottom
       anchors.left: parent.left
       anchors.right: parent.right
+      margin-top: 4
       font: verdana-11px-antialised
       color: #c0c0c0
 
@@ -164,7 +181,7 @@ ForgeClassificationTab < Panel
     anchors.top: classSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 155
+    height: 185
     margin-top: 8
 
     Label
@@ -211,12 +228,21 @@ ForgeClassificationTab < Panel
     Button
       id: classBonusButton
       !text: tr('+20%%')
-      width: 50
-      height: 22
+      size: 48 50
+      image-source: /images/ui/imbue_green
+      image-color: #666666
       anchors.top: classCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
-      color: #3399ff
+      font: verdana-11px-antialised
+      color: #aaaaaa
+
+      $on:
+        image-color: #ffffff
+        color: #00ff00
+
+      $pressed:
+        image-color: #cccccc
 
     ProgressBar
       id: classProgressBar
@@ -523,11 +549,11 @@ ForgeToolsTab < Panel
 
   UIWidget
     id: toolsArrow
-    image-source: /images/ui/imbue_empty
-    size: 48 24
+    image-source: /images/ui/arrow_horizontal
+    size: 24 63
     anchors.verticalCenter: toolsSourcePanel.verticalCenter
     anchors.left: toolsSourcePanel.right
-    margin-left: 10
+    margin-left: 15
 
   FlatPanel
     id: toolsResultPanel
@@ -547,12 +573,29 @@ ForgeToolsTab < Panel
       font: verdana-11px-antialised
       color: #dfdfdf
 
+    Panel
+      id: toolsResultItemContainer
+      size: 36 36
+      anchors.top: toolsResultTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 8
+      background-color: #ffffff11
+
+      UIItem
+        id: toolsResultItem
+        size: 34 34
+        anchors.fill: parent
+        padding: 1
+        image-source: /images/ui/slot
+        virtual: true
+
     Label
       id: toolsResultLevelLabel
       text-align: center
-      anchors.verticalCenter: parent.verticalCenter
+      anchors.top: toolsResultItemContainer.bottom
       anchors.left: parent.left
       anchors.right: parent.right
+      margin-top: 4
       font: verdana-11px-antialised
       color: #c0c0c0
 
@@ -571,7 +614,7 @@ ForgeToolsTab < Panel
     anchors.top: toolsSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 155
+    height: 185
     margin-top: 8
 
     Label
@@ -618,12 +661,21 @@ ForgeToolsTab < Panel
     Button
       id: toolsBonusButton
       !text: tr('+20%%')
-      width: 50
-      height: 22
+      size: 48 50
+      image-source: /images/ui/imbue_green
+      image-color: #666666
       anchors.top: toolsCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
-      color: #3399ff
+      font: verdana-11px-antialised
+      color: #aaaaaa
+
+      $on:
+        image-color: #ffffff
+        color: #00ff00
+
+      $pressed:
+        image-color: #cccccc
 
     ProgressBar
       id: toolsProgressBar
