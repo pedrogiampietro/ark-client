@@ -1,0 +1,29 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/data/things
+**/.vs
+vcpkg_installed/
+*.log
+*.bak
+*.user
+*.exp
+*.pdb
+*.obj
+*.7z
+*.ilk
+*.idb
+*.ipch
+*.tlog
+*.lastbuildstate
+*.recipe
+*.iobj
+*.ipdb
+
+# Build output directories
+vc17/otclient/
+x64/
+Debug/
+Release/
+
