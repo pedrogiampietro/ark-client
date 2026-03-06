@@ -1,0 +1,461 @@
+ForgeItemSlot < UIItem
+  size: 34 34
+  padding: 1
+  image-source: /images/ui/item
+  border-width: 1
+  border-color: #3f3f3f
+  &selectable: true
+  &canDrop: true
+
+  $disabled:
+    color: #646464
+
+ForgeWindow < MainWindow
+  id: forgeWindow
+  !text: tr('Forge Item')
+  size: 700 480
+  @onEscape: modules.game_forge.toggle()
+
+  // Tab bar at the top
+  TabBar
+    id: forgeTabBar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 2
+
+  // Tab content area
+  Panel
+    id: forgeContent
+    anchors.top: forgeTabBar.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: closeButton.top
+    margin-top: 5
+    margin-bottom: 8
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 64
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    @onClick: modules.game_forge.toggle()
+
+// ========== CLASSIFICATION TAB (TIER) ==========
+ForgeClassificationTab < Panel
+  id: classificationTab
+
+  // Info text at top
+  FlatPanel
+    id: classInfoPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 52
+    margin-top: 2
+
+    Label
+      id: classInfoLabel
+      anchors.fill: parent
+      margin: 5
+      text-wrap: true
+      text-auto-resize: true
+      !text: tr('In this window you can increase the classification level of your item. The maximum level is 5 and is represented by the color red. You must place the chosen item inside a forge case for it to appear in the panel below.')
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Middle section: source item -> result
+  FlatPanel
+    id: classSourcePanel
+    anchors.top: classInfoPanel.bottom
+    anchors.left: parent.left
+    width: 295
+    height: 120
+    margin-top: 8
+
+    Label
+      id: classSourceTitle
+      !text: tr('Classification')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
+
+    ForgeItemSlot
+      id: classSourceItem
+      anchors.top: classSourceTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 8
+
+    Label
+      id: classSourceTierLabel
+      text-align: center
+      anchors.top: classSourceItem.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Arrow between panels
+  UIWidget
+    id: classArrow
+    image-source: /images/ui/arrow_horizontal
+    size: 32 32
+    anchors.verticalCenter: classSourcePanel.verticalCenter
+    anchors.left: classSourcePanel.right
+    margin-left: 10
+
+  FlatPanel
+    id: classResultPanel
+    anchors.top: classSourcePanel.top
+    anchors.right: parent.right
+    width: 295
+    height: 120
+
+    Label
+      id: classResultTitle
+      !text: tr('Result')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
+
+    Label
+      id: classResultTierLabel
+      text-align: center
+      anchors.top: classResultTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 30
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Bottom section: chance + confirm
+  FlatPanel
+    id: classChancePanel
+    anchors.top: classSourcePanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 100
+    margin-top: 8
+
+    Label
+      id: classChanceTitle
+      !text: tr('Tier Upgrade')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
+
+    Label
+      id: classChanceLabel
+      text-align: center
+      anchors.top: classChanceTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 15
+      font: verdana-11px-antialised
+      color: #00ff00
+
+    Button
+      id: classForgeButton
+      !text: tr('Forge')
+      width: 80
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 8
+      enabled: false
+
+// ========== ATTRIBUTES TAB (ENCHANTMENTS) ==========
+ForgeAttributesTab < Panel
+  id: attributesTab
+
+  FlatPanel
+    id: attrInfoPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 52
+    margin-top: 2
+
+    Label
+      id: attrInfoLabel
+      anchors.fill: parent
+      margin: 5
+      text-wrap: true
+      text-auto-resize: true
+      !text: tr('Manage enchantments on your items. Add new enchantments, reroll values, or remove enchantments. The item must have a tier to receive enchantments.')
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Item slot
+  FlatPanel
+    id: attrItemPanel
+    anchors.top: attrInfoPanel.bottom
+    anchors.left: parent.left
+    width: 295
+    height: 140
+    margin-top: 8
+
+    Label
+      id: attrItemTitle
+      !text: tr('Item')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+
+    ForgeItemSlot
+      id: attrSourceItem
+      anchors.top: attrItemTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 8
+
+    Label
+      id: attrItemInfo
+      text-align: center
+      anchors.top: attrSourceItem.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Enchantment list
+  FlatPanel
+    id: attrEnchantPanel
+    anchors.top: attrInfoPanel.bottom
+    anchors.right: parent.right
+    width: 355
+    height: 140
+    margin-top: 8
+
+    Label
+      id: attrEnchantTitle
+      !text: tr('Enchantments')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+
+    ScrollableFlatPanel
+      id: attrEnchantList
+      anchors.top: attrEnchantTitle.bottom
+      anchors.left: parent.left
+      anchors.right: attrEnchantScroll.left
+      anchors.bottom: parent.bottom
+      margin: 5
+      vertical-scrollbar: attrEnchantScroll
+      layout:
+        type: verticalBox
+
+    VerticalScrollBar
+      id: attrEnchantScroll
+      anchors.top: attrEnchantTitle.bottom
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      margin-top: 5
+      margin-bottom: 5
+      step: 16
+      pixels-scroll: true
+
+  // Action buttons
+  FlatPanel
+    id: attrActionPanel
+    anchors.top: attrItemPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 80
+    margin-top: 8
+
+    Button
+      id: attrAddEnchant
+      !text: tr('Add Enchantment')
+      width: 130
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 20
+      margin-left: 15
+      enabled: false
+
+    Button
+      id: attrRerollLast
+      !text: tr('Reroll Last')
+      width: 100
+      anchors.top: parent.top
+      anchors.left: attrAddEnchant.right
+      margin-top: 20
+      margin-left: 10
+      enabled: false
+
+    Button
+      id: attrRerollAll
+      !text: tr('Reroll All')
+      width: 100
+      anchors.top: parent.top
+      anchors.left: attrRerollLast.right
+      margin-top: 20
+      margin-left: 10
+      enabled: false
+
+    Button
+      id: attrRemoveLast
+      !text: tr('Remove Last')
+      width: 100
+      anchors.top: parent.top
+      anchors.left: attrRerollAll.right
+      margin-top: 20
+      margin-left: 10
+      enabled: false
+
+    Button
+      id: attrRemoveAll
+      !text: tr('Remove All')
+      width: 100
+      anchors.top: parent.top
+      anchors.left: attrRemoveLast.right
+      margin-top: 20
+      margin-left: 10
+      enabled: false
+
+// ========== TOOLS TAB (UPGRADE) ==========
+ForgeToolsTab < Panel
+  id: toolsTab
+
+  FlatPanel
+    id: toolsInfoPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 52
+    margin-top: 2
+
+    Label
+      id: toolsInfoLabel
+      anchors.fill: parent
+      margin: 5
+      text-wrap: true
+      text-auto-resize: true
+      !text: tr('Upgrade your equipment to improve its stats. Higher upgrade levels have lower chances of success. Failed upgrades may downgrade the item.')
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Source item
+  FlatPanel
+    id: toolsSourcePanel
+    anchors.top: toolsInfoPanel.bottom
+    anchors.left: parent.left
+    width: 295
+    height: 120
+    margin-top: 8
+
+    Label
+      id: toolsSourceTitle
+      !text: tr('Upgrade Level')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+
+    ForgeItemSlot
+      id: toolsSourceItem
+      anchors.top: toolsSourceTitle.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 8
+
+    Label
+      id: toolsSourceLevelLabel
+      text-align: center
+      anchors.top: toolsSourceItem.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Arrow
+  UIWidget
+    id: toolsArrow
+    image-source: /images/ui/arrow_horizontal
+    size: 32 32
+    anchors.verticalCenter: toolsSourcePanel.verticalCenter
+    anchors.left: toolsSourcePanel.right
+    margin-left: 10
+
+  // Result
+  FlatPanel
+    id: toolsResultPanel
+    anchors.top: toolsSourcePanel.top
+    anchors.right: parent.right
+    width: 295
+    height: 120
+
+    Label
+      id: toolsResultTitle
+      !text: tr('Result')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+
+    Label
+      id: toolsResultLevelLabel
+      text-align: center
+      anchors.top: toolsResultTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 30
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+  // Chance + confirm
+  FlatPanel
+    id: toolsChancePanel
+    anchors.top: toolsSourcePanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 100
+    margin-top: 8
+
+    Label
+      id: toolsChanceTitle
+      !text: tr('Upgrade')
+      text-align: center
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 5
+
+    Label
+      id: toolsChanceLabel
+      text-align: center
+      anchors.top: toolsChanceTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 15
+      font: verdana-11px-antialised
+      color: #00ff00
+
+    Button
+      id: toolsForgeButton
+      !text: tr('Forge')
+      width: 80
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 8
+      enabled: false

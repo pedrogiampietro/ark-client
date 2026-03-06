@@ -37,5 +37,6 @@ Module
     - game_stats
     - game_shaders
     - game_rarity
+    - game_forge
   @onLoad: init()
   @onUnload: terminate()

@@ -1,0 +1,10 @@
+Module
+  name: game_forge
+  description: Item Forge System - Upgrade, Tier, Enchantments
+  author: custom
+  sandboxed: true
+  scripts: [ forge ]
+  @onLoad: init()
+  @onUnload: terminate()
+  dependencies:
+    - game_interface
