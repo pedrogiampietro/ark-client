@@ -1,13 +1,11 @@
 ForgeItemSlot < UIItem
   size: 34 34
   padding: 1
-  image-source: /images/ui/slot
   border-width: 0
   &selectable: true
   &canDrop: true
 
   $disabled:
-    image-source: /images/ui/slot_disabled
     color: #646464
 
 ForgeWindow < MainWindow
@@ -87,7 +85,8 @@ ForgeClassificationTab < Panel
       anchors.top: classSourceTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      background-color: #ffffff11
+      image-source: /images/ui/slot
+      image-size: 36 36
 
       ForgeItemSlot
         id: classSourceItem
@@ -117,12 +116,10 @@ ForgeClassificationTab < Panel
   UIWidget
     id: classArrow
     image-source: /images/ui/arrow_horizontal
-    height: 63
+    image-clip: 0 0 24 21
+    size: 24 21
     anchors.verticalCenter: classSourcePanel.verticalCenter
-    anchors.left: classSourcePanel.right
-    anchors.right: classResultPanel.left
-    margin-left: 15
-    margin-right: 15
+    anchors.horizontalCenter: parent.horizontalCenter
 
   FlatPanel
     id: classResultPanel
@@ -148,14 +145,13 @@ ForgeClassificationTab < Panel
       anchors.top: classResultTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      background-color: #ffffff11
+      image-source: /images/ui/slot
+      image-size: 36 36
 
       UIItem
         id: classResultItem
         size: 34 34
-        anchors.fill: parent
-        padding: 1
-        image-source: /images/ui/slot
+        anchors.centerIn: parent
         virtual: true
 
     Label
@@ -232,6 +228,7 @@ ForgeClassificationTab < Panel
       !text: tr('+20%%')
       size: 64 66
       image-source: /images/ui/imbue_green
+      image-size: 64 66
       image-color: #666666
       anchors.top: classCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
@@ -313,7 +310,8 @@ ForgeAttributesTab < Panel
       anchors.top: attrItemTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      background-color: #ffffff11
+      image-source: /images/ui/slot
+      image-size: 36 36
 
       ForgeItemSlot
         id: attrSourceItem
@@ -523,7 +521,8 @@ ForgeToolsTab < Panel
       anchors.top: toolsSourceTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      background-color: #ffffff11
+      image-source: /images/ui/slot
+      image-size: 36 36
 
       ForgeItemSlot
         id: toolsSourceItem
@@ -553,12 +552,10 @@ ForgeToolsTab < Panel
   UIWidget
     id: toolsArrow
     image-source: /images/ui/arrow_horizontal
-    height: 63
+    image-clip: 0 0 24 21
+    size: 24 21
     anchors.verticalCenter: toolsSourcePanel.verticalCenter
-    anchors.left: toolsSourcePanel.right
-    anchors.right: toolsResultPanel.left
-    margin-left: 15
-    margin-right: 15
+    anchors.horizontalCenter: parent.horizontalCenter
 
   FlatPanel
     id: toolsResultPanel
@@ -584,14 +581,13 @@ ForgeToolsTab < Panel
       anchors.top: toolsResultTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      background-color: #ffffff11
+      image-source: /images/ui/slot
+      image-size: 36 36
 
       UIItem
         id: toolsResultItem
         size: 34 34
-        anchors.fill: parent
-        padding: 1
-        image-source: /images/ui/slot
+        anchors.centerIn: parent
         virtual: true
 
     Label
@@ -668,6 +664,7 @@ ForgeToolsTab < Panel
       !text: tr('+20%%')
       size: 64 66
       image-source: /images/ui/imbue_green
+      image-size: 64 66
       image-color: #666666
       anchors.top: toolsCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
