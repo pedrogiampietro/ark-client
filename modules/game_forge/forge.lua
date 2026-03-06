@@ -259,7 +259,7 @@ local function runForgeAnimation(progressBarId, onComplete)
 end
 
 -- Show result message with color (green for success, red for failure)
-local function showResultMessage(labelId, success)
+local function showResultMessage(labelId, success, arrowId)
   if not forgeWindow then return end
   local label = forgeWindow:recursiveGetChildById(labelId)
   if not label then return end
@@ -272,10 +272,31 @@ local function showResultMessage(labelId, success)
     label:setColor('#ff3333')
   end
 
-  -- Clear message after 3 seconds
+  -- Update arrow image on result
+  if arrowId then
+    local arrow = forgeWindow:recursiveGetChildById(arrowId)
+    if arrow then
+      if success then
+        arrow:setImageSource('/images/ui/imbue_green')
+        arrow:setSize({width = 48, height = 50})
+      else
+        arrow:setImageSource('/images/ui/clear')
+        arrow:setSize({width = 48, height = 50})
+      end
+    end
+  end
+
+  -- Clear message and reset arrow after 3 seconds
   scheduleEvent(function()
-    if forgeWindow and label then
-      label:setText('')
+    if forgeWindow then
+      if label then label:setText('') end
+      if arrowId then
+        local arrow = forgeWindow:recursiveGetChildById(arrowId)
+        if arrow then
+          arrow:setImageSource('/images/ui/imbue_empty')
+          arrow:setSize({width = 48, height = 24})
+        end
+      end
     end
   end, 3000)
 end
@@ -322,20 +343,29 @@ end
 
 function updateClassCostDisplay(tab)
   if not classCostData then return end
+  local totalCost = classCostData.cost
+  if classBonusActive then totalCost = totalCost + classCostData.bonusCost end
+  local hasEnough = classCostData.playerGold >= totalCost
+
   local costLabel = tab:recursiveGetChildById('classCostLabel')
   if costLabel then
-    local totalCost = classCostData.cost
-    if classBonusActive then totalCost = totalCost + classCostData.bonusCost end
-    local hasEnough = classCostData.playerGold >= totalCost
     costLabel:setText(tr('Cost') .. ': ' .. totalCost .. ' crystal coins (' .. tr('You have') .. ': ' .. classCostData.playerGold .. ')')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
+
+  -- Update chance label with bonus
+  local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
+  if chanceLabel then
+    local effectiveChance = math.min(classCostData.chance + (classBonusActive and 20 or 0), 100)
+    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
+    if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
+    elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
+    else chanceLabel:setColor('#ff3333') end
+  end
+
   -- Update forge button state
   local forgBtn = tab:recursiveGetChildById('classForgeButton')
   if forgBtn then
-    local totalCost = classCostData.cost
-    if classBonusActive then totalCost = totalCost + classCostData.bonusCost end
-    local hasEnough = classCostData.playerGold >= totalCost
     forgBtn:setEnabled(classCostData.canForge and classCostData.hasRune and hasEnough and not forging)
   end
 end
@@ -357,7 +387,8 @@ function updateClassInfo(data)
     bonusCost = data.bonusCost or 0,
     playerGold = data.playerGold or 0,
     canForge = canForge,
-    hasRune = hasRune
+    hasRune = hasRune,
+    chance = chance
   }
 
   local tierLabel = tab:recursiveGetChildById('classSourceTierLabel')
@@ -681,19 +712,28 @@ end
 
 function updateToolsCostDisplay(tab)
   if not toolsCostData then return end
+  local totalCost = toolsCostData.cost
+  if toolsBonusActive then totalCost = totalCost + toolsCostData.bonusCost end
+  local hasEnough = toolsCostData.playerGold >= totalCost
+
   local costLabel = tab:recursiveGetChildById('toolsCostLabel')
   if costLabel then
-    local totalCost = toolsCostData.cost
-    if toolsBonusActive then totalCost = totalCost + toolsCostData.bonusCost end
-    local hasEnough = toolsCostData.playerGold >= totalCost
     costLabel:setText(tr('Cost') .. ': ' .. totalCost .. ' crystal coins (' .. tr('You have') .. ': ' .. toolsCostData.playerGold .. ')')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
+
+  -- Update chance label with bonus
+  local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
+  if chanceLabel then
+    local effectiveChance = math.min(toolsCostData.chance + (toolsBonusActive and 20 or 0), 100)
+    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
+    if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
+    elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
+    else chanceLabel:setColor('#ff3333') end
+  end
+
   local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
   if forgBtn then
-    local totalCost = toolsCostData.cost
-    if toolsBonusActive then totalCost = totalCost + toolsCostData.bonusCost end
-    local hasEnough = toolsCostData.playerGold >= totalCost
     forgBtn:setEnabled(toolsCostData.canForge and toolsCostData.hasRune and hasEnough and not forging)
   end
 end
@@ -715,7 +755,8 @@ function updateToolsInfo(data)
     bonusCost = data.bonusCost or 0,
     playerGold = data.playerGold or 0,
     canForge = canForge,
-    hasRune = hasRune
+    hasRune = hasRune,
+    chance = chance
   }
 
   local levelLabel = tab:recursiveGetChildById('toolsSourceLevelLabel')
@@ -895,13 +936,13 @@ function onForgeData(protocol, opcode, buffer)
 
       -- Show result feedback, then clear slot (preserving result message)
       if tab == 'CLASS' then
-        showResultMessage('classResultMessage', success)
+        showResultMessage('classResultMessage', success, 'classArrow')
         clearClassSlot()
       elseif tab == 'ATTR' then
         showResultMessage('attrResultMessage', success)
         clearAttrSlot()
       elseif tab == 'TOOLS' then
-        showResultMessage('toolsResultMessage', success)
+        showResultMessage('toolsResultMessage', success, 'toolsArrow')
         clearToolsSlot()
       end
     end
