@@ -36,5 +36,6 @@ Module
     - game_actionbar
     - game_stats
     - game_shaders
+    - game_rarity
   @onLoad: init()
   @onUnload: terminate()

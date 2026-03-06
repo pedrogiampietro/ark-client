@@ -1,0 +1,10 @@
+Module
+  name: game_rarity
+  description: Item rarity frame coloring system
+  author: custom
+  sandboxed: true
+  scripts: [ rarity ]
+  @onLoad: init()
+  @onUnload: terminate()
+  dependencies:
+    - game_interface
