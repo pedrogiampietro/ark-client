@@ -225,17 +225,17 @@ ForgeClassificationTab < Panel
     UIWidget
       id: classBonusButton
       !text: tr('+20%%')
-      size: 64 53
+      size: 96 75
       image-source: /images/ui/imbue_green
       image-clip: 0 0 128 66
-      image-size: 64 33
+      image-size: 96 50
       image-color: #666666
       anchors.top: classCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
-      text-offset: 0 -8
+      text-offset: 0 -4
 
       $on:
         image-clip: 0 66 128 66
@@ -662,17 +662,17 @@ ForgeToolsTab < Panel
     UIWidget
       id: toolsBonusButton
       !text: tr('+20%%')
-      size: 64 53
+      size: 96 75
       image-source: /images/ui/imbue_green
       image-clip: 0 0 128 66
-      image-size: 64 33
+      image-size: 96 50
       image-color: #666666
       anchors.top: toolsCostLabel.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
-      text-offset: 0 -8
+      text-offset: 0 -4
 
       $on:
         image-clip: 0 66 128 66
