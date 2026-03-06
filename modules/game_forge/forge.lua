@@ -296,10 +296,10 @@ function setupClassificationTab(tab)
       classBonusActive = not classBonusActive
       if classBonusActive then
         bonusBtn:setColor('#00ff00')
-        bonusBtn:setText(tr('+20% ON'))
+        bonusBtn:setText(tr('+20%% ON'))
       else
         bonusBtn:setColor('#3399ff')
-        bonusBtn:setText(tr('+20%'))
+        bonusBtn:setText(tr('+20%%'))
       end
       -- Update cost display
       if classCostData then
@@ -420,7 +420,7 @@ function clearClassInfo()
   local btn = tab:recursiveGetChildById('classForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%')) end
+  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
   updatePlaceholder(tab, 'classPlaceholder', false)
   local msg = tab:recursiveGetChildById('classResultMessage')
   if msg then msg:setText('') end
@@ -441,7 +441,7 @@ function clearClassSlot()
   local slot = tab:recursiveGetChildById('classSourceItem')
   if slot then slot:setItem(nil) end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%')) end
+  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -656,10 +656,10 @@ function setupToolsTab(tab)
       toolsBonusActive = not toolsBonusActive
       if toolsBonusActive then
         bonusBtn:setColor('#00ff00')
-        bonusBtn:setText(tr('+20% ON'))
+        bonusBtn:setText(tr('+20%% ON'))
       else
         bonusBtn:setColor('#3399ff')
-        bonusBtn:setText(tr('+20%'))
+        bonusBtn:setText(tr('+20%%'))
       end
       if toolsCostData then
         updateToolsCostDisplay(tab)
@@ -777,7 +777,7 @@ function clearToolsInfo()
   local btn = tab:recursiveGetChildById('toolsForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%')) end
+  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
   updatePlaceholder(tab, 'toolsPlaceholder', false)
   local msg = tab:recursiveGetChildById('toolsResultMessage')
   if msg then msg:setText('') end
@@ -798,7 +798,7 @@ function clearToolsSlot()
   local slot = tab:recursiveGetChildById('toolsSourceItem')
   if slot then slot:setItem(nil) end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%')) end
+  if bonusBtn then bonusBtn:setColor('#3399ff'); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end

@@ -212,7 +212,7 @@ ForgeClassificationTab < Panel
 
     Button
       id: classBonusButton
-      !text: tr('+20%')
+      !text: tr('+20%%')
       width: 50
       height: 22
       anchors.top: classCostLabel.bottom
@@ -623,7 +623,7 @@ ForgeToolsTab < Panel
 
     Button
       id: toolsBonusButton
-      !text: tr('+20%')
+      !text: tr('+20%%')
       width: 50
       height: 22
       anchors.top: toolsCostLabel.bottom
