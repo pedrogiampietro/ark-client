@@ -1,5 +1,5 @@
 NonClosableMiniWindow
-  height: 28
+  height: 50
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -7,12 +7,27 @@ NonClosableMiniWindow
 
   NonClosableMiniWindowContents
     margin-left: 8
+
+    InventoryButton
+      id: storeButton
+      !text: tr('Store')
+      icon: /images/topbuttons/shop
+      icon-clip: 0 0 20 20
+      icon-align: left
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      margin-top: 4
+      margin-right: 8
+      height: 20
+      @onClick: modules.game_store.toggle()
+
     InventoryButton
       id: skillsButton
       !text: tr('Skills')
       anchors.left: parent.left
-      anchors.top: parent.top
-      margin-top: 4
+      anchors.top: prev.bottom
+      margin-top: 2
       width: 34
       height: 20
       @onClick: modules.game_skills.toggle()
