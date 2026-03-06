@@ -19,6 +19,7 @@ NonClosableMiniWindow
       image-clip: 0 0 108 20
       image-border: 0
       image-smooth: true
+      margin-bottom: 2
       $hover:
         image-clip: 0 0 108 20
       $pressed:
