@@ -13,14 +13,11 @@ local rarityImages = {
 }
 
 -- Storage for current rarity data
--- containerRarities[containerId] = { [slot] = tier, ... }
--- inventoryRarities[slot] = tier
 local containerRarities = {}
 local inventoryRarities = {}
 
 -- Debounce event IDs
 local inventoryRequestEvent = nil
-local allRarityRequestEvent = nil
 
 function init()
   ProtocolGame.registerExtendedOpcode(RARITY_OPCODE, onRarityData)
@@ -65,10 +62,6 @@ function terminate()
     removeEvent(inventoryRequestEvent)
     inventoryRequestEvent = nil
   end
-  if allRarityRequestEvent then
-    removeEvent(allRarityRequestEvent)
-    allRarityRequestEvent = nil
-  end
 
   containerRarities = {}
   inventoryRarities = {}
@@ -96,7 +89,6 @@ function onRarityData(protocol, opcode, buffer)
   local prefix = buffer:sub(1, 2)
 
   if prefix == "C:" then
-    -- Container rarity: "C:<id>:<tier1>,<tier2>,..."
     local rest = buffer:sub(3)
     local colonPos = rest:find(":")
     if not colonPos then return end
@@ -113,10 +105,14 @@ function onRarityData(protocol, opcode, buffer)
     end
 
     containerRarities[containerId] = tiers
+
+    -- Apply immediately and also with a small delay (in case widgets arent fully ready)
     applyContainerRarities(containerId)
+    scheduleEvent(function()
+      applyContainerRarities(containerId)
+    end, 100)
 
   elseif prefix == "I:" then
-    -- Inventory rarity: "I:<slot>=<tier>,<slot>=<tier>,..."
     local rest = buffer:sub(3)
     inventoryRarities = {}
 
@@ -134,24 +130,58 @@ function onRarityData(protocol, opcode, buffer)
     end
 
     applyInventoryRarities()
+    scheduleEvent(function()
+      applyInventoryRarities()
+    end, 100)
   end
+end
+
+-- Find the items panel for a container, trying multiple approaches
+function getContainerItemsPanel(containerId, container)
+  -- Method 1: direct property (set by containers.lua)
+  if container.itemsPanel then
+    return container.itemsPanel
+  end
+
+  -- Method 2: find the container window by ID in the game UI
+  local containerPanel = modules.game_interface.getContainerPanel()
+  if containerPanel then
+    local containerWindow = containerPanel:getChildById('container' .. containerId)
+    if containerWindow then
+      local panel = containerWindow:getChildById('contentsPanel')
+      if panel then
+        return panel
+      end
+    end
+  end
+
+  return nil
 end
 
 -- Apply rarity frames to all items in a container
 function applyContainerRarities(containerId)
-  local containers = g_game.getContainers()
-  local container = containers[containerId]
-  if not container or not container.itemsPanel then return end
+  local container = g_game.getContainers()[containerId]
+  if not container then return end
+
+  local containerPanel = getContainerItemsPanel(containerId, container)
+  if not containerPanel then return end
 
   local tiers = containerRarities[containerId]
   if not tiers then return end
 
   for slot = 0, container:getCapacity() - 1 do
-    local itemWidget = container.itemsPanel:getChildById('item' .. slot)
+    local itemWidget = containerPanel:getChildById('item' .. slot)
     if itemWidget then
       local tier = tiers[slot] or 0
       applyRarityFrame(itemWidget, tier)
     end
+  end
+end
+
+-- Apply rarity to all open containers using cached data
+function applyAllContainerRarities()
+  for containerId, _ in pairs(containerRarities) do
+    applyContainerRarities(containerId)
   end
 end
 
@@ -182,6 +212,12 @@ function applyInventoryRarities()
   end
 end
 
+-- Apply all cached rarity data (inventory + containers)
+function applyAllRarities()
+  applyInventoryRarities()
+  applyAllContainerRarities()
+end
+
 -- Request rarity data from server for a container
 function requestContainerRarity(containerId)
   local protocol = g_game.getProtocolGame()
@@ -190,7 +226,7 @@ function requestContainerRarity(containerId)
   end
 end
 
--- Request all rarity data from server (debounced)
+-- Request all rarity data from server
 function requestAllRarities()
   local protocol = g_game.getProtocolGame()
   if protocol then
@@ -201,26 +237,31 @@ end
 -- Event handlers
 
 function onRarityGameStart()
-  -- Request rarity data after UI is fully loaded
-  -- inventory.lua refresh() runs on onGameStart and resets styles,
-  -- so we need delays to re-apply after it finishes
-  scheduleEvent(function()
-    requestAllRarities()
-  end, 1000)
-
-  scheduleEvent(function()
-    requestAllRarities()
-  end, 3000)
-
-  scheduleEvent(function()
-    requestAllRarities()
-  end, 6000)
+  -- Multiple requests at staggered delays
+  -- Ensures we sync even after inventory.lua refresh() resets styles
+  -- Server also pushes at T+2s and T+5s from login.lua
+  local delays = {1000, 2000, 4000, 7000}
+  for _, delay in ipairs(delays) do
+    scheduleEvent(function()
+      requestAllRarities()
+    end, delay)
+  end
 end
 
 function onRarityContainerOpen(container, previousContainer)
+  local id = container:getId()
+
+  -- Request from server
   scheduleEvent(function()
-    requestContainerRarity(container:getId())
-  end, 200)
+    requestContainerRarity(id)
+  end, 300)
+
+  -- If we already have cached data, re-apply it after widgets are created
+  if containerRarities[id] then
+    scheduleEvent(function()
+      applyContainerRarities(id)
+    end, 150)
+  end
 end
 
 function onRarityContainerClose(container)
@@ -228,25 +269,35 @@ function onRarityContainerClose(container)
 end
 
 function onRarityContainerUpdate(container, slot, item, oldItem)
+  local id = container:getId()
+
+  -- Re-apply cached data after the widget update
+  if containerRarities[id] then
+    scheduleEvent(function()
+      applyContainerRarities(id)
+    end, 50)
+  end
+
+  -- Request fresh data from server
   scheduleEvent(function()
-    requestContainerRarity(container:getId())
-  end, 200)
+    requestContainerRarity(id)
+  end, 300)
 end
 
 function onRarityContainerSizeChange(container, size)
+  local id = container:getId()
   scheduleEvent(function()
-    requestContainerRarity(container:getId())
-  end, 200)
+    requestContainerRarity(id)
+  end, 300)
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
-  -- Re-apply cached rarity immediately with a small delay
-  -- (the inventory module's setStyle resets image-source, we need to re-apply after it)
+  -- Re-apply cached rarity after inventory module resets the style
   scheduleEvent(function()
     applyInventoryRarities()
   end, 50)
 
-  -- Also request fresh data from server (debounced to avoid spamming)
+  -- Request fresh data from server (debounced)
   if inventoryRequestEvent then
     removeEvent(inventoryRequestEvent)
   end
