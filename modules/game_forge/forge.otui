@@ -13,7 +13,7 @@ ForgeItemSlot < UIItem
 ForgeWindow < MainWindow
   id: forgeWindow
   !text: tr('Forge Item')
-  size: 700 500
+  size: 700 550
   @onEscape: modules.game_forge.toggle()
 
   TabBar
@@ -166,7 +166,7 @@ ForgeClassificationTab < Panel
     anchors.top: classSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 110
+    height: 155
     margin-top: 8
 
     Label
@@ -200,14 +200,34 @@ ForgeClassificationTab < Panel
       font: verdana-11px-antialised
       color: #c0c0c0
 
+    Label
+      id: classCostLabel
+      text-align: center
+      anchors.top: classMaterialLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #ffcc00
+
+    Button
+      id: classBonusButton
+      !text: tr('+20%')
+      width: 50
+      height: 22
+      anchors.top: classCostLabel.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 4
+      color: #3399ff
+
     ProgressBar
       id: classProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: classMaterialLabel.bottom
+      anchors.top: classBonusButton.bottom
       margin-left: 60
       margin-right: 60
-      margin-top: 6
+      margin-top: 4
       height: 12
       background-color: #00aa00
       visible: false
@@ -348,7 +368,7 @@ ForgeAttributesTab < Panel
     anchors.top: attrItemPanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 80
+    height: 115
     margin-top: 8
 
     Label
@@ -361,14 +381,24 @@ ForgeAttributesTab < Panel
       font: verdana-11px-antialised
       color: #c0c0c0
 
+    Label
+      id: attrCostLabel
+      text-align: center
+      anchors.top: attrMaterialLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 2
+      font: verdana-11px-antialised
+      color: #ffcc00
+
     ProgressBar
       id: attrProgressBar
-      anchors.top: attrMaterialLabel.bottom
+      anchors.top: attrCostLabel.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin-left: 60
       margin-right: 60
-      margin-top: 5
+      margin-top: 4
       height: 12
       background-color: #00aa00
       visible: false
@@ -547,7 +577,7 @@ ForgeToolsTab < Panel
     anchors.top: toolsSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 110
+    height: 155
     margin-top: 8
 
     Label
@@ -581,14 +611,34 @@ ForgeToolsTab < Panel
       font: verdana-11px-antialised
       color: #c0c0c0
 
+    Label
+      id: toolsCostLabel
+      text-align: center
+      anchors.top: toolsMaterialLabel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #ffcc00
+
+    Button
+      id: toolsBonusButton
+      !text: tr('+20%')
+      width: 50
+      height: 22
+      anchors.top: toolsCostLabel.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 4
+      color: #3399ff
+
     ProgressBar
       id: toolsProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: toolsMaterialLabel.bottom
+      anchors.top: toolsBonusButton.bottom
       margin-left: 60
       margin-right: 60
-      margin-top: 6
+      margin-top: 4
       height: 12
       background-color: #00aa00
       visible: false
