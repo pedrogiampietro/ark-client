@@ -222,6 +222,10 @@ function onContainerOpen(container, previousContainer)
   containerWindow:setup()
 
   -- Notify rarity module that container is fully ready
+  print('[CONTAINERS] About to call onContainerReady, modules.game_rarity=' .. tostring(modules.game_rarity))
+  if modules.game_rarity then
+    print('[CONTAINERS] onContainerReady func=' .. tostring(modules.game_rarity.onContainerReady))
+  end
   if modules.game_rarity and modules.game_rarity.onContainerReady then
     modules.game_rarity.onContainerReady(container)
   end

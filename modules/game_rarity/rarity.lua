@@ -139,6 +139,7 @@ function onRarityData(protocol, opcode, buffer)
     end
 
     containerRarities[containerId] = tiers
+    print('[RARITY] Received C data for container ' .. containerId .. ' with ' .. slot .. ' tiers')
     applyContainerRarities(containerId)
     -- Retry in case panel wasn't ready yet
     local retryDelays = {50, 150, 300}
@@ -171,12 +172,19 @@ end
 
 function applyContainerRarities(containerId)
   local tiers = containerRarities[containerId]
-  if not tiers then return end
+  if not tiers then
+    print('[RARITY] applyContainerRarities(' .. containerId .. '): no cached tiers')
+    return
+  end
 
   local panel = findContainerPanel(containerId)
-  if not panel then return end
+  if not panel then
+    print('[RARITY] applyContainerRarities(' .. containerId .. '): panel NOT found')
+    return
+  end
 
   local children = panel:getChildren()
+  print('[RARITY] applyContainerRarities(' .. containerId .. '): applying to ' .. #children .. ' items')
   for i = 1, #children do
     local itemWidget = children[i]
     if itemWidget then
@@ -259,6 +267,7 @@ end
 
 function onRarityContainerOpen(container, previousContainer)
   local id = container:getId()
+  print('[RARITY] onRarityContainerOpen called for container ' .. id)
 
   -- Cache panel reference
   if container.itemsPanel then
@@ -270,10 +279,14 @@ end
 -- This is the primary mechanism (like onInventoryChange for inventory)
 function onContainerReady(container)
   local id = container:getId()
+  print('[RARITY] onContainerReady called for container ' .. id)
 
   -- Cache panel reference (guaranteed to be set at this point)
   if container.itemsPanel then
     containerPanels[id] = container.itemsPanel
+    print('[RARITY] Panel cached for container ' .. id)
+  else
+    print('[RARITY] WARNING: container.itemsPanel is nil for container ' .. id)
   end
 
   -- Request fresh data from server
