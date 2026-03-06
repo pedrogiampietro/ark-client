@@ -8,18 +8,21 @@ NonClosableMiniWindow
   NonClosableMiniWindowContents
     margin-left: 8
 
-    InventoryButton
+    UIButton
       id: storeButton
-      !text: tr('Store')
-      icon: /images/topbuttons/shop
-      icon-clip: 0 0 20 20
-      icon-align: left
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.top: parent.top
       margin-top: 4
       margin-right: 8
       height: 20
+      image-source: /images/ui/store_large
+      image-clip: 0 0 108 20
+      image-border: 0
+      $hover:
+        image-clip: 0 0 108 20
+      $pressed:
+        image-clip: 0 20 108 20
       @onClick: modules.game_store.toggle()
 
     InventoryButton
