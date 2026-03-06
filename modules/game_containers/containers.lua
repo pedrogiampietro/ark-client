@@ -58,6 +58,11 @@ function refreshContainerItems(container)
   if container:hasPages() then
     refreshContainerPages(container)
   end
+
+  -- Re-apply rarity frames after items are refreshed
+  if modules.game_rarity and modules.game_rarity.onContainerItemUpdated then
+    modules.game_rarity.onContainerItemUpdated(container)
+  end
 end
 
 function toggleContainerPages(containerWindow, hasPages)
@@ -215,6 +220,11 @@ function onContainerOpen(container, previousContainer)
   end
 
   containerWindow:setup()
+
+  -- Notify rarity module that container is fully ready
+  if modules.game_rarity and modules.game_rarity.onContainerReady then
+    modules.game_rarity.onContainerReady(container)
+  end
 end
 
 function onContainerClose(container)
@@ -230,4 +240,9 @@ function onContainerUpdateItem(container, slot, item, oldItem)
   if not container.window then return end
   local itemWidget = container.itemsPanel:getChildById('item' .. slot)
   itemWidget:setItem(item)
+
+  -- Re-apply rarity frame after setItem resets it
+  if modules.game_rarity and modules.game_rarity.onContainerItemUpdated then
+    modules.game_rarity.onContainerItemUpdated(container)
+  end
 end

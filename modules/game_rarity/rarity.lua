@@ -260,30 +260,55 @@ end
 function onRarityContainerOpen(container, previousContainer)
   local id = container:getId()
 
-  -- Store the panel reference directly from the container object
+  -- Cache panel reference
+  if container.itemsPanel then
+    containerPanels[id] = container.itemsPanel
+  end
+end
+
+-- Called directly by containers.lua AFTER container is fully set up
+-- This is the primary mechanism (like onInventoryChange for inventory)
+function onContainerReady(container)
+  local id = container:getId()
+
+  -- Cache panel reference (guaranteed to be set at this point)
   if container.itemsPanel then
     containerPanels[id] = container.itemsPanel
   end
 
-  -- Retry aggressively to cache panel + request + apply
-  local openDelays = {10, 50, 100, 200, 500}
-  for _, delay in ipairs(openDelays) do
-    scheduleEvent(function()
-      -- Try to cache panel reference (may not be set instantly)
-      if not containerPanels[id] then
-        if container.itemsPanel then
-          containerPanels[id] = container.itemsPanel
-        else
-          -- Fallback: search UI tree
-          findContainerPanel(id)
-        end
-      end
-      -- Request fresh data from server
-      requestContainerRarity(id)
-      -- Apply cached data if available
-      applyContainerRarities(id)
-    end, delay)
+  -- Request fresh data from server
+  requestContainerRarity(id)
+
+  -- Apply cached data immediately if available
+  applyContainerRarities(id)
+
+  -- Retry after server response arrives
+  scheduleEvent(function()
+    applyContainerRarities(id)
+  end, 100)
+  scheduleEvent(function()
+    applyContainerRarities(id)
+  end, 300)
+end
+
+-- Called directly by containers.lua after setItem() resets frames
+function onContainerItemUpdated(container)
+  local id = container:getId()
+
+  -- Cache panel
+  if container.itemsPanel and not containerPanels[id] then
+    containerPanels[id] = container.itemsPanel
   end
+
+  -- Re-apply cached rarity immediately (like inventory does after style reset)
+  scheduleEvent(function()
+    applyContainerRarities(id)
+  end, 10)
+
+  -- Request fresh data
+  scheduleEvent(function()
+    requestContainerRarity(id)
+  end, 200)
 end
 
 function onRarityContainerClose(container)
@@ -293,32 +318,13 @@ function onRarityContainerClose(container)
 end
 
 function onRarityContainerUpdate(container, slot, item, oldItem)
-  local id = container:getId()
-
-  -- Update panel reference
-  if container.itemsPanel and not containerPanels[id] then
-    containerPanels[id] = container.itemsPanel
-  end
-
-  -- Re-apply cached + request fresh
-  if containerRarities[id] then
-    scheduleEvent(function()
-      applyContainerRarities(id)
-    end, 50)
-  end
-  scheduleEvent(function()
-    requestContainerRarity(id)
-  end, 300)
+  -- containers.lua now calls onContainerItemUpdated directly
+  -- this is kept as backup
 end
 
 function onRarityContainerSizeChange(container, size)
-  local id = container:getId()
-  if container.itemsPanel and not containerPanels[id] then
-    containerPanels[id] = container.itemsPanel
-  end
-  scheduleEvent(function()
-    requestContainerRarity(id)
-  end, 300)
+  -- containers.lua now calls onContainerItemUpdated via refreshContainerItems
+  -- this is kept as backup
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
