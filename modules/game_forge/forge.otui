@@ -235,7 +235,7 @@ ForgeClassificationTab < Panel
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
-      text-offset: 0 18
+      text-offset: 0 -8
 
       $on:
         image-clip: 0 66 128 66
@@ -672,7 +672,7 @@ ForgeToolsTab < Panel
       margin-top: 4
       font: verdana-11px-antialised
       color: #aaaaaa
-      text-offset: 0 18
+      text-offset: 0 -8
 
       $on:
         image-clip: 0 66 128 66
