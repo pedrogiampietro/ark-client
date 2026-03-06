@@ -140,10 +140,13 @@ function onRarityData(protocol, opcode, buffer)
 
     containerRarities[containerId] = tiers
     applyContainerRarities(containerId)
-    -- Retry in case panel wasn't ready
-    scheduleEvent(function()
-      applyContainerRarities(containerId)
-    end, 200)
+    -- Retry in case panel wasn't ready yet
+    local retryDelays = {50, 150, 300}
+    for _, d in ipairs(retryDelays) do
+      scheduleEvent(function()
+        applyContainerRarities(containerId)
+      end, d)
+    end
 
   elseif prefix == "I:" then
     local rest = buffer:sub(3)
@@ -235,17 +238,20 @@ end
 
 function requestAndApplyAll()
   requestAllRarities()
-  -- Also re-apply cached data (covers the case where data already arrived)
-  scheduleEvent(function()
-    applyAllRarities()
-  end, 100)
+  -- Re-apply cached data at multiple short intervals
+  local applyDelays = {10, 50, 150}
+  for _, d in ipairs(applyDelays) do
+    scheduleEvent(function()
+      applyAllRarities()
+    end, d)
+  end
 end
 
 -- Event handlers
 
 function onRarityGameStart()
   -- Aggressive sync on login: request + reapply at multiple intervals
-  local delays = {50, 100, 200, 500}
+  local delays = {50, 100, 200, 500, 1000}
   for _, delay in ipairs(delays) do
     scheduleEvent(requestAndApplyAll, delay)
   end
@@ -255,25 +261,28 @@ function onRarityContainerOpen(container, previousContainer)
   local id = container:getId()
 
   -- Store the panel reference directly from the container object
-  -- containers.lua onContainerOpen runs before us (loaded first) so itemsPanel is set
   if container.itemsPanel then
     containerPanels[id] = container.itemsPanel
   end
 
-  -- Request fresh data
-  scheduleEvent(function()
-    -- Try to cache panel if we didn't get it before
-    if not containerPanels[id] and container.itemsPanel then
-      containerPanels[id] = container.itemsPanel
-    end
-    requestContainerRarity(id)
-  end, 200)
-
-  -- Apply cached data if available
-  if containerRarities[id] then
+  -- Retry aggressively to cache panel + request + apply
+  local openDelays = {10, 50, 100, 200, 500}
+  for _, delay in ipairs(openDelays) do
     scheduleEvent(function()
+      -- Try to cache panel reference (may not be set instantly)
+      if not containerPanels[id] then
+        if container.itemsPanel then
+          containerPanels[id] = container.itemsPanel
+        else
+          -- Fallback: search UI tree
+          findContainerPanel(id)
+        end
+      end
+      -- Request fresh data from server
+      requestContainerRarity(id)
+      -- Apply cached data if available
       applyContainerRarities(id)
-    end, 100)
+    end, delay)
   end
 end
 
