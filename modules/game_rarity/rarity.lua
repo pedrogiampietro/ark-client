@@ -11,8 +11,14 @@ local rarityImages = {
   [5] = '/images/ui/rarity_red',
 }
 
+-- Storage for rarity tiers
 local containerRarities = {}
 local inventoryRarities = {}
+
+-- Store direct references to container panel widgets
+local containerPanels = {}
+
+-- Debounce
 local inventoryRequestEvent = nil
 
 function init()
@@ -61,11 +67,13 @@ function terminate()
 
   containerRarities = {}
   inventoryRarities = {}
+  containerPanels = {}
 end
 
 function onRarityGameEnd()
   containerRarities = {}
   inventoryRarities = {}
+  containerPanels = {}
 end
 
 function applyRarityFrame(itemWidget, tier)
@@ -77,11 +85,36 @@ function applyRarityFrame(itemWidget, tier)
   end
 end
 
--- Find the container contentsPanel by searching the full UI tree
+-- Find container items panel using multiple strategies
 function findContainerPanel(containerId)
-  local containerWindow = rootWidget:recursiveGetChildById('container' .. containerId)
-  if not containerWindow then return nil end
-  return containerWindow:getChildById('contentsPanel')
+  -- Strategy 1: cached reference from onOpen
+  local cached = containerPanels[containerId]
+  if cached then return cached end
+
+  -- Strategy 2: from g_game.getContainers() property
+  local containers = g_game.getContainers()
+  if containers then
+    local container = containers[containerId]
+    if container and container.itemsPanel then
+      containerPanels[containerId] = container.itemsPanel
+      return container.itemsPanel
+    end
+  end
+
+  -- Strategy 3: search UI tree
+  local root = g_ui.getRootWidget()
+  if root then
+    local containerWindow = root:recursiveGetChildById('container' .. containerId)
+    if containerWindow then
+      local panel = containerWindow:getChildById('contentsPanel')
+      if panel then
+        containerPanels[containerId] = panel
+        return panel
+      end
+    end
+  end
+
+  return nil
 end
 
 function onRarityData(protocol, opcode, buffer)
@@ -107,6 +140,7 @@ function onRarityData(protocol, opcode, buffer)
 
     containerRarities[containerId] = tiers
     applyContainerRarities(containerId)
+    -- Retry in case panel wasn't ready
     scheduleEvent(function()
       applyContainerRarities(containerId)
     end, 200)
@@ -129,9 +163,6 @@ function onRarityData(protocol, opcode, buffer)
     end
 
     applyInventoryRarities()
-    scheduleEvent(function()
-      applyInventoryRarities()
-    end, 200)
   end
 end
 
@@ -139,14 +170,14 @@ function applyContainerRarities(containerId)
   local tiers = containerRarities[containerId]
   if not tiers then return end
 
-  -- Find the container panel directly in the UI tree
-  local contentsPanel = findContainerPanel(containerId)
-  if not contentsPanel then return end
+  local panel = findContainerPanel(containerId)
+  if not panel then return end
 
-  local children = contentsPanel:getChildren()
-  for slot = 0, #children - 1 do
-    local itemWidget = contentsPanel:getChildById('item' .. slot)
+  local children = panel:getChildren()
+  for i = 1, #children do
+    local itemWidget = children[i]
     if itemWidget then
+      local slot = i - 1
       local tier = tiers[slot] or 0
       applyRarityFrame(itemWidget, tier)
     end
@@ -202,61 +233,92 @@ function requestAllRarities()
   end
 end
 
+function requestAndApplyAll()
+  requestAllRarities()
+  -- Also re-apply cached data (covers the case where data already arrived)
+  scheduleEvent(function()
+    applyAllRarities()
+  end, 100)
+end
+
 -- Event handlers
 
 function onRarityGameStart()
-  local delays = {500, 1500, 3000, 5000, 8000}
+  -- Aggressive sync on login: request + reapply at multiple intervals
+  local delays = {500, 1000, 1500, 2500, 4000, 6000}
   for _, delay in ipairs(delays) do
-    scheduleEvent(function()
-      requestAllRarities()
-    end, delay)
+    scheduleEvent(requestAndApplyAll, delay)
   end
 end
 
 function onRarityContainerOpen(container, previousContainer)
   local id = container:getId()
 
-  scheduleEvent(function()
-    requestContainerRarity(id)
-  end, 500)
-
-  if containerRarities[id] then
-    scheduleEvent(function()
-      applyContainerRarities(id)
-    end, 300)
+  -- Store the panel reference directly from the container object
+  -- containers.lua onContainerOpen runs before us (loaded first) so itemsPanel is set
+  if container.itemsPanel then
+    containerPanels[id] = container.itemsPanel
   end
-end
 
-function onRarityContainerClose(container)
-  containerRarities[container:getId()] = nil
-end
+  -- Request fresh data
+  scheduleEvent(function()
+    -- Try to cache panel if we didn't get it before
+    if not containerPanels[id] and container.itemsPanel then
+      containerPanels[id] = container.itemsPanel
+    end
+    requestContainerRarity(id)
+  end, 200)
 
-function onRarityContainerUpdate(container, slot, item, oldItem)
-  local id = container:getId()
-
+  -- Apply cached data if available
   if containerRarities[id] then
     scheduleEvent(function()
       applyContainerRarities(id)
     end, 100)
   end
+end
 
+function onRarityContainerClose(container)
+  local id = container:getId()
+  containerRarities[id] = nil
+  containerPanels[id] = nil
+end
+
+function onRarityContainerUpdate(container, slot, item, oldItem)
+  local id = container:getId()
+
+  -- Update panel reference
+  if container.itemsPanel and not containerPanels[id] then
+    containerPanels[id] = container.itemsPanel
+  end
+
+  -- Re-apply cached + request fresh
+  if containerRarities[id] then
+    scheduleEvent(function()
+      applyContainerRarities(id)
+    end, 50)
+  end
   scheduleEvent(function()
     requestContainerRarity(id)
-  end, 500)
+  end, 300)
 end
 
 function onRarityContainerSizeChange(container, size)
   local id = container:getId()
+  if container.itemsPanel and not containerPanels[id] then
+    containerPanels[id] = container.itemsPanel
+  end
   scheduleEvent(function()
     requestContainerRarity(id)
-  end, 500)
+  end, 300)
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
+  -- Re-apply cached rarity after inventory module resets the style
   scheduleEvent(function()
     applyInventoryRarities()
   end, 50)
 
+  -- Request fresh data (debounced)
   if inventoryRequestEvent then
     removeEvent(inventoryRequestEvent)
   end
