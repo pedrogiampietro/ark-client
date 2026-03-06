@@ -10,7 +10,7 @@ NonClosableMiniWindow
 
     UIButton
       id: storeButton
-      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.left: parent.left
       anchors.top: parent.top
       margin-top: 4
       width: 108
