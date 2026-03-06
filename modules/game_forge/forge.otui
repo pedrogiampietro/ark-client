@@ -459,3 +459,5 @@ ForgeToolsTab < Panel
       anchors.horizontalCenter: parent.horizontalCenter
       margin-bottom: 8
       enabled: false
+
+ForgeWindow
