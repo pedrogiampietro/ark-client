@@ -145,7 +145,6 @@ ForgeClassificationTab < Panel
       anchors.top: classResultTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      image-source: /images/ui/slot
       image-size: 36 36
 
       UIItem
@@ -223,7 +222,7 @@ ForgeClassificationTab < Panel
       font: verdana-11px-antialised
       color: #ffcc00
 
-    UIButton
+    UIWidget
       id: classBonusButton
       !text: tr('+20%%')
       size: 64 66
@@ -581,7 +580,6 @@ ForgeToolsTab < Panel
       anchors.top: toolsResultTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 8
-      image-source: /images/ui/slot
       image-size: 36 36
 
       UIItem
@@ -659,7 +657,7 @@ ForgeToolsTab < Panel
       font: verdana-11px-antialised
       color: #ffcc00
 
-    UIButton
+    UIWidget
       id: toolsBonusButton
       !text: tr('+20%%')
       size: 64 66

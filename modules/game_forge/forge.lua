@@ -22,6 +22,14 @@ local TIER_COLORS = {
   [5] = '#ffcc00'
 }
 
+local TIER_RARITY_IMAGES = {
+  [1] = '/images/ui/rarity_white',
+  [2] = '/images/ui/rarity_green',
+  [3] = '/images/ui/rarity_blue',
+  [4] = '/images/ui/rarity_purple',
+  [5] = '/images/ui/rarity_gold'
+}
+
 local FORGE_RUNES = {
   TIER_UP = { id = 2312, name = 'Rune of Tiering' },
   UPGRADE = { id = 2284, name = 'Rune of Upgrading' },
@@ -396,6 +404,17 @@ function updateClassInfo(data)
     end
   end
 
+  -- Set rarity frame on result item
+  local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
+  if resultContainer then
+    local rarityImg = TIER_RARITY_IMAGES[nextTier]
+    if rarityImg then
+      resultContainer:setImageSource(rarityImg)
+    else
+      resultContainer:setImageSource('/images/ui/slot')
+    end
+  end
+
   local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
   if chanceLabel then
     chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
@@ -434,6 +453,8 @@ function clearClassInfo()
   if slot then slot:setItem(nil) end
   local resultItem = tab:recursiveGetChildById('classResultItem')
   if resultItem then resultItem:setItem(nil) end
+  local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
+  if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -463,6 +484,8 @@ function clearClassSlot()
   if slot then slot:setItem(nil) end
   local resultItem = tab:recursiveGetChildById('classResultItem')
   if resultItem then resultItem:setItem(nil) end
+  local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
+  if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
   if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel'}) do
@@ -766,6 +789,12 @@ function updateToolsInfo(data)
     end
   end
 
+  -- Set slot frame on result item
+  local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
+  if resultContainer then
+    resultContainer:setImageSource('/images/ui/slot')
+  end
+
   local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
   if chanceLabel then
     chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
@@ -804,6 +833,8 @@ function clearToolsInfo()
   if slot then slot:setItem(nil) end
   local resultItem = tab:recursiveGetChildById('toolsResultItem')
   if resultItem then resultItem:setItem(nil) end
+  local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
+  if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -833,6 +864,8 @@ function clearToolsSlot()
   if slot then slot:setItem(nil) end
   local resultItem = tab:recursiveGetChildById('toolsResultItem')
   if resultItem then resultItem:setItem(nil) end
+  local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
+  if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
   if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel'}) do
