@@ -10,15 +10,15 @@ NonClosableMiniWindow
 
     UIButton
       id: storeButton
-      anchors.left: parent.left
-      anchors.right: parent.right
+      anchors.horizontalCenter: parent.horizontalCenter
       anchors.top: parent.top
       margin-top: 4
-      margin-right: 8
+      width: 108
       height: 20
       image-source: /images/ui/store_large
       image-clip: 0 0 108 20
       image-border: 0
+      image-smooth: true
       $hover:
         image-clip: 0 0 108 20
       $pressed:
