@@ -245,7 +245,7 @@ end
 
 function onRarityGameStart()
   -- Aggressive sync on login: request + reapply at multiple intervals
-  local delays = {500, 1000, 1500, 2500, 4000, 6000}
+  local delays = {1, 50, 150, 300}
   for _, delay in ipairs(delays) do
     scheduleEvent(requestAndApplyAll, delay)
   end
