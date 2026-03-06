@@ -26,6 +26,8 @@ local TIER_COLORS = {
 forgeWindow = nil
 local forgeTabBar = nil
 local forgeButton = nil
+local forging = false
+local forgeAnimEvent = nil
 
 -- Original item positions (from inventory/container)
 local classSourcePos = nil
@@ -48,10 +50,12 @@ function terminate()
     forgeButton:destroy()
     forgeButton = nil
   end
+  stopForgeAnimation()
   destroyWindow()
 end
 
 function onGameEnd()
+  stopForgeAnimation()
   destroyWindow()
 end
 
@@ -63,6 +67,7 @@ function destroyWindow()
     classSourcePos = nil
     attrSourcePos = nil
     toolsSourcePos = nil
+    forging = false
   end
 end
 
@@ -102,9 +107,9 @@ function createWindow()
   local attrTab = g_ui.createWidget('ForgeAttributesTab')
   local toolsTab = g_ui.createWidget('ForgeToolsTab')
 
-  forgeTabBar:addTab(tr('Classification'), classTab, '/images/topbuttons/cooldowns')
-  forgeTabBar:addTab(tr('Attributes'), attrTab, '/images/topbuttons/skills')
-  forgeTabBar:addTab(tr('Tools'), toolsTab, '/images/topbuttons/inventory')
+  forgeTabBar:addTab(tr('Classification'), classTab)
+  forgeTabBar:addTab(tr('Attributes'), attrTab)
+  forgeTabBar:addTab(tr('Tools'), toolsTab)
 
   setupClassificationTab(classTab)
   setupAttributesTab(attrTab)
@@ -138,9 +143,18 @@ local function splitStr(str, sep)
   return result
 end
 
+-- Show/hide placeholder text when item is set/cleared
+local function updatePlaceholder(tab, placeholderId, hasItem)
+  local placeholder = tab:recursiveGetChildById(placeholderId)
+  if placeholder then
+    placeholder:setVisible(not hasItem)
+  end
+end
+
 -- Setup a ForgeItemSlot with drop handler that captures source position
-local function setupItemSlot(slot, tabType)
+local function setupItemSlot(slot, tabType, tab)
   slot.onDrop = function(self, widget, mousePos, forced)
+    if forging then return false end
     if not self:canAcceptDrop(widget, mousePos) and not forced then return false end
     local item = widget.currentDragThing
     if not item or not item:isItem() then return false end
@@ -151,12 +165,15 @@ local function setupItemSlot(slot, tabType)
 
     if tabType == 'CLASS' then
       classSourcePos = srcPos
+      updatePlaceholder(tab, 'classPlaceholder', true)
       sendToServer('QUERY:CLASS:' .. posToStr(srcPos))
     elseif tabType == 'ATTR' then
       attrSourcePos = srcPos
+      updatePlaceholder(tab, 'attrPlaceholder', true)
       sendToServer('QUERY:ATTR:' .. posToStr(srcPos))
     elseif tabType == 'TOOLS' then
       toolsSourcePos = srcPos
+      updatePlaceholder(tab, 'toolsPlaceholder', true)
       sendToServer('QUERY:TOOLS:' .. posToStr(srcPos))
     end
     return true
@@ -167,18 +184,94 @@ local function setupItemSlot(slot, tabType)
 end
 
 -- ==========================================
+-- FORGE ANIMATION
+-- ==========================================
+
+function stopForgeAnimation()
+  if forgeAnimEvent then
+    removeEvent(forgeAnimEvent)
+    forgeAnimEvent = nil
+  end
+  forging = false
+end
+
+-- Run progress bar animation then call onComplete
+local function runForgeAnimation(progressBarId, onComplete)
+  if not forgeWindow then return end
+  local bar = forgeWindow:recursiveGetChildById(progressBarId)
+  if not bar then
+    if onComplete then onComplete() end
+    return
+  end
+
+  forging = true
+  bar:setVisible(true)
+  bar:setPercent(0)
+
+  local step = 0
+  local totalSteps = 20
+  local interval = 80
+
+  local function animStep()
+    step = step + 1
+    if not forgeWindow or not bar then
+      stopForgeAnimation()
+      return
+    end
+
+    local pct = math.floor((step / totalSteps) * 100)
+    bar:setPercent(math.min(pct, 100))
+
+    if step >= totalSteps then
+      stopForgeAnimation()
+      bar:setVisible(false)
+      if onComplete then onComplete() end
+    else
+      forgeAnimEvent = scheduleEvent(animStep, interval)
+    end
+  end
+
+  forgeAnimEvent = scheduleEvent(animStep, interval)
+end
+
+-- Show result message with color (green for success, red for failure)
+local function showResultMessage(labelId, success)
+  if not forgeWindow then return end
+  local label = forgeWindow:recursiveGetChildById(labelId)
+  if not label then return end
+
+  if success then
+    label:setText(tr('Success!'))
+    label:setColor('#00ff00')
+  else
+    label:setText(tr('Failed!'))
+    label:setColor('#ff3333')
+  end
+
+  -- Clear message after 3 seconds
+  scheduleEvent(function()
+    if forgeWindow and label then
+      label:setText('')
+    end
+  end, 3000)
+end
+
+-- ==========================================
 -- CLASSIFICATION TAB (TIER)
 -- ==========================================
 
 function setupClassificationTab(tab)
   local sourceItem = tab:recursiveGetChildById('classSourceItem')
-  local forgeButton = tab:recursiveGetChildById('classForgeButton')
+  local forgBtn = tab:recursiveGetChildById('classForgeButton')
 
-  setupItemSlot(sourceItem, 'CLASS')
+  setupItemSlot(sourceItem, 'CLASS', tab)
 
-  forgeButton.onClick = function()
-    if classSourcePos then
-      sendToServer('FORGE:TIER_UP:' .. posToStr(classSourcePos))
+  forgBtn.onClick = function()
+    if classSourcePos and not forging then
+      forgBtn:setEnabled(false)
+      runForgeAnimation('classProgressBar', function()
+        sendToServer('FORGE:TIER_UP:' .. posToStr(classSourcePos))
+      end)
     end
   end
 end
@@ -195,31 +288,31 @@ function updateClassInfo(data)
 
   local tierLabel = tab:recursiveGetChildById('classSourceTierLabel')
   if tierLabel then
-    tierLabel:setText('Current: ' .. (TIER_NAMES[currentTier] or 'None'))
+    tierLabel:setText(tr('Current') .. ': ' .. (TIER_NAMES[currentTier] or 'None'))
     tierLabel:setColor(TIER_COLORS[currentTier] or '#c0c0c0')
   end
 
   local resultLabel = tab:recursiveGetChildById('classResultTierLabel')
   if resultLabel then
     if nextTier > 0 then
-      resultLabel:setText('Next: ' .. (TIER_NAMES[nextTier] or '?'))
+      resultLabel:setText(tr('Next') .. ': ' .. (TIER_NAMES[nextTier] or '?'))
       resultLabel:setColor(TIER_COLORS[nextTier] or '#c0c0c0')
     else
-      resultLabel:setText('Maximum Tier')
+      resultLabel:setText(tr('Maximum Tier'))
       resultLabel:setColor('#ffcc00')
     end
   end
 
   local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
   if chanceLabel then
-    chanceLabel:setText('Chance: ' .. chance .. '%')
+    chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
     if chance >= 60 then chanceLabel:setColor('#00ff00')
     elseif chance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end
   end
 
-  local forgeButton = tab:recursiveGetChildById('classForgeButton')
-  if forgeButton then forgeButton:setEnabled(canForge) end
+  local forgBtn = tab:recursiveGetChildById('classForgeButton')
+  if forgBtn then forgBtn:setEnabled(canForge and not forging) end
 end
 
 function clearClassInfo()
@@ -233,6 +326,9 @@ function clearClassInfo()
   end
   local btn = tab:recursiveGetChildById('classForgeButton')
   if btn then btn:setEnabled(false) end
+  updatePlaceholder(tab, 'classPlaceholder', false)
+  local msg = tab:recursiveGetChildById('classResultMessage')
+  if msg then msg:setText('') end
 end
 
 -- ==========================================
@@ -241,7 +337,7 @@ end
 
 function setupAttributesTab(tab)
   local sourceItem = tab:recursiveGetChildById('attrSourceItem')
-  setupItemSlot(sourceItem, 'ATTR')
+  setupItemSlot(sourceItem, 'ATTR', tab)
 
   local actions = {
     { id = 'attrAddEnchant',  action = 'ENCHANT_ADD' },
@@ -254,11 +350,24 @@ function setupAttributesTab(tab)
     local btn = tab:recursiveGetChildById(a.id)
     if btn then
       btn.onClick = function()
-        if attrSourcePos then
-          sendToServer('FORGE:' .. a.action .. ':' .. posToStr(attrSourcePos))
+        if attrSourcePos and not forging then
+          setAttrButtonsEnabled(false)
+          runForgeAnimation('attrProgressBar', function()
+            sendToServer('FORGE:' .. a.action .. ':' .. posToStr(attrSourcePos))
+          end)
         end
       end
     end
+  end
+end
+
+function setAttrButtonsEnabled(enabled)
+  if not forgeWindow then return end
+  local tab = forgeWindow:recursiveGetChildById('attributesTab')
+  if not tab then return end
+  for _, id in ipairs({'attrAddEnchant', 'attrRerollLast', 'attrRerollAll', 'attrRemoveLast', 'attrRemoveAll'}) do
+    local btn = tab:recursiveGetChildById(id)
+    if btn then btn:setEnabled(enabled) end
   end
 end
 
@@ -273,7 +382,7 @@ function updateAttrInfo(data)
 
   local itemInfo = tab:recursiveGetChildById('attrItemInfo')
   if itemInfo then
-    itemInfo:setText('Tier: ' .. (TIER_NAMES[tier] or 'None') .. ' (' .. slotsUsed .. '/' .. slotsMax .. ' slots)')
+    itemInfo:setText(tr('Tier') .. ': ' .. (TIER_NAMES[tier] or 'None') .. ' (' .. slotsUsed .. '/' .. slotsMax .. ' slots)')
   end
 
   local list = tab:recursiveGetChildById('attrEnchantList')
@@ -289,7 +398,7 @@ function updateAttrInfo(data)
     end
     for i = slotsUsed + 1, slotsMax do
       local label = g_ui.createWidget('Label', list)
-      label:setText('[Slot ' .. i .. '] empty')
+      label:setText('[Slot ' .. i .. '] ' .. tr('empty'))
       label:setColor('#666666')
       label:setHeight(18)
     end
@@ -308,7 +417,7 @@ function updateAttrInfo(data)
   }
   for _, bs in ipairs(btnStates) do
     local btn = tab:recursiveGetChildById(bs.id)
-    if btn then btn:setEnabled(bs.enabled) end
+    if btn then btn:setEnabled(bs.enabled and not forging) end
   end
 end
 
@@ -328,6 +437,10 @@ function clearAttrInfo()
     local btn = tab:recursiveGetChildById(id)
     if btn then btn:setEnabled(false) end
   end
+
+  updatePlaceholder(tab, 'attrPlaceholder', false)
+  local msg = tab:recursiveGetChildById('attrResultMessage')
+  if msg then msg:setText('') end
 end
 
 -- ==========================================
@@ -336,13 +449,16 @@ end
 
 function setupToolsTab(tab)
   local sourceItem = tab:recursiveGetChildById('toolsSourceItem')
-  local forgeButton = tab:recursiveGetChildById('toolsForgeButton')
+  local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
 
-  setupItemSlot(sourceItem, 'TOOLS')
+  setupItemSlot(sourceItem, 'TOOLS', tab)
 
-  forgeButton.onClick = function()
-    if toolsSourcePos then
-      sendToServer('FORGE:UPGRADE:' .. posToStr(toolsSourcePos))
+  forgBtn.onClick = function()
+    if toolsSourcePos and not forging then
+      forgBtn:setEnabled(false)
+      runForgeAnimation('toolsProgressBar', function()
+        sendToServer('FORGE:UPGRADE:' .. posToStr(toolsSourcePos))
+      end)
     end
   end
 end
@@ -359,30 +475,30 @@ function updateToolsInfo(data)
 
   local levelLabel = tab:recursiveGetChildById('toolsSourceLevelLabel')
   if levelLabel then
-    levelLabel:setText('Current: +' .. level)
+    levelLabel:setText(tr('Current') .. ': +' .. level)
   end
 
   local resultLabel = tab:recursiveGetChildById('toolsResultLevelLabel')
   if resultLabel then
     if level < maxLevel then
-      resultLabel:setText('Next: +' .. (level + 1))
+      resultLabel:setText(tr('Next') .. ': +' .. (level + 1))
       resultLabel:setColor('#00ff00')
     else
-      resultLabel:setText('Maximum (+' .. maxLevel .. ')')
+      resultLabel:setText(tr('Maximum') .. ' (+' .. maxLevel .. ')')
       resultLabel:setColor('#ffcc00')
     end
   end
 
   local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
   if chanceLabel then
-    chanceLabel:setText('Chance: ' .. chance .. '%')
+    chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
     if chance >= 60 then chanceLabel:setColor('#00ff00')
     elseif chance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end
   end
 
-  local forgeButton = tab:recursiveGetChildById('toolsForgeButton')
-  if forgeButton then forgeButton:setEnabled(canForge) end
+  local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
+  if forgBtn then forgBtn:setEnabled(canForge and not forging) end
 end
 
 function clearToolsInfo()
@@ -396,6 +512,9 @@ function clearToolsInfo()
   end
   local btn = tab:recursiveGetChildById('toolsForgeButton')
   if btn then btn:setEnabled(false) end
+  updatePlaceholder(tab, 'toolsPlaceholder', false)
+  local msg = tab:recursiveGetChildById('toolsResultMessage')
+  if msg then msg:setText('') end
 end
 
 -- ==========================================
@@ -452,11 +571,22 @@ function onForgeData(protocol, opcode, buffer)
       })
     end
 
-  -- FORGE_RESULT:tab,success,message
+  -- FORGE_RESULT:tab,success
   elseif buffer:sub(1, 13) == 'FORGE_RESULT:' then
     local parts = splitStr(buffer:sub(14), ',')
     if #parts >= 2 then
       local tab = parts[1]
+      local success = parts[2] == '1'
+
+      -- Show result feedback
+      if tab == 'CLASS' then
+        showResultMessage('classResultMessage', success)
+      elseif tab == 'ATTR' then
+        showResultMessage('attrResultMessage', success)
+      elseif tab == 'TOOLS' then
+        showResultMessage('toolsResultMessage', success)
+      end
+
       -- Re-query to refresh display after forge
       if tab == 'CLASS' and classSourcePos then
         sendToServer('QUERY:CLASS:' .. posToStr(classSourcePos))
@@ -469,6 +599,6 @@ function onForgeData(protocol, opcode, buffer)
 
   -- FORGE_ERROR:message
   elseif buffer:sub(1, 12) == 'FORGE_ERROR:' then
-    -- Error messages are sent in-game via sendTextMessage
+    stopForgeAnimation()
   end
 end
