@@ -1,6 +1,6 @@
 local defaultOptions = {
   layout = DEFAULT_LAYOUT, -- set in init.lua
-  vsync = true,
+  vsync = false,
   showFps = true,
   showPing = true,
   fullscreen = false,
@@ -20,7 +20,7 @@ local defaultOptions = {
   rightPanels = 1,
   leftPanels = 0,
   containerPanel = 8,
-  backgroundFrameRate = 60,
+  backgroundFrameRate = 0,
   enableAudio = false,
   enableMusicSound = false,
   musicSoundVolume = 0,
