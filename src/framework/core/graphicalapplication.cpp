@@ -161,7 +161,7 @@ void GraphicalApplication::run()
             if (drawQueue && drawMapQueue && m_maxFps > 0) { // old drawQueue not processed yet
                 mutex.unlock();
                 AutoStat s(STATS_MAIN, "Sleep");
-                stdext::microsleep(200);
+                stdext::millisleep(1);
                 continue;
             }
             mutex.unlock();
@@ -199,7 +199,7 @@ void GraphicalApplication::run()
 
             if (m_maxFps > 0 || g_window.hasVerticalSync()) {
                 AutoStat s(STATS_MAIN, "Sleep");
-                stdext::microsleep(200);
+                stdext::millisleep(1);
             }
         }
         g_dispatcher.poll(); // last poll
@@ -222,13 +222,9 @@ void GraphicalApplication::run()
         }
 
         int frameDelay = m_maxFps <= 0 ? 0 : (1000000 / m_maxFps);
-        ticks_t now = stdext::micros();
-        if (frameDelay > 0 && lastRender + frameDelay > now && !m_mustRepaint) {
-            int64_t remaining = (lastRender + frameDelay) - now;
-            if (remaining > 1000) {
-                AutoStat s(STATS_RENDER, "Sleep");
-                stdext::microsleep(remaining - 500);
-            }
+        if (lastRender + frameDelay > stdext::micros() && !m_mustRepaint) {
+            AutoStat s(STATS_RENDER, "Sleep");
+            stdext::millisleep(1);
             continue;
         }
 
@@ -238,7 +234,7 @@ void GraphicalApplication::run()
             (m_mustRepaint && !drawQueue)) {
             mutex.unlock();
             AutoStat s(STATS_RENDER, "Wait");
-            stdext::microsleep(200);
+            stdext::millisleep(1);
             continue;
         }
         toDrawQueue = drawQueue ? drawQueue : toDrawQueue;
