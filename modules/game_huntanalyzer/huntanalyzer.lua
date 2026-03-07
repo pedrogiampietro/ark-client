@@ -10,9 +10,7 @@ totalSupplyCost = 0
 local HUNT_ANALYZER_OPCODE = 55
 
 function init()
-  print("[HuntAnalyzer] init() called, registering opcode " .. HUNT_ANALYZER_OPCODE)
   ProtocolGame.registerExtendedOpcode(HUNT_ANALYZER_OPCODE, onHuntAnalyzerData)
-  print("[HuntAnalyzer] opcode registered successfully")
   
   connect(g_game, {
     onGameStart = refresh,
@@ -31,7 +29,7 @@ function init()
   expWindow:hide()
   balanceWindow:hide()
   g_keyboard.bindKeyDown('Ctrl+H', toggle)
-  analyzerButton =  modules.client_topmenu.addRightGameToggleButton('analyzerButton', tr('Analyzer (Ctrl+H)'), '/images/topbuttons/analyzers', toggle)
+  analyzerButton = modules.client_topmenu.addLeftGameButton('analyzerButton', tr('Analyzer') .. ' (Ctrl+H)', '/images/topbuttons/analyzers', toggle, false, 8)
   analyzerButton:setOn(mainWindow:isVisible())
 
   expWindow:setup()
@@ -370,13 +368,10 @@ function setSkillValue(id, value)
 
 
 function onHuntAnalyzerData(protocol, opcode, buffer)
-	print("[HuntAnalyzer] RECEIVED opcode=" .. tostring(opcode) .. " buffer=" .. tostring(buffer))
 	if not buffer or buffer == "" then return end
 
 	local msgType = buffer:sub(1, buffer:find(":") - 1)
 	local msgData = buffer:sub(buffer:find(":") + 1)
-
-	print("[HuntAnalyzer] msgType=" .. tostring(msgType) .. " msgData=" .. tostring(msgData):sub(1,100))
 
 	if msgType == "KILL" then
 		onKillData(msgData)
@@ -388,13 +383,11 @@ function onHuntAnalyzerData(protocol, opcode, buffer)
 end
 
 function onKillData(data)
-	print("[HuntAnalyzer] onKillData called with: " .. tostring(data):sub(1,200))
 	-- Format: monsterName;lookType,head,body,legs,feet,addons
 	local parts = {}
 	for part in data:gmatch("[^;]+") do
 		table.insert(parts, part)
 	end
-	print("[HuntAnalyzer] parsed " .. #parts .. " parts")
 	if #parts < 2 then return end
 
 	local monsterName = parts[1]
