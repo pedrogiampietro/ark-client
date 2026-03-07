@@ -90,7 +90,6 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
                 g_drawQueue->addText(m_font, m_decayText, drawRect, Fw::AlignBottomRight, isPaused ? m_decayPausedColor : m_decayColor);
             }
         }
-        }
     }
 
     drawBorder(m_rect);
