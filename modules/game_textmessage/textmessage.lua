@@ -93,10 +93,41 @@ function displayMessage(mode, text)
 
   if msgtype.screenTarget then
     local label = messagesPanel:recursiveGetChildById(msgtype.screenTarget)
-    local plainMessage = text:gsub("%[#%x%x%x%x%x%x%](.-)%[/#%]", "%1")
-    label:setText(plainMessage)
-    label:setColor(msgtype.color)
+    local isLootMessage = (text:find('^Loot of ') or text:find('^%d%d:%d%d Loot of ')) and text:find('%[#%x%x%x%x%x%x%]')
+    if isLootMessage then
+      local coloredData = {}
+      local pos = 1
+      local defaultColor = string.format('#%02x%02x%02x', msgtype.color.r or 0, msgtype.color.g or 235, msgtype.color.b or 0)
+      while pos <= #text do
+        local tagStart, tagEnd, hex = text:find('%[#(%x%x%x%x%x%x)%]', pos)
+        if tagStart then
+          if tagStart > pos then
+            table.insert(coloredData, text:sub(pos, tagStart - 1))
+            table.insert(coloredData, defaultColor)
+          end
+          local closeStart, closeEnd = text:find('%[/#%]', tagEnd + 1)
+          if closeStart then
+            table.insert(coloredData, text:sub(tagEnd + 1, closeStart - 1))
+            table.insert(coloredData, '#' .. hex)
+            pos = closeEnd + 1
+          else
+            table.insert(coloredData, text:sub(tagEnd + 1))
+            table.insert(coloredData, '#' .. hex)
+            break
+          end
+        else
+          table.insert(coloredData, text:sub(pos))
+          table.insert(coloredData, defaultColor)
+          break
+        end
+      end
+      label:setColoredText(coloredData)
+    else
+      label:setText(text)
+      label:setColor(msgtype.color)
+    end
     label:setVisible(true)
+    local plainMessage = text:gsub('%[#%x%x%x%x%x%x%](.-)%[/#%]', '%1')
     removeEvent(label.hideEvent)
     label.hideEvent = scheduleEvent(function() label:setVisible(false) end, calculateVisibleTime(plainMessage))
   end
