@@ -9,16 +9,6 @@ totalSupplyCost = 0
 
 local HUNT_ANALYZER_OPCODE = 55
 
--- Convert server item ID to client item ID for display
-local function serverToClientId(serverId)
-	local ok, itemType = pcall(function() return g_things.getItemType(serverId) end)
-	if ok and itemType then
-		local cid = itemType:getClientId()
-		if cid and cid > 0 then return cid end
-	end
-	return serverId
-end
-
 function init()
   print("[HuntAnalyzer] init() called, registering opcode " .. HUNT_ANALYZER_OPCODE)
   ProtocolGame.registerExtendedOpcode(HUNT_ANALYZER_OPCODE, onHuntAnalyzerData)
@@ -569,13 +559,12 @@ function updateDropTracker(data)
     if dropWindow:isVisible() then
         local items = 0
         for k, v in pairs(data) do
-            local clientId = serverToClientId(k)
             local itemSprite = lootedItemsLabel:getChildById("image"..k)
             if not itemSprite then
                 itemSprite = g_ui.createWidget("ItemSprite", lootedItemsLabel)
                 itemSprite:setId("image"..k)
             end
-            itemSprite:setItemId(clientId)
+            itemSprite:setItemId(k)
             itemSprite:setMarginTop(items * 34 + 17)
             itemSprite:setMarginLeft(5)
 
@@ -683,13 +672,12 @@ function updateSupplyDisplay(data)
 
 	local items = 0
 	for k, v in pairs(data) do
-		local clientId = serverToClientId(k)
 		local itemSprite = supplyItemsLabel:getChildById("supImg"..k)
 		if not itemSprite then
 			itemSprite = g_ui.createWidget("SupplyItemSprite", supplyItemsLabel)
 			itemSprite:setId("supImg"..k)
 		end
-		itemSprite:setItemId(clientId)
+		itemSprite:setItemId(k)
 		itemSprite:setMarginTop(items * 34 + 17)
 		itemSprite:setMarginLeft(5)
 
