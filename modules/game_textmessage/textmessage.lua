@@ -93,11 +93,12 @@ function displayMessage(mode, text)
 
   if msgtype.screenTarget then
     local label = messagesPanel:recursiveGetChildById(msgtype.screenTarget)
-    label:setText(text)
+    local plainMessage = text:gsub("%[#%x%x%x%x%x%x%](.-)%[/#%]", "%1")
+    label:setText(plainMessage)
     label:setColor(msgtype.color)
     label:setVisible(true)
     removeEvent(label.hideEvent)
-    label.hideEvent = scheduleEvent(function() label:setVisible(false) end, calculateVisibleTime(text))
+    label.hideEvent = scheduleEvent(function() label:setVisible(false) end, calculateVisibleTime(plainMessage))
   end
 end
 

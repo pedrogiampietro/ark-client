@@ -644,8 +644,19 @@ function addTabText(text, speaktype, tab, creatureName)
     label = g_ui.createWidget('ConsoleLabel', consoleBuffer)
   end
   label:setId('consoleLabel' .. consoleBuffer:getChildCount())
-  label:setText(text)
-  label:setColor(speaktype.color)
+
+  local isLootMessage = (text:find('^Loot of ') or text:find('^%d%d:%d%d Loot of ')) and text:find('%[#%x%x%x%x%x%x%]')
+
+  if isLootMessage then
+    local formatted = text:gsub("%[#(%x%x%x%x%x%x)%](.-)%[/#%]", function(hex, inner)
+      return string.format("{%s, #%s}", inner, hex)
+    end)
+    label:setColoredText(formatted)
+  else
+    label:setText(text)
+    label:setColor(speaktype.color)
+  end
+
   consoleTabBar:blinkTab(tab)
 
   if speaktype.npcChat and (g_game.getCharacterName() ~= creatureName or g_game.getCharacterName() == 'Account Manager') then
