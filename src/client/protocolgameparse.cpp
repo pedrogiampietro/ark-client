@@ -3026,28 +3026,22 @@ void ProtocolGame::parseTournamentLeaderboard(const InputMessagePtr& msg)
 
 void ProtocolGame::parseKillTracker(const InputMessagePtr& msg)
 {
-   std::string name = msg->getString(); //Monster Name
-   uint16_t lookType = msg->getU16();      //Monster Looktype
-   uint8_t lookHead = msg->getU8();       // Monster Head
-   uint8_t lookBody = msg->getU8();       // Monster Body
-   uint8_t lookLegs = msg->getU8();       // Monster Legs
-   uint8_t lookFeet = msg->getU8();       // Monster Feet
-   uint8_t addons = msg->getU8();       //Monster Addons
-   uint8_t corpseSize = msg->getU8(); // corpse size
-   std::vector<std::tuple<std::string, ItemPtr>> items;
+    msg->getString();
+    msg->getU16();
+    msg->getU8();
+    msg->getU8();
+    msg->getU8();
+    msg->getU8();
+    msg->getU8();
+    int corpseSize = msg->getU8(); // corpse size
     for (int i = 0; i < corpseSize; i++) {
-        ItemPtr item = getItem(msg);
-        std::string itemName = msg->getString();
-        items.push_back(std::make_tuple(itemName, item));
+        getItem(msg); // corpse item    
     }
-
-    m_localPlayer->updateKillTracker(name, lookType, lookHead, lookBody, lookLegs, lookFeet, addons, corpseSize, items);
 }
 
 void ProtocolGame::parseSupplyTracker(const InputMessagePtr& msg)
 {
-    uint16_t itemClientId = msg->getU16();
-    m_localPlayer->updateSupplyTracker(itemClientId);
+    msg->getU16();
 }
 
 void ProtocolGame::parseImpactTracker(const InputMessagePtr& msg)

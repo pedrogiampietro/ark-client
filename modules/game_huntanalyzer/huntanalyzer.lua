@@ -7,11 +7,10 @@ supplyItems = {}
 totalLootValue = 0
 totalSupplyCost = 0
 
+local HUNT_ANALYZER_OPCODE = 55
+
 function init()
-  connect(LocalPlayer, {
-	onUpdateKillTracker = onUpdateKillTracker,
-	onUpdateSupplyTracker = onUpdateSupplyTracker,
-  })
+  ProtocolGame.registerExtendedOpcode(HUNT_ANALYZER_OPCODE, onHuntAnalyzerData)
   
   connect(g_game, {
     onGameStart = refresh,
@@ -308,10 +307,7 @@ end
 --//########## REAL MAGIC ##########//--
 
 function terminate()
-  disconnect(LocalPlayer, {
-	onExperienceChange = onExperienceChange,
-	onUpdateSupplyTracker = onUpdateSupplyTracker,
-  })
+  ProtocolGame.unregisterExtendedOpcode(HUNT_ANALYZER_OPCODE)
   disconnect(g_game, {
     onGameStart = refresh,
     onGameEnd = offline
@@ -371,34 +367,78 @@ function setSkillValue(id, value)
 
 
 
-function onUpdateKillTracker(localPlayer, monsterName,lookType,lookHead,lookBody,lookLegs,lookFeet,addons, corpse,items)
-	if not killedCreatures[monsterName] then
-	killedCreatures[monsterName] = {amount = 0, lookType = lookType, lookHead = lookHead, lookBody = lookBody, lookLegs = lookLegs, lookFeet = lookFeet, addons = addons}
+function onHuntAnalyzerData(protocol, opcode, buffer)
+	if not buffer or buffer == "" then return end
+
+	local msgType = buffer:sub(1, buffer:find(":") - 1)
+	local msgData = buffer:sub(buffer:find(":") + 1)
+
+	if msgType == "KILL" then
+		onKillData(msgData)
+	elseif msgType == "SUPPLY" then
+		onSupplyData(msgData)
 	end
-	killedCreatures[monsterName].amount = killedCreatures[monsterName].amount + 1
-	for _, data in pairs(items) do
-	local itemName = data[1]	
-	local item = data[2]
-        -- Check if the item ID exists in the lootedItems table
-        if not lootedItems[item:getId()] then
-            -- If the item ID doesn't exist, initialize its amount to 0
-            lootedItems[item:getId()] = { amount = 0 , name = itemName}
-        end
-        -- Increment the amount of the looted item
-        local itemCount = item:getCount()
-        lootedItems[item:getId()].amount = lootedItems[item:getId()].amount + itemCount
-
-        -- Add to loot value
-        local price = LOOT_PRICES[item:getId()] or 0
-        totalLootValue = totalLootValue + (price * itemCount)
-    end
-
-updateDropTracker(lootedItems)
-updateKillTracker(killedCreatures)
-updateBalanceDisplay()
 end
 
-function onUpdateSupplyTracker(localPlayer, itemClientId)
+function onKillData(data)
+	-- Format: monsterName;lookType,head,body,legs,feet,addons;itemId1:name1:count1|itemId2:name2:count2|...
+	local parts = {}
+	for part in data:gmatch("[^;]+") do
+		table.insert(parts, part)
+	end
+	if #parts < 2 then return end
+
+	local monsterName = parts[1]
+	local outfitParts = {}
+	for v in parts[2]:gmatch("[^,]+") do
+		table.insert(outfitParts, tonumber(v) or 0)
+	end
+	local lookType = outfitParts[1] or 19
+	local lookHead = outfitParts[2] or 0
+	local lookBody = outfitParts[3] or 0
+	local lookLegs = outfitParts[4] or 0
+	local lookFeet = outfitParts[5] or 0
+	local addons = outfitParts[6] or 0
+
+	-- Track the creature kill
+	if not killedCreatures[monsterName] then
+		killedCreatures[monsterName] = {amount = 0, lookType = lookType, lookHead = lookHead, lookBody = lookBody, lookLegs = lookLegs, lookFeet = lookFeet, addons = addons}
+	end
+	killedCreatures[monsterName].amount = killedCreatures[monsterName].amount + 1
+
+	-- Parse loot items
+	if parts[3] and parts[3] ~= "" then
+		for itemStr in parts[3]:gmatch("[^|]+") do
+			-- Format: id:name:count (split carefully in case name contains colons)
+			local firstColon = itemStr:find(":")
+			local lastColon = itemStr:find(":[^:]*$")
+			if firstColon and lastColon and firstColon ~= lastColon then
+				local itemId = tonumber(itemStr:sub(1, firstColon - 1)) or 0
+				local itemName = itemStr:sub(firstColon + 1, lastColon - 1)
+				local itemCount = tonumber(itemStr:sub(lastColon + 1)) or 1
+
+				if itemId > 0 then
+					if not lootedItems[itemId] then
+						lootedItems[itemId] = { amount = 0, name = itemName }
+					end
+					lootedItems[itemId].amount = lootedItems[itemId].amount + itemCount
+
+					local price = LOOT_PRICES[itemId] or 0
+					totalLootValue = totalLootValue + (price * itemCount)
+				end
+			end
+		end
+	end
+
+	updateDropTracker(lootedItems)
+	updateKillTracker(killedCreatures)
+	updateBalanceDisplay()
+end
+
+function onSupplyData(data)
+	local itemClientId = tonumber(data)
+	if not itemClientId then return end
+
     if not supplyItems[itemClientId] then
         supplyItems[itemClientId] = { amount = 0 }
     end
