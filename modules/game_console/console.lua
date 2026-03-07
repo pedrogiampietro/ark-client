@@ -648,10 +648,33 @@ function addTabText(text, speaktype, tab, creatureName)
   local isLootMessage = (text:find('^Loot of ') or text:find('^%d%d:%d%d Loot of ')) and text:find('%[#%x%x%x%x%x%x%]')
 
   if isLootMessage then
-    local formatted = text:gsub("%[#(%x%x%x%x%x%x)%](.-)%[/#%]", function(hex, inner)
-      return string.format("{%s, #%s}", inner, hex)
-    end)
-    label:setColoredText(formatted)
+    local coloredData = {}
+    local pos = 1
+    local defaultColor = speaktype.color or "#00EB00"
+    while pos <= #text do
+      local tagStart, tagEnd, hex = text:find('%[#(%x%x%x%x%x%x)%]', pos)
+      if tagStart then
+        if tagStart > pos then
+          table.insert(coloredData, text:sub(pos, tagStart - 1))
+          table.insert(coloredData, defaultColor)
+        end
+        local closeStart, closeEnd = text:find('%[/#%]', tagEnd + 1)
+        if closeStart then
+          table.insert(coloredData, text:sub(tagEnd + 1, closeStart - 1))
+          table.insert(coloredData, "#" .. hex)
+          pos = closeEnd + 1
+        else
+          table.insert(coloredData, text:sub(tagEnd + 1))
+          table.insert(coloredData, "#" .. hex)
+          break
+        end
+      else
+        table.insert(coloredData, text:sub(pos))
+        table.insert(coloredData, defaultColor)
+        break
+      end
+    end
+    label:setColoredText(coloredData)
   else
     label:setText(text)
     label:setColor(speaktype.color)
