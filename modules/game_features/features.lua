@@ -21,6 +21,10 @@ function updateFeatures(version)
     --g_game.enableFeature(GameBot)
     --g_game.enableFeature(GameSpritesAlphaChannel)
     
+    -- show remaining time on items (rings, tools, etc.)
+    -- server must also send the duration field when it is >0
+    g_game.enableFeature(GameDisplayItemDuration)
+    
     if(version >= 770) then
         g_game.enableFeature(GameLooktypeU16)
         g_game.enableFeature(GameMessageStatements)
