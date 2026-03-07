@@ -1,5 +1,5 @@
 NonClosableMiniWindow
-  height: 50
+  height: 75
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -66,3 +66,13 @@ NonClosableMiniWindow
       height: 20
       margin-top: 0
       @onClick: modules.game_interface.tryLogout()
+
+    InventoryButton
+      id: analyzerButton
+      !text: tr('Analyzer')
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-top: 5
+      height: 20
+      @onClick: modules.game_hunteranalyzer.toggle()

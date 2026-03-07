@@ -29,8 +29,6 @@ function init()
   expWindow:hide()
   balanceWindow:hide()
   g_keyboard.bindKeyDown('Ctrl+H', toggle)
-  analyzerButton = modules.client_topmenu.addLeftGameButton('analyzerButton', tr('Analyzer') .. ' (Ctrl+H)', '/images/topbuttons/analyzers', toggle, false, 8)
-  analyzerButton:setOn(mainWindow:isVisible())
 
   expWindow:setup()
   dropWindow:setup()
@@ -319,7 +317,6 @@ function terminate()
   dropWindow:destroy()
   trackWindow:destroy()
   balanceWindow:destroy()
-  analyzerButton:destroy()
 end
 
 function expForLevel(level)
@@ -732,5 +729,4 @@ function toggle()
 end
 
 function onMiniWindowClose()
-    analyzerButton:setOn(false)
 end
