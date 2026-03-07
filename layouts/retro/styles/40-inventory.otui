@@ -326,6 +326,10 @@ InventoryWindow < HeadlessMiniWindow
         InventoryButton
           !text: tr('Hotkeys')
           @onClick: modules.client_options.showHotkeys()
+
+        InventoryButton
+          !text: tr('Tracker')
+          @onClick: modules.game_hunteranalyzer.toggle()
           
         InventoryButton
           !text: tr('Logout')
