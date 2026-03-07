@@ -903,6 +903,55 @@ function getTopBar()
   return gameTopBar
 end
 
+function addLeftPanelToggle()
+  local current = g_settings.getNumber("leftPanels")
+  if current < 5 then
+    modules.client_options.setOption("leftPanels", current + 1)
+  end
+  updatePanelArrows()
+end
+
+function removeLeftPanelToggle()
+  local current = g_settings.getNumber("leftPanels")
+  if current > 1 then
+    modules.client_options.setOption("leftPanels", current - 1)
+  end
+  updatePanelArrows()
+end
+
+function addRightPanelToggle()
+  local current = g_settings.getNumber("rightPanels")
+  if current < 5 then
+    modules.client_options.setOption("rightPanels", current + 1)
+  end
+  updatePanelArrows()
+end
+
+function removeRightPanelToggle()
+  local current = g_settings.getNumber("rightPanels")
+  if current > 1 then
+    modules.client_options.setOption("rightPanels", current - 1)
+  end
+  updatePanelArrows()
+end
+
+function updatePanelArrows()
+  local leftAdd = gameRootPanel:getChildById('leftPanelAdd')
+  local leftRemove = gameRootPanel:getChildById('leftPanelRemove')
+  local rightAdd = gameRootPanel:getChildById('rightPanelAdd')
+  local rightRemove = gameRootPanel:getChildById('rightPanelRemove')
+  if not leftAdd then return end
+
+  local leftPanels = g_settings.getNumber("leftPanels")
+  local rightPanels = g_settings.getNumber("rightPanels")
+
+  -- Disable add if at max (5), disable remove if at min (1)
+  leftAdd:setEnabled(leftPanels < 5)
+  leftRemove:setEnabled(leftPanels > 1)
+  rightAdd:setEnabled(rightPanels < 5)
+  rightRemove:setEnabled(rightPanels > 1)
+end
+
 function refreshViewMode()  
   local classic = true -- g_settings.getBoolean("classicView") and not g_app.isMobile()
   local rightPanels = g_settings.getNumber("rightPanels") - gameRightPanels:getChildCount()
@@ -1015,6 +1064,7 @@ function refreshViewMode()
   end
   
   updateSize()
+  updatePanelArrows()
 end
 
 function limitZoom()

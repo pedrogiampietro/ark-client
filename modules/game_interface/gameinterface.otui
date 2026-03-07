@@ -193,6 +193,78 @@ UIWidget
       anchors.right: gameRightPanels.left
       anchors.bottom: parent.bottom
       
+  UIButton
+    id: leftPanelRemove
+    size: 12 21
+    image-source: /images/ui/arrow_horizontal
+    image-clip: 0 0 12 21
+    image-color: #ffffff
+    anchors.verticalCenter: gameMapPanel.verticalCenter
+    anchors.left: gameLeftPanels.right
+    margin-left: 2
+    change-cursor-image: true
+    cursor: pointer
+    !tooltip: tr('Remove left panel')
+    @onClick: modules.game_interface.removeLeftPanelToggle()
+    $hover !disabled:
+      image-clip: 0 21 12 21
+    $pressed:
+      image-clip: 0 21 12 21
+
+  UIButton
+    id: leftPanelAdd
+    size: 12 21
+    image-source: /images/ui/arrow_horizontal
+    image-clip: 12 0 12 21
+    image-color: #ffffff
+    anchors.top: leftPanelRemove.bottom
+    anchors.left: leftPanelRemove.left
+    margin-top: 2
+    change-cursor-image: true
+    cursor: pointer
+    !tooltip: tr('Add left panel')
+    @onClick: modules.game_interface.addLeftPanelToggle()
+    $hover !disabled:
+      image-clip: 12 21 12 21
+    $pressed:
+      image-clip: 12 21 12 21
+
+  UIButton
+    id: rightPanelAdd
+    size: 12 21
+    image-source: /images/ui/arrow_horizontal
+    image-clip: 0 0 12 21
+    image-color: #ffffff
+    anchors.verticalCenter: gameMapPanel.verticalCenter
+    anchors.right: gameRightPanels.left
+    margin-right: 2
+    change-cursor-image: true
+    cursor: pointer
+    !tooltip: tr('Add right panel')
+    @onClick: modules.game_interface.addRightPanelToggle()
+    $hover !disabled:
+      image-clip: 0 21 12 21
+    $pressed:
+      image-clip: 0 21 12 21
+
+  UIButton
+    id: rightPanelRemove
+    size: 12 21
+    image-source: /images/ui/arrow_horizontal
+    image-clip: 12 0 12 21
+    image-color: #ffffff
+    anchors.top: rightPanelAdd.bottom
+    anchors.left: rightPanelAdd.left
+    margin-top: 2
+    change-cursor-image: true
+    cursor: pointer
+    !tooltip: tr('Remove right panel')
+    @onClick: modules.game_interface.removeRightPanelToggle()
+    $hover !disabled:
+      image-clip: 12 21 12 21
+    $pressed:
+      image-clip: 12 21 12 21
+
   UIWidget
     id: mouseGrabber
     focusable: false

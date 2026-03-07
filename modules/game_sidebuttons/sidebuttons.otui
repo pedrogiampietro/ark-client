@@ -55,7 +55,7 @@ NonClosableMiniWindow
       height: 20
       width: 34
       @onClick: modules.game_viplist.toggle()
-
+    
     InventoryButton
       !text: tr('Logout')
       anchors.left: prev.left

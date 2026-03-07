@@ -38,7 +38,7 @@ MiniWindow
 
     Button
       margin-top: 5
-      color: #b22222
+      color: #00FF00
       text: Start new hunt
       &onClick: resetSessionAll  
 
