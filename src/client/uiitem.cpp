@@ -68,8 +68,19 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
             g_drawQueue->addText(m_font, std::to_string(m_item->getServerId()), drawRect, Fw::AlignBottomRight, m_color);
         }
 
-        if (g_game.getFeature(Otc::GameDisplayItemDuration)) {
-            if (m_item->getDurationTime() > 0) {
+        // Exibe tempo de duração para rings (InventorySlotRing) ou qualquer item com duração
+        bool showDuration = g_game.getFeature(Otc::GameDisplayItemDuration);
+        if (m_item->getDurationTime() > 0) {
+            // Força exibição para rings
+            int ringClientId = m_item->getClientId();
+            // IDs de rings podem ser ajustados conforme seu servidor
+            bool isRing = false;
+            // Exemplo: IDs típicos de rings (ajuste conforme necessário)
+            std::vector<int> ringIds = {3057, 3058, 3059, 3060, 3061, 3062, 3063, 3064, 3065, 3066, 3067, 3068, 3069, 3070, 3071, 3072};
+            for (int id : ringIds) {
+                if (ringClientId == id) { isRing = true; break; }
+            }
+            if (showDuration || isRing) {
                 auto isPaused = m_item->isDurationPaused();
                 if (m_lastDecayUpdate + 1000 < stdext::millis()) {
                     uint64 duration = m_item->getDurationTime() - (isPaused ? m_item->getDurationTimePaused() : stdext::unixtimeMs());
@@ -78,6 +89,7 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
                 }
                 g_drawQueue->addText(m_font, m_decayText, drawRect, Fw::AlignBottomRight, isPaused ? m_decayPausedColor : m_decayColor);
             }
+        }
         }
     }
 
