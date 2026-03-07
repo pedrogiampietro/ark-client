@@ -12,14 +12,12 @@ NonClosableMiniWindow
       id: storeButton
       anchors.left: parent.left
       anchors.top: parent.top
-      margin-top: 4
       width: 108
       height: 20
       image-source: /images/ui/store_large
       image-clip: 0 0 108 20
       image-border: 0
       image-smooth: true
-      margin-bottom: 2
       $hover:
         image-clip: 0 0 108 20
       $pressed:
@@ -31,7 +29,7 @@ NonClosableMiniWindow
       !text: tr('Skills')
       anchors.left: parent.left
       anchors.top: prev.bottom
-      margin-top: 2
+      margin-top: 5
       width: 34
       height: 20
       @onClick: modules.game_skills.toggle()
