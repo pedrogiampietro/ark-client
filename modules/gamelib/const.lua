@@ -214,6 +214,8 @@ GameMissionId = 125
 GameItemCustomAttributes = 126
 GameAnimatedTextCustomFont = 127
 
+GameDisplayItemDuration = 129
+
 LastGameFeature = 130
         
 TextColors = {
