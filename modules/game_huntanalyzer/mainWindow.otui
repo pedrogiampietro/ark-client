@@ -1,0 +1,40 @@
+AnalyzerButton < UIButton
+  id: analyzerButton
+  height: 21
+  margin-bottom: 2
+  &onClick: onexphButtonClick
+
+MiniWindow
+  !text: tr('Analyzer')
+  color: #8F8F8F
+  icon: /images/topbuttons/analyzers
+  height: 150
+  &save: true
+
+  MiniWindowContents
+    padding-left: 5
+    padding-right: 5
+    layout: verticalBox
+  
+    Button
+      margin-top: 5
+      text: Exp Tracker
+      &onClick: showExpWindow
+
+    Button
+      margin-top: 5
+      text: Loot Tracker
+      &onClick: showDropWindow
+
+    Button
+      margin-top: 5
+      text: Kill Tracker
+      &onClick: showKillWindow
+
+    Button
+      margin-top: 5
+      color: #b22222
+      text: Start new hunt
+      &onClick: resetSessionAll  
+
+
