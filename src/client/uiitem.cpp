@@ -76,11 +76,12 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
             // IDs de rings podem ser ajustados conforme seu servidor
             bool isRing = false;
             // Exemplo: IDs típicos de rings (ajuste conforme necessário)
-            std::vector<int> ringIds = {3057, 3058, 3059, 3060, 3061, 3062, 3063, 3064, 3065, 3066, 3067, 3068, 3069, 3070, 3071, 3072};
+            std::vector<int> ringIds = {2168, 3057, 3058, 3059, 3060, 3061, 3062, 3063, 3064, 3065, 3066, 3067, 3068, 3069, 3070, 3071, 3072};
             for (int id : ringIds) {
                 if (ringClientId == id) { isRing = true; break; }
             }
-            if (showDuration || isRing) {
+            // Exibe para qualquer item com duração, mas destaca rings
+            if (showDuration || isRing || m_item->getDurationTime() > 0) {
                 auto isPaused = m_item->isDurationPaused();
                 if (m_lastDecayUpdate + 1000 < stdext::millis()) {
                     uint64 duration = m_item->getDurationTime() - (isPaused ? m_item->getDurationTimePaused() : stdext::unixtimeMs());
