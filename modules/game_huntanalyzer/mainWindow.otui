@@ -33,6 +33,11 @@ MiniWindow
 
     Button
       margin-top: 5
+      text: Balance Tracker
+      &onClick: showBalanceWindow
+
+    Button
+      margin-top: 5
       color: #b22222
       text: Start new hunt
       &onClick: resetSessionAll  

@@ -72,6 +72,7 @@ public:
     void setSpells(const std::vector<int>& spells);
     void setBlessings(int blessings);
     void updateKillTracker(std::string name, uint16_t lookType, uint8_t lookHead, uint8_t lookBody, uint8_t lookLegs, uint8_t lookFeet, uint8_t addons, uint8_t corpseSize, const std::vector<std::tuple<std::string, ItemPtr>> items);
+    void updateSupplyTracker(uint16_t itemClientId);
 
     int getStates() { return m_states; }
     int getSkillLevel(uint8_t skill) { return skill < m_skillsLevel.size() ? m_skillsLevel[skill] : 0; }

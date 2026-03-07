@@ -672,3 +672,8 @@ void LocalPlayer::updateKillTracker(std::string name, uint16_t lookType, uint8_t
 {
     callLuaField("onUpdateKillTracker", name, lookType, lookHead, lookBody, lookLegs, lookFeet, addons, corpseSize, items);
 }
+
+void LocalPlayer::updateSupplyTracker(uint16_t itemClientId)
+{
+    callLuaField("onUpdateSupplyTracker", itemClientId);
+}

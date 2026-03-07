@@ -4,7 +4,7 @@ Module
   author: Klank
   website: www.otclient.info
   sandboxed: true
-  scripts: [ huntanalyzer ]
+  scripts: [ prices, huntanalyzer ]
   autoload: true
   @onLoad: init()
   @onUnload: terminate()

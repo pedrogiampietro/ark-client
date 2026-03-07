@@ -3,10 +3,14 @@ analyzerButton = nil
 lootedItems = {}
 killedCreatures = {}
 creatureOutfit = nil
+supplyItems = {}
+totalLootValue = 0
+totalSupplyCost = 0
 
 function init()
   connect(LocalPlayer, {
 	onUpdateKillTracker = onUpdateKillTracker,
+	onUpdateSupplyTracker = onUpdateSupplyTracker,
   })
   
   connect(g_game, {
@@ -19,10 +23,12 @@ function init()
   dropWindow = g_ui.loadUI('dropTracker', modules.game_interface.getRightPanel())
   dropWindow.onClose = dropWindow:hide()
   trackWindow = g_ui.loadUI('killTracker', modules.game_interface.getRightPanel())
+  balanceWindow = g_ui.loadUI('balanceTracker', modules.game_interface.getRightPanel())
   mainWindow:hide()
   dropWindow:hide()
   trackWindow:hide()
   expWindow:hide()
+  balanceWindow:hide()
   g_keyboard.bindKeyDown('Ctrl+H', toggle)
   analyzerButton =  modules.client_topmenu.addRightGameToggleButton('analyzerButton', tr('Analyzer (Ctrl+H)'), '/images/topbuttons/analyzers', toggle)
   analyzerButton:setOn(mainWindow:isVisible())
@@ -30,12 +36,15 @@ function init()
   expWindow:setup()
   dropWindow:setup()
   trackWindow:setup()
+  balanceWindow:setup()
   mainWindow:setup()
 
   lootedItemsLabel = dropWindow:recursiveGetChildById("lootedItemsLabel")
   lootedItemsLabel:setHeight(30)
   killedMonstersLabel = trackWindow:recursiveGetChildById("monsterLabel")
   killedMonstersLabel:setHeight(30)
+  supplyItemsLabel = balanceWindow:recursiveGetChildById("supplyItemsLabel")
+  supplyItemsLabel:setHeight(30)
   
   startFreshanalyzerWindow()
   
@@ -77,13 +86,26 @@ function showKillWindow()
 	end
 end
 
+function showBalanceWindow()
+	if not balanceWindow:isVisible() then
+		balanceWindow:show()
+		updateBalanceDisplay()
+	else
+		balanceWindow:hide()
+	end
+end
+
 function resetSessionAll()
 	 resetLootedItems()
 	 resetKilledMonsters()
+	 resetSupplyItems()
 	 updateanalyzerWindow()
 	 startFreshanalyzerWindow()
 	 killedCreatures = {}
 	 lootedItems = {}
+	 supplyItems = {}
+	 totalLootValue = 0
+	 totalSupplyCost = 0
 	 if not dropWindow:isVisible() then
 		dropWindow:show()
 	end
@@ -93,6 +115,10 @@ function resetSessionAll()
 	if not expWindow:isVisible() then
 		expWindow:show()
 		updateanalyzerWindow()
+	end
+	if not balanceWindow:isVisible() then
+		balanceWindow:show()
+		updateBalanceDisplay()
 	end
 end
 
@@ -283,7 +309,8 @@ end
 
 function terminate()
   disconnect(LocalPlayer, {
-	onExperienceChange = onExperienceChange
+	onExperienceChange = onExperienceChange,
+	onUpdateSupplyTracker = onUpdateSupplyTracker,
   })
   disconnect(g_game, {
     onGameStart = refresh,
@@ -295,6 +322,7 @@ function terminate()
   expWindow:destroy()
   dropWindow:destroy()
   trackWindow:destroy()
+  balanceWindow:destroy()
   analyzerButton:destroy()
 end
 
@@ -357,12 +385,30 @@ function onUpdateKillTracker(localPlayer, monsterName,lookType,lookHead,lookBody
             lootedItems[item:getId()] = { amount = 0 , name = itemName}
         end
         -- Increment the amount of the looted item
-        lootedItems[item:getId()].amount = lootedItems[item:getId()].amount + item:getCount()
+        local itemCount = item:getCount()
+        lootedItems[item:getId()].amount = lootedItems[item:getId()].amount + itemCount
 
+        -- Add to loot value
+        local price = LOOT_PRICES[item:getId()] or 0
+        totalLootValue = totalLootValue + (price * itemCount)
     end
 
 updateDropTracker(lootedItems)
 updateKillTracker(killedCreatures)
+updateBalanceDisplay()
+end
+
+function onUpdateSupplyTracker(localPlayer, itemClientId)
+    if not supplyItems[itemClientId] then
+        supplyItems[itemClientId] = { amount = 0 }
+    end
+    supplyItems[itemClientId].amount = supplyItems[itemClientId].amount + 1
+
+    local price = SUPPLY_PRICES[itemClientId] or 0
+    totalSupplyCost = totalSupplyCost + price
+
+    updateSupplyDisplay(supplyItems)
+    updateBalanceDisplay()
 end
 
 function copyKillToClipboard()
@@ -511,6 +557,117 @@ function resetDropTracker()
 	lootedItems = {}
 end
 
+function resetSupplyItems()
+	local numberOfChilds = supplyItemsLabel:getChildCount()
+	for i = 1, numberOfChilds do
+		supplyItemsLabel:destroyChildren(i)
+	end
+	supplyItemsLabel:setHeight(30)
+end
+
+function resetBalanceTracker()
+	resetSupplyItems()
+	supplyItems = {}
+	totalLootValue = 0
+	totalSupplyCost = 0
+	updateBalanceDisplay()
+end
+
+function setBalanceValue(id, value)
+	local skill = balanceWindow:recursiveGetChildById(id)
+	if skill then
+		local widget = skill:getChildById('value')
+		if widget then
+			widget:setText(value)
+		end
+	end
+end
+
+function setBalanceColor(id, color)
+	local skill = balanceWindow:recursiveGetChildById(id)
+	if skill then
+		local widget = skill:getChildById('value')
+		if widget then
+			widget:setColor(color)
+		end
+	end
+end
+
+function formatGold(amount)
+	if amount >= 1000000 then
+		return string.format("%.1fkk", amount / 1000000)
+	elseif amount >= 1000 then
+		return string.format("%.1fk", amount / 1000)
+	end
+	return tostring(amount)
+end
+
+function updateBalanceDisplay()
+	setBalanceValue('lootValue', formatGold(totalLootValue) .. " gp")
+	setBalanceValue('supplyValue', formatGold(totalSupplyCost) .. " gp")
+
+	local balance = totalLootValue - totalSupplyCost
+	local balanceStr = formatGold(math.abs(balance)) .. " gp"
+	if balance < 0 then
+		balanceStr = "-" .. balanceStr
+		setBalanceColor('balanceValue', '#ff6e6e')
+	elseif balance > 0 then
+		balanceStr = "+" .. balanceStr
+		setBalanceColor('balanceValue', '#6eff8d')
+	else
+		setBalanceColor('balanceValue', '#edebeb')
+	end
+	setBalanceValue('balanceValue', balanceStr)
+end
+
+function updateSupplyDisplay(data)
+	if not balanceWindow:isVisible() then return end
+
+	local items = 0
+	for k, v in pairs(data) do
+		local itemSprite = supplyItemsLabel:getChildById("supImg"..k)
+		if not itemSprite then
+			itemSprite = g_ui.createWidget("SupplyItemSprite", supplyItemsLabel)
+			itemSprite:setId("supImg"..k)
+		end
+		itemSprite:setItemId(k)
+		itemSprite:setMarginTop(items * 34 + 17)
+		itemSprite:setMarginLeft(5)
+
+		local count = v.amount
+		local countStr = tostring(count)
+		if count >= 1000 then
+			countStr = string.format("%.1fk", count / 1000)
+		end
+
+		local price = SUPPLY_PRICES[k] or 0
+		local totalCost = price * count
+
+		local itemLabel = supplyItemsLabel:getChildById("supName"..k)
+		if not itemLabel then
+			itemLabel = g_ui.createWidget("SupplyItemNameLabel", supplyItemsLabel)
+			itemLabel:setId("supName"..k)
+			itemLabel:addAnchor(AnchorLeft, "supImg"..k, AnchorRight)
+			itemLabel:addAnchor(AnchorTop, "supImg"..k, AnchorTop)
+			itemLabel:setMarginLeft(5)
+		end
+		itemLabel:setText("x" .. countStr)
+
+		local costLabel = supplyItemsLabel:getChildById("supCost"..k)
+		if not costLabel then
+			costLabel = g_ui.createWidget("SupplyItemCountLabel", supplyItemsLabel)
+			costLabel:setId("supCost"..k)
+			costLabel:addAnchor(AnchorBottom, "supImg"..k, AnchorBottom)
+			costLabel:addAnchor(AnchorLeft, "supImg"..k, AnchorRight)
+			costLabel:setMarginLeft(5)
+		end
+		costLabel:setText(formatGold(totalCost) .. " gp")
+
+		items = items + 1
+	end
+	supplyItemsLabel:setHeight((items * 33 + 60) + 20)
+end
+
 
 function refresh()
 	local player = g_game.getLocalPlayer()
@@ -522,6 +679,7 @@ function offline()
 	startFreshanalyzerWindow()
 	resetLootedItems()
 	resetKilledMonsters()
+	resetSupplyItems()
 end
 
 function toggle()

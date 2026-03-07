@@ -3046,7 +3046,8 @@ void ProtocolGame::parseKillTracker(const InputMessagePtr& msg)
 
 void ProtocolGame::parseSupplyTracker(const InputMessagePtr& msg)
 {
-    msg->getU16();
+    uint16_t itemClientId = msg->getU16();
+    m_localPlayer->updateSupplyTracker(itemClientId);
 }
 
 void ProtocolGame::parseImpactTracker(const InputMessagePtr& msg)

@@ -1,0 +1,86 @@
+BalanceSkillNameLabel < GameLabel
+  font: verdana-11px-antialised
+  color: #AFAFAF
+  anchors.left: parent.left
+  anchors.top: parent.top
+  anchors.bottom: parent.bottom
+
+BalanceSkillValueLabel < GameLabel
+  id: value
+  font: verdana-11px-antialised
+  color: #AFAFAF
+  text-align: topright
+  anchors.right: parent.right
+  anchors.top: parent.top
+  anchors.bottom: parent.bottom
+  anchors.left: prev.left
+
+BalanceRow < UIWidget
+  height: 20
+
+SupplyItemSprite < UIItem
+  size: 32 32
+  padding: 1
+  anchors.top: parent.top
+  anchors.left: parent.left
+  margin-top: 10
+  phantom: true
+
+SupplyItemNameLabel < Label
+
+SupplyItemCountLabel < Label
+  font: verdana-11px-antialised
+  color: #afafaf
+  text-auto-resize: true
+
+MiniWindow
+  id: balanceTrackerWindow
+  !text: tr('Balance Tracker')
+  color: #8F8F8F
+  height: 250
+  &save: true
+  &autoOpen: false
+
+  MiniWindowContents
+    padding-left: 5
+    padding-right: 5
+    margin-top: 18
+    vertical-scrollbar: miniwindowScrollBar
+    layout: verticalBox
+
+    Button
+      id: resetBalance
+      width: 84
+      margin-top: 5
+      !text: tr("Reset Balance")
+      &onClick: resetBalanceTracker
+
+    BalanceRow
+      margin-top: 10
+      id: lootValue
+      BalanceSkillNameLabel
+        !text: tr('Loot:')
+      BalanceSkillValueLabel
+        color: #6eff8d
+
+    BalanceRow
+      id: supplyValue
+      BalanceSkillNameLabel
+        !text: tr('Supplies:')
+      BalanceSkillValueLabel
+        color: #ff6e6e
+
+    BalanceRow
+      id: balanceValue
+      BalanceSkillNameLabel
+        !text: tr('Balance:')
+      BalanceSkillValueLabel
+        color: #edebeb
+
+    Label
+      id: supplyItemsLabel
+      !text: tr('Supplies Used:')
+      font: verdana-11px-antialised
+      color: #afafaf
+      margin-top: 10
+      height: 30
