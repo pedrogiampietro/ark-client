@@ -9,6 +9,16 @@ totalSupplyCost = 0
 
 local HUNT_ANALYZER_OPCODE = 55
 
+-- Convert server item ID to client item ID for display
+local function serverToClientId(serverId)
+	local ok, itemType = pcall(function() return g_things.getItemType(serverId) end)
+	if ok and itemType then
+		local cid = itemType:getClientId()
+		if cid and cid > 0 then return cid end
+	end
+	return serverId
+end
+
 function init()
   print("[HuntAnalyzer] init() called, registering opcode " .. HUNT_ANALYZER_OPCODE)
   ProtocolGame.registerExtendedOpcode(HUNT_ANALYZER_OPCODE, onHuntAnalyzerData)
@@ -382,12 +392,14 @@ function onHuntAnalyzerData(protocol, opcode, buffer)
 		onKillData(msgData)
 	elseif msgType == "SUPPLY" then
 		onSupplyData(msgData)
+	elseif msgType == "LOOT" then
+		onLootData(msgData)
 	end
 end
 
 function onKillData(data)
 	print("[HuntAnalyzer] onKillData called with: " .. tostring(data):sub(1,200))
-	-- Format: monsterName;lookType,head,body,legs,feet,addons;itemId1:name1:count1|itemId2:name2:count2|...
+	-- Format: monsterName;lookType,head,body,legs,feet,addons
 	local parts = {}
 	for part in data:gmatch("[^;]+") do
 		table.insert(parts, part)
@@ -413,45 +425,43 @@ function onKillData(data)
 	end
 	killedCreatures[monsterName].amount = killedCreatures[monsterName].amount + 1
 
-	-- Parse loot items
-	if parts[3] and parts[3] ~= "" then
-		for itemStr in parts[3]:gmatch("[^|]+") do
-			-- Format: id:name:count (split carefully in case name contains colons)
-			local firstColon = itemStr:find(":")
-			local lastColon = itemStr:find(":[^:]*$")
-			if firstColon and lastColon and firstColon ~= lastColon then
-				local itemId = tonumber(itemStr:sub(1, firstColon - 1)) or 0
-				local itemName = itemStr:sub(firstColon + 1, lastColon - 1)
-				local itemCount = tonumber(itemStr:sub(lastColon + 1)) or 1
+	updateKillTracker(killedCreatures)
+end
 
-				if itemId > 0 then
-					if not lootedItems[itemId] then
-						lootedItems[itemId] = { amount = 0, name = itemName }
-					end
-					lootedItems[itemId].amount = lootedItems[itemId].amount + itemCount
+function onLootData(data)
+	-- Format: serverId:name:count
+	local firstColon = data:find(":")
+	local lastColon = data:find(":[^:]*$")
+	if not firstColon or not lastColon or firstColon == lastColon then return end
 
-					local price = LOOT_PRICES[itemId] or 0
-					totalLootValue = totalLootValue + (price * itemCount)
-				end
-			end
+	local serverId = tonumber(data:sub(1, firstColon - 1)) or 0
+	local itemName = data:sub(firstColon + 1, lastColon - 1)
+	local itemCount = tonumber(data:sub(lastColon + 1)) or 1
+
+	if serverId > 0 then
+		if not lootedItems[serverId] then
+			lootedItems[serverId] = { amount = 0, name = itemName }
 		end
+		lootedItems[serverId].amount = lootedItems[serverId].amount + itemCount
+
+		local price = LOOT_PRICES[serverId] or 0
+		totalLootValue = totalLootValue + (price * itemCount)
 	end
 
 	updateDropTracker(lootedItems)
-	updateKillTracker(killedCreatures)
 	updateBalanceDisplay()
 end
 
 function onSupplyData(data)
-	local itemClientId = tonumber(data)
-	if not itemClientId then return end
+	local serverId = tonumber(data)
+	if not serverId then return end
 
-    if not supplyItems[itemClientId] then
-        supplyItems[itemClientId] = { amount = 0 }
+    if not supplyItems[serverId] then
+        supplyItems[serverId] = { amount = 0 }
     end
-    supplyItems[itemClientId].amount = supplyItems[itemClientId].amount + 1
+    supplyItems[serverId].amount = supplyItems[serverId].amount + 1
 
-    local price = SUPPLY_PRICES[itemClientId] or 0
+    local price = SUPPLY_PRICES[serverId] or 0
     totalSupplyCost = totalSupplyCost + price
 
     updateSupplyDisplay(supplyItems)
@@ -559,12 +569,13 @@ function updateDropTracker(data)
     if dropWindow:isVisible() then
         local items = 0
         for k, v in pairs(data) do
+            local clientId = serverToClientId(k)
             local itemSprite = lootedItemsLabel:getChildById("image"..k)
             if not itemSprite then
                 itemSprite = g_ui.createWidget("ItemSprite", lootedItemsLabel)
                 itemSprite:setId("image"..k)
             end
-            itemSprite:setItemId(k)
+            itemSprite:setItemId(clientId)
             itemSprite:setMarginTop(items * 34 + 17)
             itemSprite:setMarginLeft(5)
 
@@ -672,12 +683,13 @@ function updateSupplyDisplay(data)
 
 	local items = 0
 	for k, v in pairs(data) do
+		local clientId = serverToClientId(k)
 		local itemSprite = supplyItemsLabel:getChildById("supImg"..k)
 		if not itemSprite then
 			itemSprite = g_ui.createWidget("SupplyItemSprite", supplyItemsLabel)
 			itemSprite:setId("supImg"..k)
 		end
-		itemSprite:setItemId(k)
+		itemSprite:setItemId(clientId)
 		itemSprite:setMarginTop(items * 34 + 17)
 		itemSprite:setMarginLeft(5)
 
