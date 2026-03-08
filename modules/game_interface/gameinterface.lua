@@ -577,6 +577,11 @@ end
 function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, marking)
   local keyboardModifiers = g_keyboard.getModifiers()
 
+  -- Map click has priority over arrow keys: cancel keyboard walk so we don't get arrow + mouse flick
+  if autoWalkPos and keyboardModifiers == KeyboardNoModifier and modules.game_walking then
+    modules.game_walking.cancelKeyboardWalk()
+  end
+
   if g_app.isMobile() then
     if mouseButton == MouseRightButton then
       createThingMenu(menuPosition, lookThing, useThing, creatureThing)
@@ -725,10 +730,6 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
     if autoWalkTile and not autoWalkTile:isWalkable(true) then
       modules.game_textmessage.displayFailureMessage(tr('Sorry, not possible.'))
       return false
-    end
-    -- Ignore arrow/keyboard direction when following map click to avoid character flick
-    if modules.game_walking then
-      modules.game_walking.cancelKeyboardWalk()
     end
     player:autoWalk(autoWalkPos)
     return true
