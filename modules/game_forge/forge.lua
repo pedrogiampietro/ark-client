@@ -204,7 +204,7 @@ local function updateForgeBalance(gold)
   if not forgeWindow then return end
   local balanceLabel = forgeWindow:getChildById('forgeBalanceLabel')
   if balanceLabel then
-    balanceLabel:setText((gold or 0) .. ' cc')
+    balanceLabel:setText(tostring(gold or 0))
   end
 end
 
@@ -404,16 +404,16 @@ function updateClassCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('classCostLabel')
   if costLabel then
-    costLabel:setText(totalCost .. ' cc')
+    costLabel:setText(tostring(totalCost))
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
 
   local bonusCostLabel = tab:recursiveGetChildById('classBonusCostLabel')
   if bonusCostLabel then
     if classBonusActive then
-      bonusCostLabel:setText(classCostData.bonusCost .. ' cc')
+      bonusCostLabel:setText(tostring(classCostData.bonusCost))
     else
-      bonusCostLabel:setText('0 cc')
+      bonusCostLabel:setText('0')
     end
   end
 
@@ -771,7 +771,7 @@ function updateAttrActionDisplay(tab)
       cost = attrCostData.costs[action.costKey]
     end
     local playerGold = (attrCostData and attrCostData.playerGold) or 0
-    costLabel:setText(cost .. ' crystal coins')
+    costLabel:setText(tostring(cost))
     costLabel:setColor(playerGold >= cost and '#ffcc00' or '#ff3333')
   end
 
@@ -973,16 +973,16 @@ function updateToolsCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('toolsCostLabel')
   if costLabel then
-    costLabel:setText(totalCost .. ' cc')
+    costLabel:setText(tostring(totalCost))
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
 
   local bonusCostLabel = tab:recursiveGetChildById('toolsBonusCostLabel')
   if bonusCostLabel then
     if toolsBonusActive then
-      bonusCostLabel:setText(toolsCostData.bonusCost .. ' cc')
+      bonusCostLabel:setText(tostring(toolsCostData.bonusCost))
     else
-      bonusCostLabel:setText('0 cc')
+      bonusCostLabel:setText('0')
     end
   end
 
