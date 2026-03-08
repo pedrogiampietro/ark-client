@@ -91,12 +91,16 @@ ForgeWindow < MainWindow
     id: forgeBalancePanel
     anchors.bottom: parent.bottom
     anchors.left: parent.left
+    anchors.right: closeButton.left
     height: 20
     margin-bottom: 2
+    margin-right: 4
 
-    UIWidget
+    Panel
       id: forgeBalanceIcon
       size: 16 16
+      image-source: /images/ui/crystal_coin
+      image-size: 16 16
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
 
@@ -105,8 +109,6 @@ ForgeWindow < MainWindow
       anchors.left: forgeBalanceIcon.right
       anchors.verticalCenter: parent.verticalCenter
       margin-left: 4
-      width: 100
-      height: 20
       font: verdana-11px-antialised
       color: #ffcc00
       text-align: left
