@@ -38,6 +38,7 @@ local FORGE_RUNES = {
   ENCHANT_REROLL_ALL = { id = 2296, name = 'Rune of Total Rolling' },
   ENCHANT_REMOVE_LAST = { id = 2270, name = 'Rune of Cleansing' },
   ENCHANT_REMOVE_ALL = { id = 2298, name = 'Rune of Total Cleansing' },
+  ENCHANT_REPLACE = { id = 2272, name = 'Rune of Rolling' },
 }
 
 local PROTECTION_RUNES = {
@@ -56,6 +57,8 @@ local ATTR_ACTIONS = {
     desc = 'Removes the last enchantment from the item, freeing up the slot for a new one.' },
   { key = 'ENCHANT_REMOVE_ALL', label = 'Remove All', runeKey = 'hasRemoveAll', countKey = 'removeAllCount', costKey = 'removeAll',
     desc = 'Removes all enchantments from the item, freeing up all slots.' },
+  { key = 'ENCHANT_REPLACE', label = 'Replace Attribute', runeKey = 'hasReplace', countKey = 'replaceCount', costKey = 'replace',
+    desc = 'Replaces the attribute in a chosen slot with another valid attribute for that slot. The new value is random.' },
 }
 
 -- State
@@ -77,6 +80,8 @@ local toolsCostData = nil
 local attrCostData = nil
 
 local selectedAttrAction = 1
+local selectedAttrReplaceSlot = nil   -- 1-based slot index for Replace
+local selectedAttrReplaceEnchantId = nil -- enchantment ID for Replace
 
 function init()
   ProtocolGame.registerExtendedOpcode(FORGE_OPCODE, onForgeData)
@@ -562,6 +567,43 @@ function setupAttributesTab(tab)
     end
     combo.onOptionChange = function(widget)
       selectedAttrAction = widget.currentIndex
+      selectedAttrReplaceSlot = nil
+      selectedAttrReplaceEnchantId = nil
+      updateAttrActionDisplay(tab)
+    end
+  end
+
+  local replaceSlotCombo = tab:recursiveGetChildById('attrReplaceSlotCombo')
+  if replaceSlotCombo then
+    replaceSlotCombo.onOptionChange = function(widget)
+      -- ComboBox currentIndex is 0-based
+      selectedAttrReplaceSlot = (widget.currentIndex or 0) + 1
+      selectedAttrReplaceEnchantId = nil
+      -- Fill attribute combo for this slot
+      local avail = attrCostData and attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
+      local attrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
+      if attrCombo and avail and avail.names then
+        attrCombo:clearOptions()
+        for _, name in ipairs(avail.names) do
+          attrCombo:addOption(name)
+        end
+        attrCombo:setCurrentIndex(0)
+      end
+      updateAttrActionDisplay(tab)
+    end
+  end
+
+  local replaceAttrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
+  if replaceAttrCombo then
+    replaceAttrCombo.onOptionChange = function(widget)
+      local slot = selectedAttrReplaceSlot
+      local avail = attrCostData and attrCostData.availableForSlot and slot and attrCostData.availableForSlot[slot]
+      local idx = (widget.currentIndex or 0) + 1
+      if avail and avail.ids and avail.ids[idx] then
+        selectedAttrReplaceEnchantId = avail.ids[idx]
+      else
+        selectedAttrReplaceEnchantId = nil
+      end
       updateAttrActionDisplay(tab)
     end
   end
@@ -573,8 +615,15 @@ function setupAttributesTab(tab)
         local action = ATTR_ACTIONS[selectedAttrAction]
         if action then
           execBtn:setEnabled(false)
+          local posStr = posToStr(attrSourcePos)
+          local msg
+          if action.key == 'ENCHANT_REPLACE' and selectedAttrReplaceSlot and selectedAttrReplaceEnchantId then
+            msg = 'FORGE:ENCHANT_REPLACE:' .. posStr .. ':' .. tostring(selectedAttrReplaceSlot) .. ':' .. tostring(selectedAttrReplaceEnchantId)
+          else
+            msg = 'FORGE:' .. action.key .. ':' .. posStr
+          end
           runForgeAnimation('attrProgressBar', function()
-            sendToServer('FORGE:' .. action.key .. ':' .. posToStr(attrSourcePos))
+            sendToServer(msg)
           end)
         end
       end
@@ -591,6 +640,74 @@ function updateAttrActionDisplay(tab)
 
   local action = ATTR_ACTIONS[selectedAttrAction]
   if not action then return end
+
+  local runeTitle = tab:recursiveGetChildById('attrRuneTitle')
+  local replaceSlotLabel = tab:recursiveGetChildById('attrReplaceSlotLabel')
+  local replaceSlotCombo = tab:recursiveGetChildById('attrReplaceSlotCombo')
+  local replaceAttrLabel = tab:recursiveGetChildById('attrReplaceAttrLabel')
+  local replaceAttrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
+
+  local isReplace = (action.key == 'ENCHANT_REPLACE')
+  if replaceSlotLabel then replaceSlotLabel:setVisible(isReplace) end
+  if replaceSlotCombo then replaceSlotCombo:setVisible(isReplace) end
+  if replaceAttrLabel then replaceAttrLabel:setVisible(isReplace) end
+  if replaceAttrCombo then replaceAttrCombo:setVisible(isReplace) end
+
+  if isReplace and attrCostData then
+    local slotsUsed = attrCostData.slotsUsed or 0
+    -- Anchor rune title below replace attribute combo
+    if runeTitle and replaceAttrCombo then
+      runeTitle:clearAnchors()
+      runeTitle:addAnchor(AnchorTop, replaceAttrCombo, AnchorBottom)
+      runeTitle:setMarginTop(14)
+      runeTitle:setMarginLeft(12)
+    end
+    -- Fill slot combo with 1..slotsUsed
+    if replaceSlotCombo and slotsUsed > 0 then
+      replaceSlotCombo:clearOptions()
+      for i = 1, slotsUsed do
+        replaceSlotCombo:addOption(tostring(i))
+      end
+      if not selectedAttrReplaceSlot or selectedAttrReplaceSlot > slotsUsed then
+        selectedAttrReplaceSlot = 1
+      end
+      replaceSlotCombo:setCurrentIndex(selectedAttrReplaceSlot - 1)
+      -- Fill attribute combo for selected slot; preserve selection if still valid
+      local avail = attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
+      if replaceAttrCombo and avail and avail.names then
+        replaceAttrCombo:clearOptions()
+        for _, name in ipairs(avail.names) do
+          replaceAttrCombo:addOption(name)
+        end
+        local attrIdx = 0
+        if avail.ids and selectedAttrReplaceEnchantId then
+          for i, id in ipairs(avail.ids) do
+            if id == selectedAttrReplaceEnchantId then attrIdx = i - 1 break end
+          end
+        end
+        replaceAttrCombo:setCurrentIndex(attrIdx)
+        if avail.ids and avail.ids[attrIdx + 1] then
+          selectedAttrReplaceEnchantId = avail.ids[attrIdx + 1]
+        elseif avail.ids and avail.ids[1] then
+          selectedAttrReplaceEnchantId = avail.ids[1]
+        else
+          selectedAttrReplaceEnchantId = nil
+        end
+      else
+        selectedAttrReplaceEnchantId = nil
+      end
+    end
+  else
+    if runeTitle then
+      local actionCombo = tab:recursiveGetChildById('attrActionCombo')
+      if actionCombo then
+        runeTitle:clearAnchors()
+        runeTitle:addAnchor(AnchorTop, actionCombo, AnchorBottom)
+        runeTitle:setMarginTop(14)
+        runeTitle:setMarginLeft(12)
+      end
+    end
+  end
 
   local rune = FORGE_RUNES[action.key]
   if rune then
@@ -640,6 +757,9 @@ function updateAttrActionDisplay(tab)
     elseif action.key == 'ENCHANT_REROLL_LAST' or action.key == 'ENCHANT_REROLL_ALL'
         or action.key == 'ENCHANT_REMOVE_LAST' or action.key == 'ENCHANT_REMOVE_ALL' then
       canDo = canDo and (slotsUsed > 0)
+    elseif action.key == 'ENCHANT_REPLACE' then
+      canDo = canDo and (slotsUsed > 0) and (selectedAttrReplaceSlot and selectedAttrReplaceSlot >= 1)
+          and (selectedAttrReplaceEnchantId ~= nil)
     end
 
     execBtn:setEnabled(canDo)
@@ -704,7 +824,8 @@ function updateAttrInfo(data)
     costs = data.costs or {},
     runeCounts = data.runeCounts or {},
     bonusCost = data.bonusCost or 0,
-    playerGold = data.playerGold or 0
+    playerGold = data.playerGold or 0,
+    availableForSlot = data.availableForSlot or {}
   }
 
   updateForgeBalance(data.playerGold or 0)
@@ -714,6 +835,8 @@ end
 function clearAttrInfo()
   attrSourcePos = nil
   attrCostData = nil
+  selectedAttrReplaceSlot = nil
+  selectedAttrReplaceEnchantId = nil
   if not forgeWindow then return end
   local tab = forgeWindow:recursiveGetChildById('attributesTab')
   if not tab then return end
@@ -741,6 +864,8 @@ end
 function clearAttrSlot()
   attrSourcePos = nil
   attrCostData = nil
+  selectedAttrReplaceSlot = nil
+  selectedAttrReplaceEnchantId = nil
   if not forgeWindow then return end
   local tab = forgeWindow:recursiveGetChildById('attributesTab')
   if not tab then return end
@@ -975,21 +1100,43 @@ function onForgeData(protocol, opcode, buffer)
       })
     end
 
-  -- ATTR_INFO:tier,slotsUsed,slotsMax,hasAdd,hasRerollLast,hasRerollAll,hasRemoveLast,hasRemoveAll,
-  --   costAdd,costRerollLast,costRerollAll,costRemoveLast,costRemoveAll,bonusCost,playerGold,
-  --   addCount,rerollLastCount,rerollAllCount,removeLastCount,removeAllCount|enchName1=val1|...
+  -- ATTR_INFO:tier,slotsUsed,slotsMax,hasAdd,hasRerollLast,hasRerollAll,hasRemoveLast,hasRemoveAll,hasReplace,
+  --   costAdd,costRerollLast,costRerollAll,costRemoveLast,costRemoveAll,costReplace,bonusCost,playerGold,
+  --   addCount,...,replaceCount|enchName1=val1|...|S1=id1,id2|A1=name1\tname2|...
   elseif buffer:sub(1, 10) == 'ATTR_INFO:' then
     local sections = splitStr(buffer:sub(11), '|')
     if #sections >= 1 then
       local mainParts = splitStr(sections[1], ',')
       local enchantments = {}
+      local availableForSlot = {}
       for i = 2, #sections do
-        local eqPos = sections[i]:find('=')
+        local s = sections[i]
+        local eqPos = s:find('=')
         if eqPos then
-          table.insert(enchantments, {
-            name = sections[i]:sub(1, eqPos - 1),
-            value = sections[i]:sub(eqPos + 1)
-          })
+          local key = s:sub(1, eqPos - 1)
+          local val = s:sub(eqPos + 1)
+          if key:sub(1, 1) == 'S' and key:match('^S%d+$') then
+            local slotNum = tonumber(key:sub(2))
+            if slotNum then
+              local ids = {}
+              for idStr in val:gmatch('[^,]+') do
+                local id = tonumber(idStr)
+                if id then table.insert(ids, id) end
+              end
+              availableForSlot[slotNum] = availableForSlot[slotNum] or { ids = {}, names = {} }
+              availableForSlot[slotNum].ids = ids
+            end
+          elseif key:sub(1, 1) == 'A' and key:match('^A%d+$') then
+            local slotNum = tonumber(key:sub(2))
+            if slotNum then
+              local names = {}
+              for name in val:gmatch('[^\t]+') do table.insert(names, name) end
+              availableForSlot[slotNum] = availableForSlot[slotNum] or { ids = {}, names = {} }
+              availableForSlot[slotNum].names = names
+            end
+          else
+            table.insert(enchantments, { name = key, value = val })
+          end
         end
       end
       updateAttrInfo({
@@ -1002,24 +1149,28 @@ function onForgeData(protocol, opcode, buffer)
           hasRerollAll = mainParts[6] == '1',
           hasRemoveLast = mainParts[7] == '1',
           hasRemoveAll = mainParts[8] == '1',
+          hasReplace = mainParts[9] == '1',
         },
         costs = {
-          add = tonumber(mainParts[9]) or 0,
-          rerollLast = tonumber(mainParts[10]) or 0,
-          rerollAll = tonumber(mainParts[11]) or 0,
-          removeLast = tonumber(mainParts[12]) or 0,
-          removeAll = tonumber(mainParts[13]) or 0,
+          add = tonumber(mainParts[10]) or 0,
+          rerollLast = tonumber(mainParts[11]) or 0,
+          rerollAll = tonumber(mainParts[12]) or 0,
+          removeLast = tonumber(mainParts[13]) or 0,
+          removeAll = tonumber(mainParts[14]) or 0,
+          replace = tonumber(mainParts[15]) or 0,
         },
-        bonusCost = tonumber(mainParts[14]) or 0,
-        playerGold = tonumber(mainParts[15]) or 0,
+        bonusCost = tonumber(mainParts[16]) or 0,
+        playerGold = tonumber(mainParts[17]) or 0,
         runeCounts = {
-          addCount = tonumber(mainParts[16]) or 0,
-          rerollLastCount = tonumber(mainParts[17]) or 0,
-          rerollAllCount = tonumber(mainParts[18]) or 0,
-          removeLastCount = tonumber(mainParts[19]) or 0,
-          removeAllCount = tonumber(mainParts[20]) or 0,
+          addCount = tonumber(mainParts[18]) or 0,
+          rerollLastCount = tonumber(mainParts[19]) or 0,
+          rerollAllCount = tonumber(mainParts[20]) or 0,
+          removeLastCount = tonumber(mainParts[21]) or 0,
+          removeAllCount = tonumber(mainParts[22]) or 0,
+          replaceCount = tonumber(mainParts[23]) or 0,
         },
-        enchantments = enchantments
+        enchantments = enchantments,
+        availableForSlot = availableForSlot,
       })
     end
 
