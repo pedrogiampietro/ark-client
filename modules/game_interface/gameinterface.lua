@@ -577,12 +577,6 @@ end
 function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, marking)
   local keyboardModifiers = g_keyboard.getModifiers()
 
-  -- Map click has priority over arrow keys: cancel keyboard walk and ignore key repeat for a short time
-  if autoWalkPos and keyboardModifiers == KeyboardNoModifier and modules.game_walking then
-    modules.game_walking.cancelKeyboardWalk()
-    modules.game_walking.setMousePriority()
-  end
-
   if g_app.isMobile() then
     if mouseButton == MouseRightButton then
       createThingMenu(menuPosition, lookThing, useThing, creatureThing)
@@ -726,11 +720,16 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
   local player = g_game.getLocalPlayer()
   player:stopAutoWalk()  
 
+  -- Only cancel keyboard walk when we're actually walking with the mouse (left-click move)
   if autoWalkPos and keyboardModifiers == KeyboardNoModifier and (mouseButton == MouseLeftButton or mouseButton == MouseTouch2 or mouseButton == MouseTouch3) then
     local autoWalkTile = g_map.getTile(autoWalkPos)
     if autoWalkTile and not autoWalkTile:isWalkable(true) then
       modules.game_textmessage.displayFailureMessage(tr('Sorry, not possible.'))
       return false
+    end
+    if modules.game_walking then
+      modules.game_walking.cancelKeyboardWalk()
+      modules.game_walking.setMousePriority()
     end
     player:autoWalk(autoWalkPos)
     return true
