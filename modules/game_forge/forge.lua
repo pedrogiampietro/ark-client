@@ -82,6 +82,7 @@ local attrCostData = nil
 local selectedAttrAction = 1
 local selectedAttrReplaceSlot = nil   -- 1-based slot index for Replace
 local selectedAttrReplaceEnchantId = nil -- enchantment ID for Replace
+local selectedAttrAddEnchantId = nil  -- enchantment ID for Add (nil = random)
 local _updatingAttrReplaceUI = false  -- guard to avoid recursion when filling replace combos
 
 function init()
@@ -606,14 +607,26 @@ function setupAttributesTab(tab)
   if replaceAttrCombo then
     replaceAttrCombo.onOptionChange = function(widget)
       if _updatingAttrReplaceUI then return end
-      local slot = selectedAttrReplaceSlot
-      local avail = attrCostData and attrCostData.availableForSlot and slot and attrCostData.availableForSlot[slot]
-      -- UIComboBox uses 1-based currentIndex
-      local idx = widget.currentIndex or 1
-      if avail and avail.ids and avail.ids[idx] then
-        selectedAttrReplaceEnchantId = avail.ids[idx]
+      local action = ATTR_ACTIONS[selectedAttrAction]
+      if action and action.key == 'ENCHANT_ADD' then
+        local slotsUsed = attrCostData and attrCostData.slotsUsed or 0
+        local nextSlot = slotsUsed + 1
+        local avail = attrCostData and attrCostData.availableForSlot and attrCostData.availableForSlot[nextSlot]
+        local idx = widget.currentIndex or 1
+        if avail and avail.ids and avail.ids[idx] then
+          selectedAttrAddEnchantId = avail.ids[idx]
+        else
+          selectedAttrAddEnchantId = nil
+        end
       else
-        selectedAttrReplaceEnchantId = nil
+        local slot = selectedAttrReplaceSlot
+        local avail = attrCostData and attrCostData.availableForSlot and slot and attrCostData.availableForSlot[slot]
+        local idx = widget.currentIndex or 1
+        if avail and avail.ids and avail.ids[idx] then
+          selectedAttrReplaceEnchantId = avail.ids[idx]
+        else
+          selectedAttrReplaceEnchantId = nil
+        end
       end
       updateAttrActionDisplay(tab)
     end
@@ -630,6 +643,8 @@ function setupAttributesTab(tab)
           local msg
           if action.key == 'ENCHANT_REPLACE' and selectedAttrReplaceSlot and selectedAttrReplaceEnchantId then
             msg = 'FORGE:ENCHANT_REPLACE:' .. posStr .. ':' .. tostring(selectedAttrReplaceSlot) .. ':' .. tostring(selectedAttrReplaceEnchantId)
+          elseif action.key == 'ENCHANT_ADD' and selectedAttrAddEnchantId then
+            msg = 'FORGE:ENCHANT_ADD:' .. posStr .. ':' .. tostring(selectedAttrAddEnchantId)
           else
             msg = 'FORGE:' .. action.key .. ':' .. posStr
           end
@@ -658,13 +673,45 @@ function updateAttrActionDisplay(tab)
   local replaceAttrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
 
   local isReplace = (action.key == 'ENCHANT_REPLACE')
+  local isAdd = (action.key == 'ENCHANT_ADD')
+  local showAddOrReplacePanel = isReplace or isAdd
   if replaceSlotLabel then replaceSlotLabel:setVisible(isReplace) end
   if replaceSlotCombo then replaceSlotCombo:setVisible(isReplace) end
-  if replaceAttrLabel then replaceAttrLabel:setVisible(isReplace) end
-  if replaceAttrCombo then replaceAttrCombo:setVisible(isReplace) end
+  if replaceAttrLabel then
+    replaceAttrLabel:setVisible(showAddOrReplacePanel)
+    replaceAttrLabel:setText(isAdd and tr('Attribute to add:') or tr('New attribute:'))
+  end
+  if replaceAttrCombo then replaceAttrCombo:setVisible(showAddOrReplacePanel) end
 
   -- Rune title is always anchored to attrReplacePanel.bottom in OTUI (panel has fixed height for Slot + New attribute)
-  if isReplace and attrCostData then
+  if isAdd and attrCostData then
+    local slotsUsed = attrCostData.slotsUsed or 0
+    local slotsMax = attrCostData.slotsMax or 0
+    local nextSlot = slotsUsed + 1
+    if replaceAttrCombo and nextSlot <= slotsMax then
+      local avail = attrCostData.availableForSlot and attrCostData.availableForSlot[nextSlot]
+      if avail and avail.names and #avail.names > 0 then
+        _updatingAttrReplaceUI = true
+        replaceAttrCombo:clearOptions()
+        for _, name in ipairs(avail.names) do
+          replaceAttrCombo:addOption(name)
+        end
+        local idx = 1
+        if avail.ids and selectedAttrAddEnchantId then
+          for i, id in ipairs(avail.ids) do
+            if id == selectedAttrAddEnchantId then idx = i break end
+          end
+        end
+        replaceAttrCombo:setCurrentIndex(idx, true)
+        selectedAttrAddEnchantId = avail.ids and avail.ids[idx] or avail.ids[1]
+        _updatingAttrReplaceUI = false
+      else
+        selectedAttrAddEnchantId = nil
+      end
+    else
+      selectedAttrAddEnchantId = nil
+    end
+  elseif isReplace and attrCostData then
     local slotsUsed = attrCostData.slotsUsed or 0
     if replaceSlotCombo and slotsUsed > 0 then
       _updatingAttrReplaceUI = true
@@ -830,6 +877,7 @@ function clearAttrInfo()
   attrCostData = nil
   selectedAttrReplaceSlot = nil
   selectedAttrReplaceEnchantId = nil
+  selectedAttrAddEnchantId = nil
   if not forgeWindow then return end
   local tab = forgeWindow:recursiveGetChildById('attributesTab')
   if not tab then return end
@@ -859,6 +907,7 @@ function clearAttrSlot()
   attrCostData = nil
   selectedAttrReplaceSlot = nil
   selectedAttrReplaceEnchantId = nil
+  selectedAttrAddEnchantId = nil
   if not forgeWindow then return end
   local tab = forgeWindow:recursiveGetChildById('attributesTab')
   if not tab then return end
