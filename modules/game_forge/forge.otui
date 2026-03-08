@@ -91,16 +91,16 @@ ForgeWindow < MainWindow
     id: forgeBalancePanel
     anchors.bottom: parent.bottom
     anchors.left: parent.left
-    anchors.right: closeButton.left
-    height: 26
+    height: 28
     margin-bottom: 2
     margin-right: 4
+    width: 56
 
     Panel
       id: forgeBalanceIcon
-      size: 22 22
+      size: 26 26
       image-source: /images/ui/crystal_coin
-      image-size: 22 22
+      image-size: 26 26
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
 
@@ -108,7 +108,8 @@ ForgeWindow < MainWindow
       id: forgeBalanceLabel
       anchors.left: forgeBalanceIcon.right
       anchors.verticalCenter: parent.verticalCenter
-      margin-left: 4
+      margin-left: 6
+      width: 36
       font: verdana-11px-antialised
       color: #ffcc00
       text-align: left
@@ -323,14 +324,14 @@ ForgeClassificationTab < Panel
         id: classBonusCostRow
         anchors.top: classBonusButton.bottom
         anchors.left: classBonusButton.left
-        anchors.right: classBonusButton.right
         margin-top: 4
-        height: 20
+        width: 50
+        height: 18
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 18 18
-          size: 18 18
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -339,8 +340,9 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 22
-          height: 16
+          margin-left: 24
+          width: 24
+          height: 14
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -394,14 +396,14 @@ ForgeClassificationTab < Panel
         id: classCostRow
         anchors.top: classForgeButton.bottom
         anchors.left: classForgeButton.left
-        anchors.right: classForgeButton.right
         margin-top: 4
-        height: 20
+        width: 50
+        height: 18
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 18 18
-          size: 18 18
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -410,8 +412,9 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 22
-          height: 16
+          margin-left: 24
+          width: 24
+          height: 14
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -934,14 +937,14 @@ ForgeToolsTab < Panel
         id: toolsBonusCostRow
         anchors.top: toolsBonusButton.bottom
         anchors.left: toolsBonusButton.left
-        anchors.right: toolsBonusButton.right
         margin-top: 4
-        height: 20
+        width: 50
+        height: 18
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 18 18
-          size: 18 18
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -950,8 +953,9 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 22
-          height: 16
+          margin-left: 24
+          width: 24
+          height: 14
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -1005,14 +1009,14 @@ ForgeToolsTab < Panel
         id: toolsCostRow
         anchors.top: toolsForgeButton.bottom
         anchors.left: toolsForgeButton.left
-        anchors.right: toolsForgeButton.right
         margin-top: 4
-        height: 20
+        width: 50
+        height: 18
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 18 18
-          size: 18 18
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -1021,8 +1025,9 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 22
-          height: 16
+          margin-left: 24
+          width: 24
+          height: 14
           font: verdana-11px-antialised
           color: #ffcc00
 
