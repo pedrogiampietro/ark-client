@@ -547,7 +547,7 @@ ForgeAttributesTab < Panel
 
     Panel
       id: attrReplacePanel
-      height: 92
+      height: 120
       anchors.top: attrActionCombo.bottom
       anchors.left: parent.left
       anchors.right: parent.right
