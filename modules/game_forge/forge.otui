@@ -9,11 +9,11 @@ ForgeItemSlot < UIItem
     color: #646464
 
 ForgeRuneSlot < Panel
-  size: 56 88
+  size: 62 94
 
   Panel
     id: slotBg
-    size: 52 52
+    size: 56 56
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     background-color: #2a2a2a
@@ -22,20 +22,20 @@ ForgeRuneSlot < Panel
 
     UIItem
       id: runeItem
-      size: 50 50
+      size: 54 54
       anchors.centerIn: parent
       virtual: true
 
   FlatPanel
     id: runeCountBox
-    height: 22
+    height: 24
     anchors.top: slotBg.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 4
-    background-color: #2a2a2a
+    background-color: #1e1e1e
     border-width: 1
-    border-color: #4a4a4a
+    border-color: #555555
 
     Label
       id: runeCount
@@ -266,7 +266,7 @@ ForgeClassificationTab < Panel
 
     Panel
       id: classActionRow
-      height: 92
+      height: 100
       anchors.top: classMatTitle.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -288,6 +288,7 @@ ForgeClassificationTab < Panel
         id: classBonusButton
         size: 66 66
         image-source: /images/ui/20
+        image-clip: 695 327 66 66
         image-size: 66 66
         image-color: #888888
         anchors.verticalCenter: parent.verticalCenter
@@ -786,7 +787,7 @@ ForgeToolsTab < Panel
 
     Panel
       id: toolsActionRow
-      height: 92
+      height: 100
       anchors.top: toolsMatTitle.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -808,6 +809,7 @@ ForgeToolsTab < Panel
         id: toolsBonusButton
         size: 66 66
         image-source: /images/ui/20
+        image-clip: 695 327 66 66
         image-size: 66 66
         image-color: #888888
         anchors.verticalCenter: parent.verticalCenter
