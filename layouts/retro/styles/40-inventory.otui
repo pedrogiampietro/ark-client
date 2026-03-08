@@ -114,7 +114,8 @@ SoulCapLabel < GameLabel
   icon-source: /images/game/slots/soulcap
 
 ElderaLabel < SoulCapLabel
-  font: verdana-9px
+  font: small-9px
+  width: 48
       
 FightOffensiveBox < CombatBox
   image-source: /images/game/combatmodes/fightoffensive
