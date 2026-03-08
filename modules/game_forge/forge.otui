@@ -94,12 +94,11 @@ ForgeWindow < MainWindow
     height: 20
     margin-bottom: 2
 
-    UIItem
+    UIWidget
       id: forgeBalanceIcon
       size: 16 16
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      virtual: true
 
     FlatLabel
       id: forgeBalanceLabel

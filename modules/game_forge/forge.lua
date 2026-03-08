@@ -156,10 +156,12 @@ function createWindow()
   forgeWindow = g_ui.displayUI('forge')
   forgeWindow:hide()
 
-  -- Crystal coin icon (item id 2160 - drawn by client from game assets)
+  -- Crystal coin icon (embedded base64 so it always loads)
+  local CRYSTAL_COIN_B64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAC2SURBVFhH7c69CoIAFMVxwcXtjj5T+i5N1VLUi+Ra9qE1+SC55VJL+JHmkFFEnVAxGpoaLgT3B2c+f0URQgjxp/BlbKDqI2jdoF4vgIcHWwRUfQitswW5J9A6r2Zmd3hPnogqgJwU5Gaw9kUdsso5AwageQJaJBj7B5CTVTFmeuMK6IPsCDSLYe3OdczyCCO58gVo7Q1oEoKmEciO0QoLGNGFJaD0jmhWhnCdN5rDzwkhhBA/eQEKDIzmQNhuGwAAAABJRU5ErkJggg=='
   local balanceIcon = forgeWindow:recursiveGetChildById('forgeBalanceIcon')
-  if balanceIcon and balanceIcon.setItemId then
-    balanceIcon:setItemId(2160)
+  if balanceIcon and balanceIcon.setImageSourceBase64 then
+    balanceIcon:setImageSourceBase64(CRYSTAL_COIN_B64)
+    balanceIcon:setImageSize({ width = 16, height = 16 })
   end
 
   forgeTabBar = forgeWindow:getChildById('forgeTabBar')
