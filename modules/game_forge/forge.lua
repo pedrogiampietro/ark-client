@@ -82,6 +82,7 @@ local attrCostData = nil
 local selectedAttrAction = 1
 local selectedAttrReplaceSlot = nil   -- 1-based slot index for Replace
 local selectedAttrReplaceEnchantId = nil -- enchantment ID for Replace
+local _updatingAttrReplaceUI = false  -- guard to avoid recursion when filling replace combos
 
 function init()
   ProtocolGame.registerExtendedOpcode(FORGE_OPCODE, onForgeData)
@@ -576,18 +577,24 @@ function setupAttributesTab(tab)
   local replaceSlotCombo = tab:recursiveGetChildById('attrReplaceSlotCombo')
   if replaceSlotCombo then
     replaceSlotCombo.onOptionChange = function(widget)
+      if _updatingAttrReplaceUI then return end
       -- ComboBox currentIndex is 0-based
       selectedAttrReplaceSlot = (widget.currentIndex or 0) + 1
       selectedAttrReplaceEnchantId = nil
-      -- Fill attribute combo for this slot
+      -- Fill attribute combo for this slot (without re-calling updateAttrActionDisplay to avoid stack overflow)
       local avail = attrCostData and attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
       local attrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
       if attrCombo and avail and avail.names then
+        _updatingAttrReplaceUI = true
         attrCombo:clearOptions()
         for _, name in ipairs(avail.names) do
           attrCombo:addOption(name)
         end
         attrCombo:setCurrentIndex(0)
+        _updatingAttrReplaceUI = false
+        if avail.ids and avail.ids[1] then
+          selectedAttrReplaceEnchantId = avail.ids[1]
+        end
       end
       updateAttrActionDisplay(tab)
     end
@@ -596,6 +603,7 @@ function setupAttributesTab(tab)
   local replaceAttrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
   if replaceAttrCombo then
     replaceAttrCombo.onOptionChange = function(widget)
+      if _updatingAttrReplaceUI then return end
       local slot = selectedAttrReplaceSlot
       local avail = attrCostData and attrCostData.availableForSlot and slot and attrCostData.availableForSlot[slot]
       local idx = (widget.currentIndex or 0) + 1
@@ -662,13 +670,14 @@ function updateAttrActionDisplay(tab)
       runeTitle:setMarginTop(14)
       runeTitle:setMarginLeft(12)
     end
-    -- Fill slot combo with 1..slotsUsed
+    -- Fill slot and attribute combos (guard to prevent onOptionChange from re-entering)
     if replaceSlotCombo and slotsUsed > 0 then
+      _updatingAttrReplaceUI = true
       replaceSlotCombo:clearOptions()
       for i = 1, slotsUsed do
         replaceSlotCombo:addOption(tostring(i))
       end
-      if not selectedAttrReplaceSlot or selectedAttrReplaceSlot > slotsUsed then
+      if not selectedAttrReplaceSlot or selectedAttrReplaceSlot > slotsUsed or selectedAttrReplaceSlot < 1 then
         selectedAttrReplaceSlot = 1
       end
       replaceSlotCombo:setCurrentIndex(selectedAttrReplaceSlot - 1)
@@ -696,6 +705,7 @@ function updateAttrActionDisplay(tab)
       else
         selectedAttrReplaceEnchantId = nil
       end
+      _updatingAttrReplaceUI = false
     end
   else
     if runeTitle then
