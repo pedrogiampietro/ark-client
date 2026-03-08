@@ -325,13 +325,13 @@ ForgeClassificationTab < Panel
         anchors.top: classBonusButton.bottom
         anchors.left: classBonusButton.left
         margin-top: 4
-        width: 50
-        height: 18
+        width: 58
+        height: 26
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 20 20
-          size: 20 20
+          image-size: 24 24
+          size: 24 24
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -340,9 +340,9 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 24
-          width: 24
-          height: 14
+          margin-left: 28
+          width: 28
+          height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -397,13 +397,13 @@ ForgeClassificationTab < Panel
         anchors.top: classForgeButton.bottom
         anchors.left: classForgeButton.left
         margin-top: 4
-        width: 50
-        height: 18
+        width: 58
+        height: 26
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 20 20
-          size: 20 20
+          image-size: 24 24
+          size: 24 24
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -412,9 +412,9 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 24
-          width: 24
-          height: 14
+          margin-left: 28
+          width: 28
+          height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -938,13 +938,13 @@ ForgeToolsTab < Panel
         anchors.top: toolsBonusButton.bottom
         anchors.left: toolsBonusButton.left
         margin-top: 4
-        width: 50
-        height: 18
+        width: 58
+        height: 26
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 20 20
-          size: 20 20
+          image-size: 24 24
+          size: 24 24
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -953,9 +953,9 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 24
-          width: 24
-          height: 14
+          margin-left: 28
+          width: 28
+          height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
@@ -1010,13 +1010,13 @@ ForgeToolsTab < Panel
         anchors.top: toolsForgeButton.bottom
         anchors.left: toolsForgeButton.left
         margin-top: 4
-        width: 50
-        height: 18
+        width: 58
+        height: 26
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 20 20
-          size: 20 20
+          image-size: 24 24
+          size: 24 24
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -1025,9 +1025,9 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 24
-          width: 24
-          height: 14
+          margin-left: 28
+          width: 28
+          height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
