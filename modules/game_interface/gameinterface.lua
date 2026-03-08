@@ -577,9 +577,10 @@ end
 function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, marking)
   local keyboardModifiers = g_keyboard.getModifiers()
 
-  -- Map click has priority over arrow keys: cancel keyboard walk so we don't get arrow + mouse flick
+  -- Map click has priority over arrow keys: cancel keyboard walk and ignore key repeat for a short time
   if autoWalkPos and keyboardModifiers == KeyboardNoModifier and modules.game_walking then
     modules.game_walking.cancelKeyboardWalk()
+    modules.game_walking.setMousePriority()
   end
 
   if g_app.isMobile() then

@@ -15,6 +15,7 @@ lastStop = 0
 lastManualWalk = 0
 autoFinishNextServerWalk = 0
 turnKeys = {}
+mousePriorityUntil = 0  -- while > g_clock.millis(), ignore keyboard walk (mouse has priority)
 
 function init()
   connect(g_game, { onTeleport = onTeleport })
@@ -189,6 +190,11 @@ function cancelKeyboardWalk()
   autoWalkEvent = nil
 end
 
+-- After a map click, ignore keyboard walk for a short time so key repeat doesn't override mouse.
+function setMousePriority()
+  mousePriorityUntil = g_clock.millis() + 450
+end
+
 function changeWalkDir(dir, pop)
   while table.removevalue(smartWalkDirs, dir) do end
   if pop then
@@ -279,6 +285,11 @@ function onCancelWalk(player)
 end
 
 function walk(dir, ticks) 
+  -- Mouse has priority: ignore keyboard walk for a short time after any map click
+  if g_clock.millis() < mousePriorityUntil then
+    return
+  end
+
   lastManualWalk = g_clock.millis()
   local player = g_game.getLocalPlayer()
   if not player or g_game.isDead() or player:isDead() then
