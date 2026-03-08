@@ -92,15 +92,15 @@ ForgeWindow < MainWindow
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: closeButton.left
-    height: 20
+    height: 26
     margin-bottom: 2
     margin-right: 4
 
     Panel
       id: forgeBalanceIcon
-      size: 16 16
+      size: 22 22
       image-source: /images/ui/crystal_coin
-      image-size: 16 16
+      image-size: 22 22
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
 
@@ -319,16 +319,30 @@ ForgeClassificationTab < Panel
         $pressed:
           image-color: #cccccc
 
-      FlatLabel
-        id: classBonusCostLabel
-        text-align: center
+      Panel
+        id: classBonusCostRow
         anchors.top: classBonusButton.bottom
         anchors.left: classBonusButton.left
         anchors.right: classBonusButton.right
         margin-top: 4
-        height: 16
-        font: verdana-11px-antialised
-        color: #ffcc00
+        height: 20
+
+        Panel
+          image-source: /images/ui/crystal_coin
+          image-size: 18 18
+          size: 18 18
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+
+        FlatLabel
+          id: classBonusCostLabel
+          text-align: left
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 22
+          height: 16
+          font: verdana-11px-antialised
+          color: #ffcc00
 
       UIWidget
         id: classForgeArrow
@@ -376,16 +390,30 @@ ForgeClassificationTab < Panel
         $disabled:
           image-color: #555555
 
-      FlatLabel
-        id: classCostLabel
-        text-align: center
+      Panel
+        id: classCostRow
         anchors.top: classForgeButton.bottom
         anchors.left: classForgeButton.left
         anchors.right: classForgeButton.right
         margin-top: 4
-        height: 16
-        font: verdana-11px-antialised
-        color: #ffcc00
+        height: 20
+
+        Panel
+          image-source: /images/ui/crystal_coin
+          image-size: 18 18
+          size: 18 18
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+
+        FlatLabel
+          id: classCostLabel
+          text-align: left
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 22
+          height: 16
+          font: verdana-11px-antialised
+          color: #ffcc00
 
     Label
       id: classMaterialLabel
@@ -902,16 +930,30 @@ ForgeToolsTab < Panel
         $pressed:
           image-color: #cccccc
 
-      FlatLabel
-        id: toolsBonusCostLabel
-        text-align: center
+      Panel
+        id: toolsBonusCostRow
         anchors.top: toolsBonusButton.bottom
         anchors.left: toolsBonusButton.left
         anchors.right: toolsBonusButton.right
         margin-top: 4
-        height: 16
-        font: verdana-11px-antialised
-        color: #ffcc00
+        height: 20
+
+        Panel
+          image-source: /images/ui/crystal_coin
+          image-size: 18 18
+          size: 18 18
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+
+        FlatLabel
+          id: toolsBonusCostLabel
+          text-align: left
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 22
+          height: 16
+          font: verdana-11px-antialised
+          color: #ffcc00
 
       UIWidget
         id: toolsForgeArrow
@@ -959,16 +1001,30 @@ ForgeToolsTab < Panel
         $disabled:
           image-color: #555555
 
-      FlatLabel
-        id: toolsCostLabel
-        text-align: center
+      Panel
+        id: toolsCostRow
         anchors.top: toolsForgeButton.bottom
         anchors.left: toolsForgeButton.left
         anchors.right: toolsForgeButton.right
         margin-top: 4
-        height: 16
-        font: verdana-11px-antialised
-        color: #ffcc00
+        height: 20
+
+        Panel
+          image-source: /images/ui/crystal_coin
+          image-size: 18 18
+          size: 18 18
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+
+        FlatLabel
+          id: toolsCostLabel
+          text-align: left
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          margin-left: 22
+          height: 16
+          font: verdana-11px-antialised
+          color: #ffcc00
 
     Label
       id: toolsMaterialLabel
