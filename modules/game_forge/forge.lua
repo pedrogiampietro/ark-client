@@ -726,33 +726,27 @@ function updateAttrActionDisplay(tab)
   end
 
   local execBtn = tab:recursiveGetChildById('attrExecuteButton')
-  if execBtn and attrCostData then
-    local hasRune = false
-    if attrCostData.runeFlags and attrCostData.runeFlags[action.runeKey] then
-      hasRune = true
+  if execBtn then
+    local canDo = false
+    if attrCostData then
+      local hasRune = not not (attrCostData.runeFlags and attrCostData.runeFlags[action.runeKey])
+      local cost = attrCostData.costs and attrCostData.costs[action.costKey] or 0
+      local hasEnough = (attrCostData.playerGold or 0) >= cost
+      canDo = hasRune and hasEnough and not forging
+      local tier = attrCostData.tier or 0
+      local slotsUsed = attrCostData.slotsUsed or 0
+      local slotsMax = attrCostData.slotsMax or 0
+
+      if action.key == 'ENCHANT_ADD' then
+        canDo = canDo and (tier > 0) and (slotsUsed < slotsMax)
+      elseif action.key == 'ENCHANT_REROLL_LAST' or action.key == 'ENCHANT_REROLL_ALL'
+          or action.key == 'ENCHANT_REMOVE_LAST' or action.key == 'ENCHANT_REMOVE_ALL' then
+        canDo = canDo and (slotsUsed > 0)
+      elseif action.key == 'ENCHANT_REPLACE' then
+        canDo = canDo and (slotsUsed > 0) and (selectedAttrReplaceSlot and selectedAttrReplaceSlot >= 1)
+            and (selectedAttrReplaceEnchantId ~= nil)
+      end
     end
-
-    local cost = 0
-    if attrCostData.costs and attrCostData.costs[action.costKey] then
-      cost = attrCostData.costs[action.costKey]
-    end
-    local hasEnough = (attrCostData.playerGold or 0) >= cost
-
-    local canDo = hasRune and hasEnough and not forging
-    local tier = attrCostData.tier or 0
-    local slotsUsed = attrCostData.slotsUsed or 0
-    local slotsMax = attrCostData.slotsMax or 0
-
-    if action.key == 'ENCHANT_ADD' then
-      canDo = canDo and (tier > 0) and (slotsUsed < slotsMax)
-    elseif action.key == 'ENCHANT_REROLL_LAST' or action.key == 'ENCHANT_REROLL_ALL'
-        or action.key == 'ENCHANT_REMOVE_LAST' or action.key == 'ENCHANT_REMOVE_ALL' then
-      canDo = canDo and (slotsUsed > 0)
-    elseif action.key == 'ENCHANT_REPLACE' then
-      canDo = canDo and (slotsUsed > 0) and (selectedAttrReplaceSlot and selectedAttrReplaceSlot >= 1)
-          and (selectedAttrReplaceEnchantId ~= nil)
-    end
-
     execBtn:setEnabled(canDo)
   end
 end

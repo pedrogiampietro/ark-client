@@ -353,12 +353,13 @@ ForgeClassificationTab < Panel
         margin-top: 0
         margin-right: 24
         enabled: false
+        image-color: #b0ffb0
 
         $pressed:
           image-clip: 0 66 128 66
 
         $disabled:
-          image-color: #666666
+          image-color: #555555
 
       FlatLabel
         id: classCostLabel
@@ -933,12 +934,13 @@ ForgeToolsTab < Panel
         margin-top: 0
         margin-right: 24
         enabled: false
+        image-color: #b0ffb0
 
         $pressed:
           image-clip: 0 66 128 66
 
         $disabled:
-          image-color: #666666
+          image-color: #555555
 
       FlatLabel
         id: toolsCostLabel
