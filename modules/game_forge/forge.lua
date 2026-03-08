@@ -361,25 +361,22 @@ function setupClassificationTab(tab)
     bonusBtn.onClick = function()
       classBonusActive = not classBonusActive
       bonusBtn:setOn(classBonusActive)
-      if classBonusActive then
-        bonusBtn:setText(tr('+20%% ON'))
-      else
-        bonusBtn:setText(tr('+20%%'))
-      end
       if classCostData then
         updateClassCostDisplay(tab)
       end
     end
   end
 
-  forgBtn.onClick = function()
-    if classSourcePos and not forging then
-      forgBtn:setEnabled(false)
-      runForgeAnimation('classProgressBar', function()
-        local msg = 'FORGE:TIER_UP:' .. posToStr(classSourcePos)
-        if classBonusActive then msg = msg .. ':BONUS' end
-        sendToServer(msg)
-      end)
+  if forgBtn then
+    forgBtn.onClick = function()
+      if classSourcePos and not forging then
+        forgBtn:setEnabled(false)
+        runForgeAnimation('classProgressBar', function()
+          local msg = 'FORGE:TIER_UP:' .. posToStr(classSourcePos)
+          if classBonusActive then msg = msg .. ':BONUS' end
+          sendToServer(msg)
+        end)
+      end
     end
   end
 end
@@ -497,7 +494,7 @@ function clearClassInfo()
   local btn = tab:recursiveGetChildById('classForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false) end
   updatePlaceholder(tab, 'classPlaceholder', false)
   local msg = tab:recursiveGetChildById('classResultMessage')
   if msg then msg:setText('') end
@@ -519,7 +516,7 @@ function clearClassSlot()
   local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
-  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false) end
   for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
@@ -761,25 +758,22 @@ function setupToolsTab(tab)
     bonusBtn.onClick = function()
       toolsBonusActive = not toolsBonusActive
       bonusBtn:setOn(toolsBonusActive)
-      if toolsBonusActive then
-        bonusBtn:setText(tr('+20%% ON'))
-      else
-        bonusBtn:setText(tr('+20%%'))
-      end
       if toolsCostData then
         updateToolsCostDisplay(tab)
       end
     end
   end
 
-  forgBtn.onClick = function()
-    if toolsSourcePos and not forging then
-      forgBtn:setEnabled(false)
-      runForgeAnimation('toolsProgressBar', function()
-        local msg = 'FORGE:UPGRADE:' .. posToStr(toolsSourcePos)
-        if toolsBonusActive then msg = msg .. ':BONUS' end
-        sendToServer(msg)
-      end)
+  if forgBtn then
+    forgBtn.onClick = function()
+      if toolsSourcePos and not forging then
+        forgBtn:setEnabled(false)
+        runForgeAnimation('toolsProgressBar', function()
+          local msg = 'FORGE:UPGRADE:' .. posToStr(toolsSourcePos)
+          if toolsBonusActive then msg = msg .. ':BONUS' end
+          sendToServer(msg)
+        end)
+      end
     end
   end
 end
@@ -891,7 +885,7 @@ function clearToolsInfo()
   local btn = tab:recursiveGetChildById('toolsForgeButton')
   if btn then btn:setEnabled(false) end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false) end
   updatePlaceholder(tab, 'toolsPlaceholder', false)
   local msg = tab:recursiveGetChildById('toolsResultMessage')
   if msg then msg:setText('') end
@@ -913,7 +907,7 @@ function clearToolsSlot()
   local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
-  if bonusBtn then bonusBtn:setOn(false); bonusBtn:setText(tr('+20%%')) end
+  if bonusBtn then bonusBtn:setOn(false) end
   for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
