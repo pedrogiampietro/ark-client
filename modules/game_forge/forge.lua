@@ -649,7 +649,6 @@ function updateAttrActionDisplay(tab)
   local action = ATTR_ACTIONS[selectedAttrAction]
   if not action then return end
 
-  local runeTitle = tab:recursiveGetChildById('attrRuneTitle')
   local replaceSlotLabel = tab:recursiveGetChildById('attrReplaceSlotLabel')
   local replaceSlotCombo = tab:recursiveGetChildById('attrReplaceSlotCombo')
   local replaceAttrLabel = tab:recursiveGetChildById('attrReplaceAttrLabel')
@@ -661,16 +660,9 @@ function updateAttrActionDisplay(tab)
   if replaceAttrLabel then replaceAttrLabel:setVisible(isReplace) end
   if replaceAttrCombo then replaceAttrCombo:setVisible(isReplace) end
 
+  -- Rune title is always anchored to attrReplacePanel.bottom in OTUI (panel has fixed height for Slot + New attribute)
   if isReplace and attrCostData then
     local slotsUsed = attrCostData.slotsUsed or 0
-    -- Anchor rune title below replace attribute combo
-    if runeTitle and replaceAttrCombo then
-      if runeTitle.breakAnchors then runeTitle:breakAnchors() end
-      runeTitle:addAnchor(AnchorTop, replaceAttrCombo, AnchorBottom)
-      runeTitle:setMarginTop(14)
-      runeTitle:setMarginLeft(12)
-    end
-    -- Fill slot and attribute combos (guard to prevent onOptionChange from re-entering)
     if replaceSlotCombo and slotsUsed > 0 then
       _updatingAttrReplaceUI = true
       replaceSlotCombo:clearOptions()
@@ -681,7 +673,6 @@ function updateAttrActionDisplay(tab)
         selectedAttrReplaceSlot = 1
       end
       replaceSlotCombo:setCurrentIndex(selectedAttrReplaceSlot - 1)
-      -- Fill attribute combo for selected slot; preserve selection if still valid
       local avail = attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
       if replaceAttrCombo and avail and avail.names then
         replaceAttrCombo:clearOptions()
@@ -706,16 +697,6 @@ function updateAttrActionDisplay(tab)
         selectedAttrReplaceEnchantId = nil
       end
       _updatingAttrReplaceUI = false
-    end
-  else
-    if runeTitle then
-      local actionCombo = tab:recursiveGetChildById('attrActionCombo')
-      if actionCombo then
-        if runeTitle.breakAnchors then runeTitle:breakAnchors() end
-        runeTitle:addAnchor(AnchorTop, actionCombo, AnchorBottom)
-        runeTitle:setMarginTop(14)
-        runeTitle:setMarginLeft(12)
-      end
     end
   end
 

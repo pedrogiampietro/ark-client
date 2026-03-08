@@ -544,54 +544,62 @@ ForgeAttributesTab < Panel
       margin-right: 12
       margin-top: -2
 
-    Label
-      id: attrReplaceSlotLabel
-      !text: tr('Slot:')
+    Panel
+      id: attrReplacePanel
+      height: 92
       anchors.top: attrActionCombo.bottom
       anchors.left: parent.left
-      margin-top: 12
-      margin-left: 12
-      font: verdana-11px-antialised
-      color: #c0c0c0
-      visible: false
-
-    ComboBox
-      id: attrReplaceSlotCombo
-      anchors.top: attrReplaceSlotLabel.bottom
-      anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 4
-      margin-left: 12
-      margin-right: 12
-      visible: false
 
-    Label
-      id: attrReplaceAttrLabel
-      !text: tr('New attribute:')
-      anchors.top: attrReplaceSlotCombo.bottom
-      anchors.left: parent.left
-      margin-top: 8
-      margin-left: 12
-      font: verdana-11px-antialised
-      color: #c0c0c0
-      visible: false
+      Label
+        id: attrReplaceSlotLabel
+        !text: tr('Slot:')
+        anchors.top: parent.top
+        anchors.left: parent.left
+        margin-top: 4
+        margin-left: 12
+        font: verdana-11px-antialised
+        color: #c0c0c0
+        visible: false
 
-    ComboBox
-      id: attrReplaceAttrCombo
-      anchors.top: attrReplaceAttrLabel.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 4
-      margin-left: 12
-      margin-right: 12
-      visible: false
+      ComboBox
+        id: attrReplaceSlotCombo
+        anchors.top: attrReplaceSlotLabel.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-top: 4
+        margin-left: 12
+        margin-right: 12
+        visible: false
+
+      Label
+        id: attrReplaceAttrLabel
+        !text: tr('New attribute:')
+        anchors.top: attrReplaceSlotCombo.bottom
+        anchors.left: parent.left
+        margin-top: 8
+        margin-left: 12
+        font: verdana-11px-antialised
+        color: #c0c0c0
+        visible: false
+
+      ComboBox
+        id: attrReplaceAttrCombo
+        anchors.top: attrReplaceAttrLabel.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-top: 4
+        margin-left: 12
+        margin-right: 12
+        visible: false
 
     Label
       id: attrRuneTitle
       !text: tr('Required Rune:')
-      anchors.top: attrActionCombo.bottom
+      anchors.top: attrReplacePanel.bottom
       anchors.left: parent.left
-      margin-top: 14
+      margin-top: 10
       margin-left: 12
       font: verdana-11px-antialised
       color: #c0c0c0
