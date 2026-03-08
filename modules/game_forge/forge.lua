@@ -156,11 +156,10 @@ function createWindow()
   forgeWindow = g_ui.displayUI('forge')
   forgeWindow:hide()
 
-  -- Crystal coin icon (client loads /images/ui/crystal_coin.png from data folder)
+  -- Crystal coin icon (item id 2160 - drawn by client from game assets)
   local balanceIcon = forgeWindow:recursiveGetChildById('forgeBalanceIcon')
-  if balanceIcon and balanceIcon.setImageSource then
-    balanceIcon:setImageSource('/images/ui/crystal_coin')
-    balanceIcon:setImageSize({ width = 16, height = 16 })
+  if balanceIcon and balanceIcon.setItemId then
+    balanceIcon:setItemId(2160)
   end
 
   forgeTabBar = forgeWindow:getChildById('forgeTabBar')
