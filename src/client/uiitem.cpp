@@ -60,8 +60,14 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
         m_item->setColor(m_itemColor);
         m_item->draw(drawRect);
 
-        if(m_font && m_showCount && (m_showCountAlways || (m_item->isStackable() || m_item->isChargeable()) && m_item->getCountOrSubType() > 1)) {
-            g_drawQueue->addText(m_font, m_countText, Rect(drawRect.topLeft(), drawRect.bottomRight() - Point(3, 0)), Fw::AlignBottomRight, m_color);
+        if(m_font && m_showCount) {
+            int countOrSub = m_item->getCountOrSubType();
+            bool showCount = m_showCountAlways
+                || countOrSub > 1
+                || ((m_item->isStackable() || m_item->isChargeable()) && countOrSub >= 1);
+            if(showCount && countOrSub >= 1) {
+                g_drawQueue->addText(m_font, m_countText, Rect(drawRect.topLeft(), drawRect.bottomRight() - Point(3, 0)), Fw::AlignBottomRight, m_color);
+            }
         }
 
         if (m_showId) {
