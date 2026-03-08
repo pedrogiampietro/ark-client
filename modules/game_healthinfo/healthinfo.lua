@@ -62,7 +62,7 @@ function init()
   experienceBar = healthInfoWindow:recursiveGetChildById('experienceBar')
   soulLabel = healthInfoWindow:recursiveGetChildById('soulLabel')
   capLabel = healthInfoWindow:recursiveGetChildById('capLabel')
-  if capLabel then capLabel:setText('Eldera 7.4') end
+  if soulLabel then soulLabel:setText('Eldera 7.4') end
 
   overlay = g_ui.createWidget('HealthOverlay', modules.game_interface.getMapPanel())  
   healthCircleFront = overlay:getChildById('healthCircleFront')
@@ -227,11 +227,11 @@ function onLevelChange(localPlayer, value, percent)
 end
 
 function onSoulChange(localPlayer, soul)
-  soulLabel:setText(tr('Soul') .. ': ' .. soul)
+  soulLabel:setText('Eldera 7.4')
 end
 
 function onFreeCapacityChange(player, freeCapacity)
-  capLabel:setText('Eldera 7.4')
+  capLabel:setText(tr('Cap') .. ': ' .. freeCapacity)
 end
 
 function onStatesChange(localPlayer, now, old)

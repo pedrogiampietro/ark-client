@@ -144,7 +144,7 @@ function init()
 -- status
   soulLabel = inventoryWindow:recursiveGetChildById('soulLabel')
   capLabel = inventoryWindow:recursiveGetChildById('capLabel')
-  if capLabel then capLabel:setText('Eldera 7.4') end
+  if soulLabel then soulLabel:setText('Eldera 7.4') end
   conditionPanel = inventoryWindow:recursiveGetChildById('conditionPanel')
 
 
@@ -485,13 +485,22 @@ function loadIcon(bitChanged)
 end
 
 function onSoulChange(localPlayer, soul)
-  if not soul then return end
-  soulLabel:setText(tr('Soul') .. ':\n' .. soul)
+  if not soulLabel then return end
+  soulLabel:setText('Eldera 7.4')
 end
 
 function onFreeCapacityChange(player, freeCapacity)
-  if not capLabel then return end
-  capLabel:setText('Eldera 7.4')
+  if not freeCapacity then return end
+  if freeCapacity > 99 then
+    freeCapacity = math.floor(freeCapacity * 10) / 10
+  end
+  if freeCapacity > 999 then
+    freeCapacity = math.floor(freeCapacity)
+  end
+  if freeCapacity > 99999 then
+    freeCapacity = math.min(9999, math.floor(freeCapacity/1000)) .. "k"
+  end
+  capLabel:setText(tr('Cap') .. ':\n' .. (freeCapacity*100))
 end
 
 function onStatesChange(localPlayer, now, old)
