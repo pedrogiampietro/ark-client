@@ -579,8 +579,10 @@ ForgeAttributesTab < Panel
         !text: tr('New attribute:')
         anchors.top: attrReplaceSlotCombo.bottom
         anchors.left: parent.left
+        anchors.right: parent.right
         margin-top: 8
         margin-left: 12
+        margin-right: 12
         font: verdana-11px-antialised
         color: #c0c0c0
         visible: false
