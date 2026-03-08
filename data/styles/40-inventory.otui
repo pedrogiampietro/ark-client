@@ -109,6 +109,9 @@ SoulCapLabel < GameLabel
   width: 36
   height: 20
   icon-source: /images/game/slots/soulcap
+
+ElderaLabel < SoulCapLabel
+  font: verdana-9px
       
 FightOffensiveBox < CombatBox
   image-source: /images/game/combatmodes/fightoffensive
@@ -193,7 +196,7 @@ InventoryWindow < MiniWindow
         anchors.horizontalCenter: prev.horizontalCenter
         margin-top: 3
 
-      SoulCapLabel
+      ElderaLabel
         id: soulLabel
         anchors.top: slot10.bottom
         anchors.horizontalCenter: slot10.horizontalCenter
