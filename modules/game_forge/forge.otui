@@ -22,7 +22,7 @@ ForgeRuneSlot < Panel
 
     UIItem
       id: runeItem
-      size: 54 54
+      size: 32 32
       anchors.centerIn: parent
       virtual: true
 
@@ -288,18 +288,18 @@ ForgeClassificationTab < Panel
         id: classBonusButton
         size: 66 66
         image-source: /images/ui/20
-        image-clip: 695 327 66 66
+        image-clip: 0 0 66 66
         image-size: 66 66
-        image-color: #888888
+        image-color: #ffffff
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: classProtRuneSlot.right
         margin-left: 18
 
         $on:
-          image-color: #ffffff
+          image-clip: 66 0 66 66
 
         $pressed:
-          image-color: #aaaaaa
+          image-color: #cccccc
 
       FlatLabel
         id: classBonusCostLabel
@@ -809,18 +809,18 @@ ForgeToolsTab < Panel
         id: toolsBonusButton
         size: 66 66
         image-source: /images/ui/20
-        image-clip: 695 327 66 66
+        image-clip: 0 0 66 66
         image-size: 66 66
-        image-color: #888888
+        image-color: #ffffff
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: toolsProtRuneSlot.right
         margin-left: 18
 
         $on:
-          image-color: #ffffff
+          image-clip: 66 0 66 66
 
         $pressed:
-          image-color: #aaaaaa
+          image-color: #cccccc
 
       FlatLabel
         id: toolsBonusCostLabel
