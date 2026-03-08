@@ -15,8 +15,12 @@ function init()
   g_shaders.createOutfitShader("outfit_rainbow", "/shaders/outfit_rainbow_vertex", "/shaders/outfit_rainbow_fragment")
   g_shaders.addTexture("outfit_rainbow", "/images/shaders/rainbow.png")
 
-  -- you can use creature:setOutfitShader("outfit_rainbow") to set shader
+  -- Elite monster shaders (contorno pulsante: verde / vermelho / preto-dourado)
+  g_shaders.createOutfitShader("outfit_elite", "/shaders/outfit_elite_vertex", "/shaders/outfit_elite_fragment")
+  g_shaders.createOutfitShader("outfit_champion", "/shaders/outfit_champion_vertex", "/shaders/outfit_champion_fragment")
+  g_shaders.createOutfitShader("outfit_legendary", "/shaders/outfit_legendary_vertex", "/shaders/outfit_legendary_fragment")
 
+  -- creature:setOutfitShader("outfit_elite") | "outfit_champion" | "outfit_legendary")
 end
 
 function terminate()
