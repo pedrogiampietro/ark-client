@@ -94,10 +94,8 @@ ForgeWindow < MainWindow
     height: 20
     margin-bottom: 2
 
-    UIWidget
+    ImageView
       id: forgeBalanceIcon
-      image-source: /images/ui/crystal_coin
-      image-size: 16 16
       size: 16 16
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
