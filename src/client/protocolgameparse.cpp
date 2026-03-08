@@ -24,7 +24,6 @@
 
 #include "localplayer.h"
 #include "thingtypemanager.h"
-#include "itemtype.h"
 #include "game.h"
 #include "const.h"
 #include "map.h"
@@ -3592,17 +3591,15 @@ ItemPtr ProtocolGame::getItem(const InputMessagePtr& msg, int id, bool hasDescri
         msg->getU8(); // mark
     }
 
-    const ItemTypePtr& itemType = g_things.findItemTypeByClientId(id);
-    bool hasCountByte = item->isStackable() || item->isChargeable() ||
-        (itemType && (itemType->getCategory() == ItemCategoryCharges || itemType->getCategory() == ItemCategoryRune));
-    if (hasCountByte) {
+    if (g_game.getFeature(Otc::GameItemAlwaysHasSubType)) {
+        item->setCountOrSubType(g_game.getFeature(Otc::GameCountU16) ? msg->getU16() : msg->getU8());
+    } else if (item->isStackable() || item->isChargeable()) {
         item->setCountOrSubType(g_game.getFeature(Otc::GameCountU16) ? msg->getU16() : msg->getU8());
     }
     else if (item->isFluidContainer() || item->isSplash()) {
         item->setCountOrSubType(msg->getU8());
     }
     else if (item->rawGetThingType()->isContainer() && (g_game.getFeature(Otc::GameTibia12Protocol) || g_game.getFeature(Otc::GameQuickLootFlags))) {
-        // not sure about this part
         uint8_t hasQuickLootFlags = msg->getU8();
         if (hasQuickLootFlags > 0) {
             item->setQuickLootFlags(msg->getU32()); // quick loot flags

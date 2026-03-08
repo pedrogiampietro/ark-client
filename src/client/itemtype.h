@@ -44,8 +44,7 @@ enum ItemCategory : uint8 {
     ItemCategoryFluid        = 12,
     ItemCategoryDoor         = 13,
     ItemCategoryDeprecated   = 14,
-    ItemCategoryRune         = 15,
-    ItemCategoryLast         = 16
+    ItemCategoryLast         = 15
 };
 
 enum ItemTypeAttr : uint8 {

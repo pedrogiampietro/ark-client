@@ -26,6 +26,9 @@ function updateFeatures(version)
     -- server must also send the duration field when it is >0
     g_game.enableFeature(GameDisplayItemDuration)
     
+    -- server always sends a subtype byte for every item (runes show charges on icon)
+    g_game.enableFeature(GameItemAlwaysHasSubType)
+    
     if(version >= 770) then
         g_game.enableFeature(GameLooktypeU16)
         g_game.enableFeature(GameMessageStatements)

@@ -401,8 +401,6 @@ void ThingTypeManager::parseItemType(uint16 serverId, TiXmlElement* elem)
                 itemType->setCategory(ItemCategoryTeleport);
             else if(value == "door")
                 itemType->setCategory(ItemCategoryDoor);
-            else if(value == "rune")
-                itemType->setCategory(ItemCategoryRune);
         }
     }
 }

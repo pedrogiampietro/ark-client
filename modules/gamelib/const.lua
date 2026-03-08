@@ -215,8 +215,9 @@ GameItemCustomAttributes = 126
 GameAnimatedTextCustomFont = 127
 
 GameDisplayItemDuration = 129
+GameItemAlwaysHasSubType = 130
 
-LastGameFeature = 130
+LastGameFeature = 131
         
 TextColors = {
   red       = '#f55e5e', --'#c83200'
