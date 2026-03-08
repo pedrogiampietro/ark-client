@@ -726,6 +726,10 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
       modules.game_textmessage.displayFailureMessage(tr('Sorry, not possible.'))
       return false
     end
+    -- Ignore arrow/keyboard direction when following map click to avoid character flick
+    if modules.game_walking then
+      modules.game_walking.cancelKeyboardWalk()
+    end
     player:autoWalk(autoWalkPos)
     return true
   end

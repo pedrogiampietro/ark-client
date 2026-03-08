@@ -179,6 +179,16 @@ function stopSmartWalk()
   smartWalkDir = nil
 end
 
+-- Cancel keyboard/arrow walking so only map click (autoWalk) is followed. Prevents flick when holding arrow and clicking map.
+function cancelKeyboardWalk()
+  stopSmartWalk()
+  nextWalkDir = nil
+  removeEvent(walkEvent)
+  walkEvent = nil
+  removeEvent(autoWalkEvent)
+  autoWalkEvent = nil
+end
+
 function changeWalkDir(dir, pop)
   while table.removevalue(smartWalkDirs, dir) do end
   if pop then
