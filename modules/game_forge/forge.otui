@@ -274,14 +274,16 @@ ForgeClassificationTab < Panel
 
       ForgeRuneSlot
         id: classTierRuneSlot
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: parent.left
+        margin-top: 0
         margin-left: 24
 
       ForgeRuneSlot
         id: classProtRuneSlot
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: classTierRuneSlot.right
+        margin-top: 0
         margin-left: 14
 
       UIWidget
@@ -291,8 +293,9 @@ ForgeClassificationTab < Panel
         image-clip: 0 0 66 66
         image-size: 66 66
         image-color: #ffffff
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: classProtRuneSlot.right
+        margin-top: 0
         margin-left: 18
 
         $on:
@@ -317,8 +320,9 @@ ForgeClassificationTab < Panel
         image-source: /images/ui/arrow_horizontal
         image-clip: 12 0 12 21
         size: 12 21
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: classBonusButton.right
+        margin-top: 22
         margin-left: 14
         phantom: false
 
@@ -326,8 +330,9 @@ ForgeClassificationTab < Panel
         id: classChancePanel
         width: 80
         height: 36
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: classForgeArrow.right
+        margin-top: 14
         margin-left: 12
 
         Label
@@ -343,8 +348,9 @@ ForgeClassificationTab < Panel
         size: 128 66
         image-source: /images/game/imbuing/imbue_green
         image-clip: 0 0 128 66
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.right: parent.right
+        margin-top: 0
         margin-right: 24
         enabled: false
 
@@ -795,14 +801,16 @@ ForgeToolsTab < Panel
 
       ForgeRuneSlot
         id: toolsUpgradeRuneSlot
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: parent.left
+        margin-top: 0
         margin-left: 24
 
       ForgeRuneSlot
         id: toolsProtRuneSlot
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: toolsUpgradeRuneSlot.right
+        margin-top: 0
         margin-left: 14
 
       UIWidget
@@ -812,8 +820,9 @@ ForgeToolsTab < Panel
         image-clip: 0 0 66 66
         image-size: 66 66
         image-color: #ffffff
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: toolsProtRuneSlot.right
+        margin-top: 0
         margin-left: 18
 
         $on:
@@ -838,8 +847,9 @@ ForgeToolsTab < Panel
         image-source: /images/ui/arrow_horizontal
         image-clip: 12 0 12 21
         size: 12 21
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: toolsBonusButton.right
+        margin-top: 22
         margin-left: 14
         phantom: false
 
@@ -847,8 +857,9 @@ ForgeToolsTab < Panel
         id: toolsChancePanel
         width: 80
         height: 36
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: toolsForgeArrow.right
+        margin-top: 14
         margin-left: 12
 
         Label
@@ -864,8 +875,9 @@ ForgeToolsTab < Panel
         size: 128 66
         image-source: /images/game/imbuing/imbue_green
         image-clip: 0 0 128 66
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.right: parent.right
+        margin-top: 0
         margin-right: 24
         enabled: false
 
