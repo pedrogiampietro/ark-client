@@ -657,7 +657,7 @@ function updateAttrActionDisplay(tab)
     local slotsUsed = attrCostData.slotsUsed or 0
     -- Anchor rune title below replace attribute combo
     if runeTitle and replaceAttrCombo then
-      runeTitle:clearAnchors()
+      if runeTitle.breakAnchors then runeTitle:breakAnchors() end
       runeTitle:addAnchor(AnchorTop, replaceAttrCombo, AnchorBottom)
       runeTitle:setMarginTop(14)
       runeTitle:setMarginLeft(12)
@@ -701,7 +701,7 @@ function updateAttrActionDisplay(tab)
     if runeTitle then
       local actionCombo = tab:recursiveGetChildById('attrActionCombo')
       if actionCombo then
-        runeTitle:clearAnchors()
+        if runeTitle.breakAnchors then runeTitle:breakAnchors() end
         runeTitle:addAnchor(AnchorTop, actionCombo, AnchorBottom)
         runeTitle:setMarginTop(14)
         runeTitle:setMarginLeft(12)

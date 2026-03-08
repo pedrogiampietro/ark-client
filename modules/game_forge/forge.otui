@@ -549,7 +549,7 @@ ForgeAttributesTab < Panel
       !text: tr('Slot:')
       anchors.top: attrActionCombo.bottom
       anchors.left: parent.left
-      margin-top: 10
+      margin-top: 12
       margin-left: 12
       font: verdana-11px-antialised
       color: #c0c0c0
@@ -557,12 +557,12 @@ ForgeAttributesTab < Panel
 
     ComboBox
       id: attrReplaceSlotCombo
-      anchors.top: attrReplaceSlotLabel.top
-      anchors.left: attrReplaceSlotLabel.right
+      anchors.top: attrReplaceSlotLabel.bottom
+      anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 8
+      margin-top: 4
+      margin-left: 12
       margin-right: 12
-      margin-top: -2
       visible: false
 
     Label
@@ -578,12 +578,12 @@ ForgeAttributesTab < Panel
 
     ComboBox
       id: attrReplaceAttrCombo
-      anchors.top: attrReplaceAttrLabel.top
-      anchors.left: attrReplaceAttrLabel.right
+      anchors.top: attrReplaceAttrLabel.bottom
+      anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 8
+      margin-top: 4
+      margin-left: 12
       margin-right: 12
-      margin-top: -2
       visible: false
 
     Label
