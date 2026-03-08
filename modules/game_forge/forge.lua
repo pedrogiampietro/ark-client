@@ -193,6 +193,14 @@ local function splitStr(str, sep)
   return result
 end
 
+local function updateForgeBalance(gold)
+  if not forgeWindow then return end
+  local balanceLabel = forgeWindow:getChildById('forgeBalanceLabel')
+  if balanceLabel then
+    balanceLabel:setText((gold or 0) .. ' cc')
+  end
+end
+
 local function updatePlaceholder(tab, placeholderId, hasItem)
   local placeholder = tab:recursiveGetChildById(placeholderId)
   if placeholder then
@@ -389,18 +397,29 @@ function updateClassCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('classCostLabel')
   if costLabel then
-    costLabel:setText(totalCost .. ' crystal coins')
+    costLabel:setText(totalCost .. ' cc')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
+  end
+
+  local bonusCostLabel = tab:recursiveGetChildById('classBonusCostLabel')
+  if bonusCostLabel then
+    if classBonusActive then
+      bonusCostLabel:setText(classCostData.bonusCost .. ' cc')
+    else
+      bonusCostLabel:setText('0 cc')
+    end
   end
 
   local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(classCostData.chance + (classBonusActive and 20 or 0), 100)
-    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
+    chanceLabel:setText(tr('Chance') .. ':\n' .. effectiveChance .. '%')
     if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
     elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end
   end
+
+  updateForgeBalance(classCostData.playerGold)
 
   local forgBtn = tab:recursiveGetChildById('classForgeButton')
   if forgBtn then
@@ -487,7 +506,7 @@ function clearClassInfo()
   if resultItem then resultItem:setItem(nil) end
   local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
-  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classCostLabel', 'classMaterialLabel'}) do
+  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classCostLabel', 'classMaterialLabel', 'classBonusCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
@@ -517,7 +536,7 @@ function clearClassSlot()
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('classBonusButton')
   if bonusBtn then bonusBtn:setOn(false) end
-  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel'}) do
+  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classMaterialLabel', 'classCostLabel', 'classBonusCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
@@ -688,6 +707,7 @@ function updateAttrInfo(data)
     playerGold = data.playerGold or 0
   }
 
+  updateForgeBalance(data.playerGold or 0)
   updateAttrActionDisplay(tab)
 end
 
@@ -786,18 +806,29 @@ function updateToolsCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('toolsCostLabel')
   if costLabel then
-    costLabel:setText(totalCost .. ' crystal coins')
+    costLabel:setText(totalCost .. ' cc')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
+  end
+
+  local bonusCostLabel = tab:recursiveGetChildById('toolsBonusCostLabel')
+  if bonusCostLabel then
+    if toolsBonusActive then
+      bonusCostLabel:setText(toolsCostData.bonusCost .. ' cc')
+    else
+      bonusCostLabel:setText('0 cc')
+    end
   end
 
   local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(toolsCostData.chance + (toolsBonusActive and 20 or 0), 100)
-    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
+    chanceLabel:setText(tr('Chance') .. ':\n' .. effectiveChance .. '%')
     if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
     elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end
   end
+
+  updateForgeBalance(toolsCostData.playerGold)
 
   local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
   if forgBtn then
@@ -878,7 +909,7 @@ function clearToolsInfo()
   if resultItem then resultItem:setItem(nil) end
   local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
-  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsCostLabel', 'toolsMaterialLabel'}) do
+  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsCostLabel', 'toolsMaterialLabel', 'toolsBonusCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
@@ -908,7 +939,7 @@ function clearToolsSlot()
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
   local bonusBtn = tab:recursiveGetChildById('toolsBonusButton')
   if bonusBtn then bonusBtn:setOn(false) end
-  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel'}) do
+  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsMaterialLabel', 'toolsCostLabel', 'toolsBonusCostLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
