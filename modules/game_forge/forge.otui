@@ -626,18 +626,21 @@ ForgeAttributesTab < Panel
       id: attrExecuteButton
       !text: tr('Attribute!')
       width: 120
-      anchors.top: attrCostLabel.bottom
-      anchors.left: attrCostTitle.left
+      anchors.top: attrRuneSlot.bottom
+      anchors.left: attrRuneSlot.left
       margin-top: 8
       enabled: false
 
     FlatPanel
       id: attrDescPanel
-      anchors.top: attrRuneSlot.bottom
+      anchors.top: attrExecuteButton.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
-      margin: 8 8 8 8
+      margin-top: 8
+      margin-left: 8
+      margin-right: 8
+      margin-bottom: 8
 
       Label
         id: attrDescLabel
