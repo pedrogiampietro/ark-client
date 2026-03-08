@@ -578,25 +578,27 @@ function setupAttributesTab(tab)
   if replaceSlotCombo then
     replaceSlotCombo.onOptionChange = function(widget)
       if _updatingAttrReplaceUI then return end
-      -- ComboBox currentIndex is 0-based
-      selectedAttrReplaceSlot = (widget.currentIndex or 0) + 1
+      _updatingAttrReplaceUI = true
+      -- UIComboBox uses 1-based currentIndex
+      selectedAttrReplaceSlot = math.max(1, widget.currentIndex or 1)
       selectedAttrReplaceEnchantId = nil
-      -- Fill attribute combo for this slot (without re-calling updateAttrActionDisplay to avoid stack overflow)
+      -- Fill attribute combo for this slot
       local avail = attrCostData and attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
       local attrCombo = tab:recursiveGetChildById('attrReplaceAttrCombo')
       if attrCombo and avail and avail.names then
-        _updatingAttrReplaceUI = true
         attrCombo:clearOptions()
         for _, name in ipairs(avail.names) do
           attrCombo:addOption(name)
         end
-        attrCombo:setCurrentIndex(0)
-        _updatingAttrReplaceUI = false
+        attrCombo:setCurrentIndex(1, true)
         if avail.ids and avail.ids[1] then
           selectedAttrReplaceEnchantId = avail.ids[1]
         end
       end
       updateAttrActionDisplay(tab)
+      scheduleEvent(function()
+        _updatingAttrReplaceUI = false
+      end, 50)
     end
   end
 
@@ -606,7 +608,8 @@ function setupAttributesTab(tab)
       if _updatingAttrReplaceUI then return end
       local slot = selectedAttrReplaceSlot
       local avail = attrCostData and attrCostData.availableForSlot and slot and attrCostData.availableForSlot[slot]
-      local idx = (widget.currentIndex or 0) + 1
+      -- UIComboBox uses 1-based currentIndex
+      local idx = widget.currentIndex or 1
       if avail and avail.ids and avail.ids[idx] then
         selectedAttrReplaceEnchantId = avail.ids[idx]
       else
@@ -665,14 +668,19 @@ function updateAttrActionDisplay(tab)
     local slotsUsed = attrCostData.slotsUsed or 0
     if replaceSlotCombo and slotsUsed > 0 then
       _updatingAttrReplaceUI = true
-      replaceSlotCombo:clearOptions()
-      for i = 1, slotsUsed do
-        replaceSlotCombo:addOption(tostring(i))
+      -- Only rebuild slot options when count changed, to avoid ComboBox firing onOptionChange(0) and resetting to slot 1
+      local optsCount = (replaceSlotCombo.getOptionsCount and replaceSlotCombo:getOptionsCount()) or 0
+      if optsCount ~= slotsUsed then
+        replaceSlotCombo:clearOptions()
+        for i = 1, slotsUsed do
+          replaceSlotCombo:addOption(tostring(i))
+        end
       end
       if not selectedAttrReplaceSlot or selectedAttrReplaceSlot > slotsUsed or selectedAttrReplaceSlot < 1 then
         selectedAttrReplaceSlot = 1
       end
-      replaceSlotCombo:setCurrentIndex(selectedAttrReplaceSlot - 1)
+      -- UIComboBox is 1-based; dontSignal to avoid onOptionChange resetting selection
+      replaceSlotCombo:setCurrentIndex(selectedAttrReplaceSlot, true)
       local avail = attrCostData.availableForSlot and attrCostData.availableForSlot[selectedAttrReplaceSlot]
       if replaceAttrCombo and avail and avail.names then
         replaceAttrCombo:clearOptions()
@@ -685,7 +693,7 @@ function updateAttrActionDisplay(tab)
             if id == selectedAttrReplaceEnchantId then attrIdx = i - 1 break end
           end
         end
-        replaceAttrCombo:setCurrentIndex(attrIdx)
+        replaceAttrCombo:setCurrentIndex(attrIdx + 1, true)
         if avail.ids and avail.ids[attrIdx + 1] then
           selectedAttrReplaceEnchantId = avail.ids[attrIdx + 1]
         elseif avail.ids and avail.ids[1] then
