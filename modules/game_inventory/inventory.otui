@@ -108,7 +108,6 @@ SoulCapLabel < GameLabel
 
 ElderaLabel < SoulCapLabel
   font: small-9px
-  width: 48
       
 FightOffensiveBox < CombatBox
   image-source: /images/game/combatmodes/fightoffensive
