@@ -413,7 +413,7 @@ function updateClassCostDisplay(tab)
   local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(classCostData.chance + (classBonusActive and 20 or 0), 100)
-    chanceLabel:setText(tr('Chance') .. ':\n' .. effectiveChance .. '%')
+    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
     if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
     elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end
@@ -822,7 +822,7 @@ function updateToolsCostDisplay(tab)
   local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(toolsCostData.chance + (toolsBonusActive and 20 or 0), 100)
-    chanceLabel:setText(tr('Chance') .. ':\n' .. effectiveChance .. '%')
+    chanceLabel:setText(tr('Chance') .. ': ' .. effectiveChance .. '%')
     if effectiveChance >= 60 then chanceLabel:setColor('#00ff00')
     elseif effectiveChance >= 30 then chanceLabel:setColor('#ffcc00')
     else chanceLabel:setColor('#ff3333') end

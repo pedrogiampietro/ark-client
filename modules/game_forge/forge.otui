@@ -9,43 +9,40 @@ ForgeItemSlot < UIItem
     color: #646464
 
 ForgeRuneSlot < Panel
-  size: 80 80
+  size: 56 88
 
   Panel
     id: slotBg
-    size: 48 48
+    size: 52 52
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    image-source: /images/ui/slot
-    image-size: 48 48
+    background-color: #2a2a2a
+    border-width: 1
+    border-color: #4a4a4a
 
     UIItem
       id: runeItem
-      size: 46 46
+      size: 50 50
       anchors.centerIn: parent
       virtual: true
 
-  Label
-    id: runeCount
-    text-align: center
+  FlatPanel
+    id: runeCountBox
+    height: 22
     anchors.top: slotBg.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 3
-    font: verdana-11px-antialised
-    color: #c0c0c0
-    height: 14
+    margin-top: 4
+    background-color: #2a2a2a
+    border-width: 1
+    border-color: #4a4a4a
 
-  Label
-    id: runeName
-    text-align: center
-    anchors.top: runeCount.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    font: verdana-11px-antialised
-    color: #888888
-    height: 12
-    text-auto-resize: true
+    Label
+      id: runeCount
+      anchors.fill: parent
+      text-align: center
+      font: verdana-11px-antialised
+      color: #c0c0c0
 
 ForgeEnchantRow < Panel
   height: 20
@@ -118,13 +115,13 @@ ForgeClassificationTab < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 40
+    height: 52
     margin-top: 2
 
     Label
       id: classInfoLabel
       anchors.fill: parent
-      margin: 5 8 5 8
+      margin: 6 12 6 12
       text-wrap: true
       text-auto-resize: true
       !text: tr('Increase the classification (tier) of your item. Drag an item to the slot below. Higher tiers unlock more enchantment slots.')
@@ -257,111 +254,129 @@ ForgeClassificationTab < Panel
       !text: tr('Below are the items needed to level up, you have the option to increase the chance of obtaining them by 20%%.')
       text-align: center
       text-wrap: true
+      height: 32
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 6
-      margin-left: 10
-      margin-right: 10
+      margin-top: 8
+      margin-left: 16
+      margin-right: 16
       font: verdana-11px-antialised
       color: #aaaaaa
 
-    ForgeRuneSlot
-      id: classTierRuneSlot
+    Panel
+      id: classActionRow
+      height: 92
       anchors.top: classMatTitle.bottom
       anchors.left: parent.left
-      margin-top: 12
-      margin-left: 18
-
-    ForgeRuneSlot
-      id: classProtRuneSlot
-      anchors.top: classTierRuneSlot.top
-      anchors.left: classTierRuneSlot.right
-      margin-left: 10
-
-    UIWidget
-      id: classBonusButton
-      size: 66 66
-      image-source: /images/ui/20
-      image-clip: 0 0 66 66
-      image-color: #666666
-      anchors.top: classTierRuneSlot.top
-      anchors.left: classProtRuneSlot.right
-      margin-left: 14
-
-      $on:
-        image-clip: 66 0 66 66
-        image-color: #ffffff
-
-      $pressed:
-        image-color: #cccccc
-
-    FlatLabel
-      id: classBonusCostLabel
-      text-align: center
-      anchors.top: classBonusButton.bottom
-      anchors.left: classBonusButton.left
-      anchors.right: classBonusButton.right
-      margin-top: 2
-      font: verdana-11px-antialised
-      color: #ffcc00
-
-    UIWidget
-      id: classForgeArrow
-      image-source: /images/ui/arrow_horizontal
-      image-clip: 12 0 12 21
-      size: 12 21
-      anchors.verticalCenter: classBonusButton.verticalCenter
-      anchors.left: classBonusButton.right
-      margin-left: 16
-      phantom: false
-
-    Label
-      id: classChanceLabel
-      text-align: center
-      anchors.verticalCenter: classBonusButton.verticalCenter
-      anchors.left: classForgeArrow.right
-      margin-left: 10
-      width: 90
-      font: verdana-11px-antialised
-      color: #c0c0c0
-
-    UIButton
-      id: classForgeButton
-      size: 128 66
-      image-source: /images/game/imbuing/imbue_green
-      image-clip: 0 0 128 66
-      anchors.top: classTierRuneSlot.top
       anchors.right: parent.right
-      margin-right: 18
-      enabled: false
+      margin-top: 10
 
-      $pressed:
-        image-clip: 0 66 128 66
+      ForgeRuneSlot
+        id: classTierRuneSlot
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        margin-left: 24
 
-      $disabled:
-        image-color: #666666
+      ForgeRuneSlot
+        id: classProtRuneSlot
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: classTierRuneSlot.right
+        margin-left: 14
 
-    FlatLabel
-      id: classCostLabel
-      text-align: center
-      anchors.top: classForgeButton.bottom
-      anchors.left: classForgeButton.left
-      anchors.right: classForgeButton.right
-      margin-top: 2
-      font: verdana-11px-antialised
-      color: #ffcc00
+      UIWidget
+        id: classBonusButton
+        size: 66 66
+        image-source: /images/ui/20
+        image-size: 66 66
+        image-color: #888888
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: classProtRuneSlot.right
+        margin-left: 18
+
+        $on:
+          image-color: #ffffff
+
+        $pressed:
+          image-color: #aaaaaa
+
+      FlatLabel
+        id: classBonusCostLabel
+        text-align: center
+        anchors.top: classBonusButton.bottom
+        anchors.left: classBonusButton.left
+        anchors.right: classBonusButton.right
+        margin-top: 4
+        height: 16
+        font: verdana-11px-antialised
+        color: #ffcc00
+
+      UIWidget
+        id: classForgeArrow
+        image-source: /images/ui/arrow_horizontal
+        image-clip: 12 0 12 21
+        size: 12 21
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: classBonusButton.right
+        margin-left: 14
+        phantom: false
+
+      Panel
+        id: classChancePanel
+        width: 80
+        height: 36
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: classForgeArrow.right
+        margin-left: 12
+
+        Label
+          id: classChanceLabel
+          anchors.fill: parent
+          text-align: center
+          font: verdana-11px-antialised
+          color: #c0c0c0
+          text-wrap: true
+
+      UIButton
+        id: classForgeButton
+        size: 128 66
+        image-source: /images/game/imbuing/imbue_green
+        image-clip: 0 0 128 66
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        margin-right: 24
+        enabled: false
+
+        $pressed:
+          image-clip: 0 66 128 66
+
+        $disabled:
+          image-color: #666666
+
+      FlatLabel
+        id: classCostLabel
+        text-align: center
+        anchors.top: classForgeButton.bottom
+        anchors.left: classForgeButton.left
+        anchors.right: classForgeButton.right
+        margin-top: 4
+        height: 16
+        font: verdana-11px-antialised
+        color: #ffcc00
 
     Label
       id: classMaterialLabel
       text-align: center
-      anchors.top: classCostLabel.bottom
+      anchors.top: classActionRow.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 4
+      margin-top: 6
+      margin-left: 16
+      margin-right: 16
       font: verdana-11px-antialised
       color: #c0c0c0
       text-wrap: true
+      height: 20
 
     ProgressBar
       id: classProgressBar
@@ -620,13 +635,13 @@ ForgeToolsTab < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 40
+    height: 52
     margin-top: 2
 
     Label
       id: toolsInfoLabel
       anchors.fill: parent
-      margin: 5 8 5 8
+      margin: 6 12 6 12
       text-wrap: true
       text-auto-resize: true
       !text: tr('Upgrade your equipment to improve its stats. Higher upgrade levels have lower chances of success. Failed upgrades may downgrade the item.')
@@ -759,111 +774,129 @@ ForgeToolsTab < Panel
       !text: tr('Below are the items needed to level up, you have the option to increase the chance of obtaining them by 20%%.')
       text-align: center
       text-wrap: true
+      height: 32
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 6
-      margin-left: 10
-      margin-right: 10
+      margin-top: 8
+      margin-left: 16
+      margin-right: 16
       font: verdana-11px-antialised
       color: #aaaaaa
 
-    ForgeRuneSlot
-      id: toolsUpgradeRuneSlot
+    Panel
+      id: toolsActionRow
+      height: 92
       anchors.top: toolsMatTitle.bottom
       anchors.left: parent.left
-      margin-top: 12
-      margin-left: 18
-
-    ForgeRuneSlot
-      id: toolsProtRuneSlot
-      anchors.top: toolsUpgradeRuneSlot.top
-      anchors.left: toolsUpgradeRuneSlot.right
-      margin-left: 10
-
-    UIWidget
-      id: toolsBonusButton
-      size: 66 66
-      image-source: /images/ui/20
-      image-clip: 0 0 66 66
-      image-color: #666666
-      anchors.top: toolsUpgradeRuneSlot.top
-      anchors.left: toolsProtRuneSlot.right
-      margin-left: 14
-
-      $on:
-        image-clip: 66 0 66 66
-        image-color: #ffffff
-
-      $pressed:
-        image-color: #cccccc
-
-    FlatLabel
-      id: toolsBonusCostLabel
-      text-align: center
-      anchors.top: toolsBonusButton.bottom
-      anchors.left: toolsBonusButton.left
-      anchors.right: toolsBonusButton.right
-      margin-top: 2
-      font: verdana-11px-antialised
-      color: #ffcc00
-
-    UIWidget
-      id: toolsForgeArrow
-      image-source: /images/ui/arrow_horizontal
-      image-clip: 12 0 12 21
-      size: 12 21
-      anchors.verticalCenter: toolsBonusButton.verticalCenter
-      anchors.left: toolsBonusButton.right
-      margin-left: 16
-      phantom: false
-
-    Label
-      id: toolsChanceLabel
-      text-align: center
-      anchors.verticalCenter: toolsBonusButton.verticalCenter
-      anchors.left: toolsForgeArrow.right
-      margin-left: 10
-      width: 90
-      font: verdana-11px-antialised
-      color: #c0c0c0
-
-    UIButton
-      id: toolsForgeButton
-      size: 128 66
-      image-source: /images/game/imbuing/imbue_green
-      image-clip: 0 0 128 66
-      anchors.top: toolsUpgradeRuneSlot.top
       anchors.right: parent.right
-      margin-right: 18
-      enabled: false
+      margin-top: 10
 
-      $pressed:
-        image-clip: 0 66 128 66
+      ForgeRuneSlot
+        id: toolsUpgradeRuneSlot
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        margin-left: 24
 
-      $disabled:
-        image-color: #666666
+      ForgeRuneSlot
+        id: toolsProtRuneSlot
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: toolsUpgradeRuneSlot.right
+        margin-left: 14
 
-    FlatLabel
-      id: toolsCostLabel
-      text-align: center
-      anchors.top: toolsForgeButton.bottom
-      anchors.left: toolsForgeButton.left
-      anchors.right: toolsForgeButton.right
-      margin-top: 2
-      font: verdana-11px-antialised
-      color: #ffcc00
+      UIWidget
+        id: toolsBonusButton
+        size: 66 66
+        image-source: /images/ui/20
+        image-size: 66 66
+        image-color: #888888
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: toolsProtRuneSlot.right
+        margin-left: 18
+
+        $on:
+          image-color: #ffffff
+
+        $pressed:
+          image-color: #aaaaaa
+
+      FlatLabel
+        id: toolsBonusCostLabel
+        text-align: center
+        anchors.top: toolsBonusButton.bottom
+        anchors.left: toolsBonusButton.left
+        anchors.right: toolsBonusButton.right
+        margin-top: 4
+        height: 16
+        font: verdana-11px-antialised
+        color: #ffcc00
+
+      UIWidget
+        id: toolsForgeArrow
+        image-source: /images/ui/arrow_horizontal
+        image-clip: 12 0 12 21
+        size: 12 21
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: toolsBonusButton.right
+        margin-left: 14
+        phantom: false
+
+      Panel
+        id: toolsChancePanel
+        width: 80
+        height: 36
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: toolsForgeArrow.right
+        margin-left: 12
+
+        Label
+          id: toolsChanceLabel
+          anchors.fill: parent
+          text-align: center
+          font: verdana-11px-antialised
+          color: #c0c0c0
+          text-wrap: true
+
+      UIButton
+        id: toolsForgeButton
+        size: 128 66
+        image-source: /images/game/imbuing/imbue_green
+        image-clip: 0 0 128 66
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        margin-right: 24
+        enabled: false
+
+        $pressed:
+          image-clip: 0 66 128 66
+
+        $disabled:
+          image-color: #666666
+
+      FlatLabel
+        id: toolsCostLabel
+        text-align: center
+        anchors.top: toolsForgeButton.bottom
+        anchors.left: toolsForgeButton.left
+        anchors.right: toolsForgeButton.right
+        margin-top: 4
+        height: 16
+        font: verdana-11px-antialised
+        color: #ffcc00
 
     Label
       id: toolsMaterialLabel
       text-align: center
-      anchors.top: toolsCostLabel.bottom
+      anchors.top: toolsActionRow.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 4
+      margin-top: 6
+      margin-left: 16
+      margin-right: 16
       font: verdana-11px-antialised
       color: #c0c0c0
       text-wrap: true
+      height: 20
 
     ProgressBar
       id: toolsProgressBar
