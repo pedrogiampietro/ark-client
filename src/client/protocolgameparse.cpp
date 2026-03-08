@@ -24,6 +24,7 @@
 
 #include "localplayer.h"
 #include "thingtypemanager.h"
+#include "itemtype.h"
 #include "game.h"
 #include "const.h"
 #include "map.h"
@@ -3591,7 +3592,10 @@ ItemPtr ProtocolGame::getItem(const InputMessagePtr& msg, int id, bool hasDescri
         msg->getU8(); // mark
     }
 
-    if (item->isStackable() || item->isChargeable()) {
+    const ItemTypePtr& itemType = g_things.findItemTypeByClientId(id);
+    bool hasCountByte = item->isStackable() || item->isChargeable() ||
+        (itemType && (itemType->getCategory() == ItemCategoryCharges || itemType->getCategory() == ItemCategoryRune));
+    if (hasCountByte) {
         item->setCountOrSubType(g_game.getFeature(Otc::GameCountU16) ? msg->getU16() : msg->getU8());
     }
     else if (item->isFluidContainer() || item->isSplash()) {
