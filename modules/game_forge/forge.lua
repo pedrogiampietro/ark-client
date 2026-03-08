@@ -40,6 +40,24 @@ local FORGE_RUNES = {
   ENCHANT_REMOVE_ALL = { id = 2298, name = 'Rune of Total Cleansing' },
 }
 
+local PROTECTION_RUNES = {
+  TIER = { id = 2309, name = 'Tier Protection' },
+  UPGRADE = { id = 2283, name = 'Upgrade Protection' },
+}
+
+local ATTR_ACTIONS = {
+  { key = 'ENCHANT_ADD', label = 'Add Enchantment', runeKey = 'hasAdd', countKey = 'addCount', costKey = 'add',
+    desc = 'Adds a random enchantment to the next free slot. The enchantment type depends on the item slot and the tier of the slot being filled.' },
+  { key = 'ENCHANT_REROLL_LAST', label = 'Reroll Last', runeKey = 'hasRerollLast', countKey = 'rerollLastCount', costKey = 'rerollLast',
+    desc = 'Rerolls the last enchantment, generating a new random type and value for that slot.' },
+  { key = 'ENCHANT_REROLL_ALL', label = 'Reroll All', runeKey = 'hasRerollAll', countKey = 'rerollAllCount', costKey = 'rerollAll',
+    desc = 'Rerolls all enchantments on the item, generating new random types and values for every slot.' },
+  { key = 'ENCHANT_REMOVE_LAST', label = 'Remove Last', runeKey = 'hasRemoveLast', countKey = 'removeLastCount', costKey = 'removeLast',
+    desc = 'Removes the last enchantment from the item, freeing up the slot for a new one.' },
+  { key = 'ENCHANT_REMOVE_ALL', label = 'Remove All', runeKey = 'hasRemoveAll', countKey = 'removeAllCount', costKey = 'removeAll',
+    desc = 'Removes all enchantments from the item, freeing up all slots.' },
+}
+
 -- State
 forgeWindow = nil
 local forgeTabBar = nil
@@ -47,19 +65,18 @@ local forgeButton = nil
 local forging = false
 local forgeAnimEvent = nil
 
--- Original item positions (from inventory/container)
 local classSourcePos = nil
 local attrSourcePos = nil
 local toolsSourcePos = nil
 
--- Bonus toggle state per tab
 local classBonusActive = false
 local toolsBonusActive = false
 
--- Cached cost data from server
 local classCostData = nil
 local toolsCostData = nil
 local attrCostData = nil
+
+local selectedAttrAction = 1
 
 function init()
   ProtocolGame.registerExtendedOpcode(FORGE_OPCODE, onForgeData)
@@ -100,6 +117,7 @@ function destroyWindow()
     toolsCostData = nil
     attrCostData = nil
     forging = false
+    selectedAttrAction = 1
   end
 end
 
@@ -175,7 +193,6 @@ local function splitStr(str, sep)
   return result
 end
 
--- Show/hide placeholder text when item is set/cleared
 local function updatePlaceholder(tab, placeholderId, hasItem)
   local placeholder = tab:recursiveGetChildById(placeholderId)
   if placeholder then
@@ -183,7 +200,43 @@ local function updatePlaceholder(tab, placeholderId, hasItem)
   end
 end
 
--- Setup a ForgeItemSlot with drop handler that captures source position
+local function setupRuneSlot(tab, slotId, runeId, count, total)
+  local slot = tab:recursiveGetChildById(slotId)
+  if not slot then return end
+
+  local runeItem = slot:recursiveGetChildById('runeItem')
+  if runeItem then
+    runeItem:setItemId(runeId)
+  end
+
+  local countLabel = slot:recursiveGetChildById('runeCount')
+  if countLabel then
+    local displayCount = count or 0
+    local displayTotal = total or 1
+    countLabel:setText(displayCount .. ' / ' .. displayTotal)
+    if displayCount >= displayTotal then
+      countLabel:setColor('#00ff00')
+    else
+      countLabel:setColor('#ff3333')
+    end
+  end
+end
+
+local function clearRuneSlot(tab, slotId)
+  local slot = tab:recursiveGetChildById(slotId)
+  if not slot then return end
+
+  local runeItem = slot:recursiveGetChildById('runeItem')
+  if runeItem then
+    runeItem:setItemId(0)
+  end
+
+  local countLabel = slot:recursiveGetChildById('runeCount')
+  if countLabel then
+    countLabel:setText('')
+  end
+end
+
 local function setupItemSlot(slot, tabType, tab)
   slot.onDrop = function(self, widget, mousePos, forced)
     if forging then return false end
@@ -196,7 +249,6 @@ local function setupItemSlot(slot, tabType, tab)
     local itemCopy = Item.create(item:getId(), item:getCountOrSubType())
     self:setItem(itemCopy)
 
-    -- Mirror item in result panel
     local resultItemId = ({CLASS = 'classResultItem', TOOLS = 'toolsResultItem'})[tabType]
     if resultItemId then
       local resultItem = tab:recursiveGetChildById(resultItemId)
@@ -221,7 +273,6 @@ local function setupItemSlot(slot, tabType, tab)
     return true
   end
 
-  -- Prevent dragging items OUT of forge slots
   slot.onDragEnter = function() return false end
 end
 
@@ -237,7 +288,6 @@ function stopForgeAnimation()
   forging = false
 end
 
--- Run progress bar animation then call onComplete
 local function runForgeAnimation(progressBarId, onComplete)
   if not forgeWindow then return end
   local bar = forgeWindow:recursiveGetChildById(progressBarId)
@@ -276,7 +326,6 @@ local function runForgeAnimation(progressBarId, onComplete)
   forgeAnimEvent = scheduleEvent(animStep, interval)
 end
 
--- Show result message with color (green for success, red for failure)
 local function showResultMessage(labelId, success)
   if not forgeWindow then return end
   local label = forgeWindow:recursiveGetChildById(labelId)
@@ -290,7 +339,6 @@ local function showResultMessage(labelId, success)
     label:setColor('#ff3333')
   end
 
-  -- Clear message after 3 seconds
   scheduleEvent(function()
     if forgeWindow and label then
       label:setText('')
@@ -318,7 +366,6 @@ function setupClassificationTab(tab)
       else
         bonusBtn:setText(tr('+20%%'))
       end
-      -- Update cost display
       if classCostData then
         updateClassCostDisplay(tab)
       end
@@ -345,11 +392,10 @@ function updateClassCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('classCostLabel')
   if costLabel then
-    costLabel:setText(tr('Cost') .. ': ' .. totalCost .. ' crystal coins (' .. tr('You have') .. ': ' .. classCostData.playerGold .. ')')
+    costLabel:setText(totalCost .. ' crystal coins')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
 
-  -- Update chance label with bonus
   local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(classCostData.chance + (classBonusActive and 20 or 0), 100)
@@ -359,7 +405,6 @@ function updateClassCostDisplay(tab)
     else chanceLabel:setColor('#ff3333') end
   end
 
-  -- Update forge button state
   local forgBtn = tab:recursiveGetChildById('classForgeButton')
   if forgBtn then
     forgBtn:setEnabled(classCostData.canForge and classCostData.hasRune and hasEnough and not forging)
@@ -377,7 +422,6 @@ function updateClassInfo(data)
   local canForge = data.canForge or false
   local hasRune = data.hasRune or false
 
-  -- Cache cost data
   classCostData = {
     cost = data.cost or 0,
     bonusCost = data.bonusCost or 0,
@@ -404,7 +448,6 @@ function updateClassInfo(data)
     end
   end
 
-  -- Set rarity frame on result item
   local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
   if resultContainer then
     local rarityImg = TIER_RARITY_IMAGES[nextTier]
@@ -415,30 +458,22 @@ function updateClassInfo(data)
     end
   end
 
-  local chanceLabel = tab:recursiveGetChildById('classChanceLabel')
-  if chanceLabel then
-    chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
-    if chance >= 60 then chanceLabel:setColor('#00ff00')
-    elseif chance >= 30 then chanceLabel:setColor('#ffcc00')
-    else chanceLabel:setColor('#ff3333') end
-  end
+  setupRuneSlot(tab, 'classTierRuneSlot', FORGE_RUNES.TIER_UP.id, data.runeCount or (hasRune and 1 or 0), 1)
+  setupRuneSlot(tab, 'classProtRuneSlot', PROTECTION_RUNES.TIER.id, data.protectionCount or 0, 1)
 
   local matLabel = tab:recursiveGetChildById('classMaterialLabel')
   if matLabel then
-    local rune = FORGE_RUNES.TIER_UP
-    if hasRune then
-      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [OK]')
-      matLabel:setColor('#00ff00')
-    else
-      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [' .. tr('Missing') .. ']')
+    if not hasRune then
+      matLabel:setText(FORGE_RUNES.TIER_UP.name .. ' [' .. tr('Missing') .. ']')
       matLabel:setColor('#ff3333')
+    else
+      matLabel:setText('')
     end
   end
 
   local forgBtn = tab:recursiveGetChildById('classForgeButton')
   if forgBtn then forgBtn:setEnabled(canForge and hasRune and not forging) end
 
-  -- Display cost
   updateClassCostDisplay(tab)
 end
 
@@ -455,7 +490,7 @@ function clearClassInfo()
   if resultItem then resultItem:setItem(nil) end
   local resultContainer = tab:recursiveGetChildById('classResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
-  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel'}) do
+  for _, id in ipairs({'classSourceTierLabel', 'classResultTierLabel', 'classChanceLabel', 'classCostLabel', 'classMaterialLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
@@ -466,13 +501,10 @@ function clearClassInfo()
   updatePlaceholder(tab, 'classPlaceholder', false)
   local msg = tab:recursiveGetChildById('classResultMessage')
   if msg then msg:setText('') end
-  local mat = tab:recursiveGetChildById('classMaterialLabel')
-  if mat then mat:setText('') end
-  local costLabel = tab:recursiveGetChildById('classCostLabel')
-  if costLabel then costLabel:setText('') end
+  clearRuneSlot(tab, 'classTierRuneSlot')
+  clearRuneSlot(tab, 'classProtRuneSlot')
 end
 
--- Clear slot after forge (preserves result message)
 function clearClassSlot()
   classSourcePos = nil
   classBonusActive = false
@@ -495,6 +527,8 @@ function clearClassSlot()
   local btn = tab:recursiveGetChildById('classForgeButton')
   if btn then btn:setEnabled(false) end
   updatePlaceholder(tab, 'classPlaceholder', false)
+  clearRuneSlot(tab, 'classTierRuneSlot')
+  clearRuneSlot(tab, 'classProtRuneSlot')
 end
 
 -- ==========================================
@@ -505,21 +539,26 @@ function setupAttributesTab(tab)
   local sourceItem = tab:recursiveGetChildById('attrSourceItem')
   setupItemSlot(sourceItem, 'ATTR', tab)
 
-  local actions = {
-    { id = 'attrAddEnchant',  action = 'ENCHANT_ADD' },
-    { id = 'attrRerollLast',  action = 'ENCHANT_REROLL_LAST' },
-    { id = 'attrRerollAll',   action = 'ENCHANT_REROLL_ALL' },
-    { id = 'attrRemoveLast',  action = 'ENCHANT_REMOVE_LAST' },
-    { id = 'attrRemoveAll',   action = 'ENCHANT_REMOVE_ALL' },
-  }
-  for _, a in ipairs(actions) do
-    local btn = tab:recursiveGetChildById(a.id)
-    if btn then
-      btn.onClick = function()
-        if attrSourcePos and not forging then
-          setAttrButtonsEnabled(false)
+  local combo = tab:recursiveGetChildById('attrActionCombo')
+  if combo then
+    for i, action in ipairs(ATTR_ACTIONS) do
+      combo:addOption(tr(action.label))
+    end
+    combo.onOptionChange = function(widget)
+      selectedAttrAction = widget.currentIndex
+      updateAttrActionDisplay(tab)
+    end
+  end
+
+  local execBtn = tab:recursiveGetChildById('attrExecuteButton')
+  if execBtn then
+    execBtn.onClick = function()
+      if attrSourcePos and not forging then
+        local action = ATTR_ACTIONS[selectedAttrAction]
+        if action then
+          execBtn:setEnabled(false)
           runForgeAnimation('attrProgressBar', function()
-            sendToServer('FORGE:' .. a.action .. ':' .. posToStr(attrSourcePos))
+            sendToServer('FORGE:' .. action.key .. ':' .. posToStr(attrSourcePos))
           end)
         end
       end
@@ -527,13 +566,67 @@ function setupAttributesTab(tab)
   end
 end
 
-function setAttrButtonsEnabled(enabled)
-  if not forgeWindow then return end
-  local tab = forgeWindow:recursiveGetChildById('attributesTab')
-  if not tab then return end
-  for _, id in ipairs({'attrAddEnchant', 'attrRerollLast', 'attrRerollAll', 'attrRemoveLast', 'attrRemoveAll'}) do
-    local btn = tab:recursiveGetChildById(id)
-    if btn then btn:setEnabled(enabled) end
+function updateAttrActionDisplay(tab)
+  if not tab then
+    if not forgeWindow then return end
+    tab = forgeWindow:recursiveGetChildById('attributesTab')
+    if not tab then return end
+  end
+
+  local action = ATTR_ACTIONS[selectedAttrAction]
+  if not action then return end
+
+  local rune = FORGE_RUNES[action.key]
+  if rune then
+    local runeCount = 0
+    if attrCostData and attrCostData.runeCounts and attrCostData.runeCounts[action.countKey] then
+      runeCount = attrCostData.runeCounts[action.countKey]
+    end
+    setupRuneSlot(tab, 'attrRuneSlot', rune.id, runeCount, 1)
+  end
+
+  local costLabel = tab:recursiveGetChildById('attrCostLabel')
+  if costLabel then
+    local cost = 0
+    if attrCostData and attrCostData.costs and attrCostData.costs[action.costKey] then
+      cost = attrCostData.costs[action.costKey]
+    end
+    local playerGold = (attrCostData and attrCostData.playerGold) or 0
+    costLabel:setText(cost .. ' crystal coins')
+    costLabel:setColor(playerGold >= cost and '#ffcc00' or '#ff3333')
+  end
+
+  local descLabel = tab:recursiveGetChildById('attrDescLabel')
+  if descLabel then
+    descLabel:setText(tr(action.desc))
+  end
+
+  local execBtn = tab:recursiveGetChildById('attrExecuteButton')
+  if execBtn and attrCostData then
+    local hasRune = false
+    if attrCostData.runeFlags and attrCostData.runeFlags[action.runeKey] then
+      hasRune = true
+    end
+
+    local cost = 0
+    if attrCostData.costs and attrCostData.costs[action.costKey] then
+      cost = attrCostData.costs[action.costKey]
+    end
+    local hasEnough = (attrCostData.playerGold or 0) >= cost
+
+    local canDo = hasRune and hasEnough and not forging
+    local tier = attrCostData.tier or 0
+    local slotsUsed = attrCostData.slotsUsed or 0
+    local slotsMax = attrCostData.slotsMax or 0
+
+    if action.key == 'ENCHANT_ADD' then
+      canDo = canDo and (tier > 0) and (slotsUsed < slotsMax)
+    elseif action.key == 'ENCHANT_REROLL_LAST' or action.key == 'ENCHANT_REROLL_ALL'
+        or action.key == 'ENCHANT_REMOVE_LAST' or action.key == 'ENCHANT_REMOVE_ALL' then
+      canDo = canDo and (slotsUsed > 0)
+    end
+
+    execBtn:setEnabled(canDo)
   end
 end
 
@@ -545,11 +638,13 @@ function updateAttrInfo(data)
   local tier = data.tier or 0
   local slotsUsed = data.slotsUsed or 0
   local slotsMax = data.slotsMax or 0
-  local runeFlags = data.runeFlags or {}
 
   local itemInfo = tab:recursiveGetChildById('attrItemInfo')
   if itemInfo then
-    itemInfo:setText(tr('Tier') .. ': ' .. (TIER_NAMES[tier] or 'None') .. ' (' .. slotsUsed .. '/' .. slotsMax .. ' slots)')
+    local tierName = TIER_NAMES[tier] or 'None'
+    local tierColor = TIER_COLORS[tier] or '#c0c0c0'
+    itemInfo:setText(tierName .. ' (' .. slotsUsed .. '/' .. slotsMax .. ' ' .. tr('slots') .. ')')
+    itemInfo:setColor(tierColor)
   end
 
   local list = tab:recursiveGetChildById('attrEnchantList')
@@ -557,74 +652,46 @@ function updateAttrInfo(data)
     list:destroyChildren()
     if data.enchantments then
       for i, ench in ipairs(data.enchantments) do
-        local label = g_ui.createWidget('Label', list)
-        label:setText('[Slot ' .. i .. '] ' .. ench.name .. ': ' .. ench.value)
-        label:setColor('#c0ffee')
-        label:setHeight(18)
+        local row = g_ui.createWidget('ForgeEnchantRow', list)
+        local slotIdx = row:recursiveGetChildById('slotIndex')
+        local enchName = row:recursiveGetChildById('enchantName')
+        if slotIdx then
+          slotIdx:setText('[' .. i .. ']')
+          slotIdx:setColor('#888888')
+        end
+        if enchName then
+          enchName:setText(ench.name .. ': ' .. ench.value)
+          enchName:setColor('#c0ffee')
+        end
       end
     end
     for i = slotsUsed + 1, slotsMax do
-      local label = g_ui.createWidget('Label', list)
-      label:setText('[Slot ' .. i .. '] ' .. tr('empty'))
-      label:setColor('#666666')
-      label:setHeight(18)
+      local row = g_ui.createWidget('ForgeEnchantRow', list)
+      local slotIdx = row:recursiveGetChildById('slotIndex')
+      local enchName = row:recursiveGetChildById('enchantName')
+      if slotIdx then
+        slotIdx:setText('[' .. i .. ']')
+        slotIdx:setColor('#666666')
+      end
+      if enchName then
+        enchName:setText(tr('empty'))
+        enchName:setColor('#666666')
+      end
     end
   end
 
-  local hasTier = tier > 0
-  local hasFreeSlots = slotsUsed < slotsMax
-  local hasEnchants = slotsUsed > 0
-
-  local btnStates = {
-    { id = 'attrAddEnchant',  enabled = hasTier and hasFreeSlots, runeKey = 'hasAdd' },
-    { id = 'attrRerollLast',  enabled = hasEnchants, runeKey = 'hasRerollLast' },
-    { id = 'attrRerollAll',   enabled = hasEnchants, runeKey = 'hasRerollAll' },
-    { id = 'attrRemoveLast',  enabled = hasEnchants, runeKey = 'hasRemoveLast' },
-    { id = 'attrRemoveAll',   enabled = hasEnchants, runeKey = 'hasRemoveAll' },
-  }
-  for _, bs in ipairs(btnStates) do
-    local btn = tab:recursiveGetChildById(bs.id)
-    if btn then
-      local hasRune = runeFlags[bs.runeKey] or false
-      btn:setEnabled(bs.enabled and hasRune and not forging)
-    end
-  end
-
-  -- Show material summary
-  local matLabel = tab:recursiveGetChildById('attrMaterialLabel')
-  if matLabel then
-    local parts = {}
-    local runeInfo = {
-      { key = 'hasAdd', name = FORGE_RUNES.ENCHANT_ADD.name },
-      { key = 'hasRerollLast', name = FORGE_RUNES.ENCHANT_REROLL_LAST.name },
-      { key = 'hasRemoveLast', name = FORGE_RUNES.ENCHANT_REMOVE_LAST.name },
-    }
-    for _, ri in ipairs(runeInfo) do
-      local has = runeFlags[ri.key] or false
-      local status = has and '[OK]' or '[' .. tr('Missing') .. ']'
-      table.insert(parts, ri.name .. ' ' .. status)
-    end
-    matLabel:setText(table.concat(parts, '  |  '))
-    -- Color based on whether any rune is missing
-    local anyMissing = false
-    for _, v in pairs(runeFlags) do
-      if not v then anyMissing = true break end
-    end
-    matLabel:setColor(anyMissing and '#ffcc00' or '#00ff00')
-  end
-
-  -- Display cost info
   attrCostData = {
+    tier = tier,
+    slotsUsed = slotsUsed,
+    slotsMax = slotsMax,
+    runeFlags = data.runeFlags or {},
     costs = data.costs or {},
+    runeCounts = data.runeCounts or {},
     bonusCost = data.bonusCost or 0,
     playerGold = data.playerGold or 0
   }
-  local costLabel = tab:recursiveGetChildById('attrCostLabel')
-  if costLabel then
-    local costAdd = (data.costs and data.costs.add) or 0
-    costLabel:setText(tr('Cost') .. ': ' .. costAdd .. '+ crystal coins (' .. tr('You have') .. ': ' .. (data.playerGold or 0) .. ')')
-    costLabel:setColor((data.playerGold or 0) >= costAdd and '#ffcc00' or '#ff3333')
-  end
+
+  updateAttrActionDisplay(tab)
 end
 
 function clearAttrInfo()
@@ -643,21 +710,17 @@ function clearAttrInfo()
   local list = tab:recursiveGetChildById('attrEnchantList')
   if list then list:destroyChildren() end
 
-  for _, id in ipairs({'attrAddEnchant', 'attrRerollLast', 'attrRerollAll', 'attrRemoveLast', 'attrRemoveAll'}) do
-    local btn = tab:recursiveGetChildById(id)
-    if btn then btn:setEnabled(false) end
-  end
+  local execBtn = tab:recursiveGetChildById('attrExecuteButton')
+  if execBtn then execBtn:setEnabled(false) end
 
   updatePlaceholder(tab, 'attrPlaceholder', false)
   local msg = tab:recursiveGetChildById('attrResultMessage')
   if msg then msg:setText('') end
-  local mat = tab:recursiveGetChildById('attrMaterialLabel')
-  if mat then mat:setText('') end
   local costLabel = tab:recursiveGetChildById('attrCostLabel')
   if costLabel then costLabel:setText('') end
+  clearRuneSlot(tab, 'attrRuneSlot')
 end
 
--- Clear slot after forge (preserves result message)
 function clearAttrSlot()
   attrSourcePos = nil
   attrCostData = nil
@@ -674,16 +737,13 @@ function clearAttrSlot()
   local list = tab:recursiveGetChildById('attrEnchantList')
   if list then list:destroyChildren() end
 
-  for _, id in ipairs({'attrAddEnchant', 'attrRerollLast', 'attrRerollAll', 'attrRemoveLast', 'attrRemoveAll'}) do
-    local btn = tab:recursiveGetChildById(id)
-    if btn then btn:setEnabled(false) end
-  end
+  local execBtn = tab:recursiveGetChildById('attrExecuteButton')
+  if execBtn then execBtn:setEnabled(false) end
 
   updatePlaceholder(tab, 'attrPlaceholder', false)
-  local mat = tab:recursiveGetChildById('attrMaterialLabel')
-  if mat then mat:setText('') end
   local costLabel = tab:recursiveGetChildById('attrCostLabel')
   if costLabel then costLabel:setText('') end
+  clearRuneSlot(tab, 'attrRuneSlot')
 end
 
 -- ==========================================
@@ -732,11 +792,10 @@ function updateToolsCostDisplay(tab)
 
   local costLabel = tab:recursiveGetChildById('toolsCostLabel')
   if costLabel then
-    costLabel:setText(tr('Cost') .. ': ' .. totalCost .. ' crystal coins (' .. tr('You have') .. ': ' .. toolsCostData.playerGold .. ')')
+    costLabel:setText(totalCost .. ' crystal coins')
     costLabel:setColor(hasEnough and '#ffcc00' or '#ff3333')
   end
 
-  -- Update chance label with bonus
   local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
   if chanceLabel then
     local effectiveChance = math.min(toolsCostData.chance + (toolsBonusActive and 20 or 0), 100)
@@ -763,7 +822,6 @@ function updateToolsInfo(data)
   local canForge = data.canForge or false
   local hasRune = data.hasRune or false
 
-  -- Cache cost data
   toolsCostData = {
     cost = data.cost or 0,
     bonusCost = data.bonusCost or 0,
@@ -789,36 +847,27 @@ function updateToolsInfo(data)
     end
   end
 
-  -- Set slot frame on result item
   local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
   if resultContainer then
     resultContainer:setImageSource('/images/ui/slot')
   end
 
-  local chanceLabel = tab:recursiveGetChildById('toolsChanceLabel')
-  if chanceLabel then
-    chanceLabel:setText(tr('Chance') .. ': ' .. chance .. '%')
-    if chance >= 60 then chanceLabel:setColor('#00ff00')
-    elseif chance >= 30 then chanceLabel:setColor('#ffcc00')
-    else chanceLabel:setColor('#ff3333') end
-  end
+  setupRuneSlot(tab, 'toolsUpgradeRuneSlot', FORGE_RUNES.UPGRADE.id, data.runeCount or (hasRune and 1 or 0), 1)
+  setupRuneSlot(tab, 'toolsProtRuneSlot', PROTECTION_RUNES.UPGRADE.id, data.protectionCount or 0, 1)
 
   local matLabel = tab:recursiveGetChildById('toolsMaterialLabel')
   if matLabel then
-    local rune = FORGE_RUNES.UPGRADE
-    if hasRune then
-      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [OK]')
-      matLabel:setColor('#00ff00')
-    else
-      matLabel:setText(tr('Required') .. ': ' .. rune.name .. ' [' .. tr('Missing') .. ']')
+    if not hasRune then
+      matLabel:setText(FORGE_RUNES.UPGRADE.name .. ' [' .. tr('Missing') .. ']')
       matLabel:setColor('#ff3333')
+    else
+      matLabel:setText('')
     end
   end
 
   local forgBtn = tab:recursiveGetChildById('toolsForgeButton')
   if forgBtn then forgBtn:setEnabled(canForge and hasRune and not forging) end
 
-  -- Display cost
   updateToolsCostDisplay(tab)
 end
 
@@ -835,7 +884,7 @@ function clearToolsInfo()
   if resultItem then resultItem:setItem(nil) end
   local resultContainer = tab:recursiveGetChildById('toolsResultItemContainer')
   if resultContainer then resultContainer:setImageSource('/images/ui/slot') end
-  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel'}) do
+  for _, id in ipairs({'toolsSourceLevelLabel', 'toolsResultLevelLabel', 'toolsChanceLabel', 'toolsCostLabel', 'toolsMaterialLabel'}) do
     local w = tab:recursiveGetChildById(id)
     if w then w:setText('') end
   end
@@ -846,13 +895,10 @@ function clearToolsInfo()
   updatePlaceholder(tab, 'toolsPlaceholder', false)
   local msg = tab:recursiveGetChildById('toolsResultMessage')
   if msg then msg:setText('') end
-  local mat = tab:recursiveGetChildById('toolsMaterialLabel')
-  if mat then mat:setText('') end
-  local costLabel = tab:recursiveGetChildById('toolsCostLabel')
-  if costLabel then costLabel:setText('') end
+  clearRuneSlot(tab, 'toolsUpgradeRuneSlot')
+  clearRuneSlot(tab, 'toolsProtRuneSlot')
 end
 
--- Clear slot after forge (preserves result message)
 function clearToolsSlot()
   toolsSourcePos = nil
   toolsBonusActive = false
@@ -875,6 +921,8 @@ function clearToolsSlot()
   local btn = tab:recursiveGetChildById('toolsForgeButton')
   if btn then btn:setEnabled(false) end
   updatePlaceholder(tab, 'toolsPlaceholder', false)
+  clearRuneSlot(tab, 'toolsUpgradeRuneSlot')
+  clearRuneSlot(tab, 'toolsProtRuneSlot')
 end
 
 -- ==========================================
@@ -884,7 +932,7 @@ end
 function onForgeData(protocol, opcode, buffer)
   if not buffer or #buffer == 0 then return end
 
-  -- CLASS_INFO:currentTier,nextTier,chance,canForge,hasRune,cost,bonusCost,playerGold
+  -- CLASS_INFO:currentTier,nextTier,chance,canForge,hasRune,cost,bonusCost,playerGold,runeCount,protectionCount
   if buffer:sub(1, 11) == 'CLASS_INFO:' then
     local parts = splitStr(buffer:sub(12), ',')
     if #parts >= 5 then
@@ -896,11 +944,15 @@ function onForgeData(protocol, opcode, buffer)
         hasRune = parts[5] == '1',
         cost = tonumber(parts[6]) or 0,
         bonusCost = tonumber(parts[7]) or 0,
-        playerGold = tonumber(parts[8]) or 0
+        playerGold = tonumber(parts[8]) or 0,
+        runeCount = tonumber(parts[9]) or 0,
+        protectionCount = tonumber(parts[10]) or 0
       })
     end
 
-  -- ATTR_INFO:tier,slotsUsed,slotsMax,hasAdd,hasRerollLast,hasRerollAll,hasRemoveLast,hasRemoveAll,costAdd,costRerollLast,costRerollAll,costRemoveLast,costRemoveAll,bonusCost,playerGold|enchName1=val1|...
+  -- ATTR_INFO:tier,slotsUsed,slotsMax,hasAdd,hasRerollLast,hasRerollAll,hasRemoveLast,hasRemoveAll,
+  --   costAdd,costRerollLast,costRerollAll,costRemoveLast,costRemoveAll,bonusCost,playerGold,
+  --   addCount,rerollLastCount,rerollAllCount,removeLastCount,removeAllCount|enchName1=val1|...
   elseif buffer:sub(1, 10) == 'ATTR_INFO:' then
     local sections = splitStr(buffer:sub(11), '|')
     if #sections >= 1 then
@@ -935,11 +987,18 @@ function onForgeData(protocol, opcode, buffer)
         },
         bonusCost = tonumber(mainParts[14]) or 0,
         playerGold = tonumber(mainParts[15]) or 0,
+        runeCounts = {
+          addCount = tonumber(mainParts[16]) or 0,
+          rerollLastCount = tonumber(mainParts[17]) or 0,
+          rerollAllCount = tonumber(mainParts[18]) or 0,
+          removeLastCount = tonumber(mainParts[19]) or 0,
+          removeAllCount = tonumber(mainParts[20]) or 0,
+        },
         enchantments = enchantments
       })
     end
 
-  -- TOOLS_INFO:level,maxLevel,chance,canForge,hasRune,cost,bonusCost,playerGold
+  -- TOOLS_INFO:level,maxLevel,chance,canForge,hasRune,cost,bonusCost,playerGold,runeCount,protectionCount
   elseif buffer:sub(1, 11) == 'TOOLS_INFO:' then
     local parts = splitStr(buffer:sub(12), ',')
     if #parts >= 5 then
@@ -951,7 +1010,9 @@ function onForgeData(protocol, opcode, buffer)
         hasRune = parts[5] == '1',
         cost = tonumber(parts[6]) or 0,
         bonusCost = tonumber(parts[7]) or 0,
-        playerGold = tonumber(parts[8]) or 0
+        playerGold = tonumber(parts[8]) or 0,
+        runeCount = tonumber(parts[9]) or 0,
+        protectionCount = tonumber(parts[10]) or 0
       })
     end
 
@@ -962,7 +1023,6 @@ function onForgeData(protocol, opcode, buffer)
       local tab = parts[1]
       local success = parts[2] == '1'
 
-      -- Show result feedback, then clear slot (preserving result message)
       if tab == 'CLASS' then
         showResultMessage('classResultMessage', success)
         clearClassSlot()
@@ -979,7 +1039,6 @@ function onForgeData(protocol, opcode, buffer)
   elseif buffer:sub(1, 12) == 'FORGE_ERROR:' then
     stopForgeAnimation()
     local errorMsg = buffer:sub(13)
-    -- Show error in the active tab's result label
     if forgeWindow then
       local labels = {'classResultMessage', 'attrResultMessage', 'toolsResultMessage'}
       for _, id in ipairs(labels) do

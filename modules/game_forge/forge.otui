@@ -8,10 +8,70 @@ ForgeItemSlot < UIItem
   $disabled:
     color: #646464
 
+ForgeRuneSlot < Panel
+  size: 60 66
+
+  Panel
+    id: slotBg
+    size: 36 36
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    image-source: /images/ui/slot
+    image-size: 36 36
+
+    UIItem
+      id: runeItem
+      size: 34 34
+      anchors.centerIn: parent
+      virtual: true
+
+  Label
+    id: runeCount
+    text-align: center
+    anchors.top: slotBg.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 2
+    font: verdana-11px-antialised
+    color: #c0c0c0
+    height: 14
+
+  Label
+    id: runeName
+    text-align: center
+    anchors.top: runeCount.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    font: verdana-11px-antialised
+    color: #888888
+    height: 12
+    text-auto-resize: true
+
+ForgeEnchantRow < Panel
+  height: 20
+
+  Label
+    id: slotIndex
+    width: 20
+    text-align: right
+    anchors.left: parent.left
+    anchors.verticalCenter: parent.verticalCenter
+    font: verdana-11px-antialised
+    color: #888888
+
+  Label
+    id: enchantName
+    anchors.left: slotIndex.right
+    anchors.right: parent.right
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 6
+    font: verdana-11px-antialised
+    color: #c0ffee
+
 ForgeWindow < MainWindow
   id: forgeWindow
   !text: tr('Forge Item')
-  size: 700 595
+  size: 700 570
   @onEscape: modules.game_forge.toggle()
 
   TabBar
@@ -47,13 +107,13 @@ ForgeClassificationTab < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 46
+    height: 40
     margin-top: 2
 
     Label
       id: classInfoLabel
       anchors.fill: parent
-      margin: 5
+      margin: 5 8 5 8
       text-wrap: true
       text-auto-resize: true
       !text: tr('Increase the classification (tier) of your item. Drag an item to the slot below. Higher tiers unlock more enchantment slots.')
@@ -64,9 +124,9 @@ ForgeClassificationTab < Panel
     id: classSourcePanel
     anchors.top: classInfoPanel.bottom
     anchors.left: parent.left
-    width: 295
-    height: 130
-    margin-top: 8
+    width: 290
+    height: 120
+    margin-top: 6
 
     Label
       id: classSourceTitle
@@ -125,8 +185,8 @@ ForgeClassificationTab < Panel
     id: classResultPanel
     anchors.top: classSourcePanel.top
     anchors.right: parent.right
-    width: 295
-    height: 130
+    width: 290
+    height: 120
 
     Label
       id: classResultTitle
@@ -169,70 +229,56 @@ ForgeClassificationTab < Panel
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-bottom: 8
+      margin-bottom: 4
       font: verdana-11px-antialised
       color: #c0c0c0
 
   FlatPanel
-    id: classChancePanel
+    id: classActionPanel
     anchors.top: classSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 200
-    margin-top: 8
+    anchors.bottom: parent.bottom
+    margin-top: 6
 
     Label
-      id: classChanceTitle
-      !text: tr('Tier Upgrade')
+      id: classMatTitle
+      !text: tr('Below are the items needed to upgrade. You can increase the chance by 20%%.')
       text-align: center
+      text-wrap: true
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 5
+      margin-top: 6
+      margin-left: 10
+      margin-right: 10
       font: verdana-11px-antialised
-      color: #dfdfdf
+      color: #aaaaaa
 
-    Label
-      id: classChanceLabel
-      text-align: center
-      anchors.top: classChanceTitle.bottom
+    ForgeRuneSlot
+      id: classTierRuneSlot
+      anchors.top: classMatTitle.bottom
       anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 8
-      font: verdana-11px-antialised
-      color: #c0c0c0
+      margin-top: 10
+      margin-left: 60
 
-    Label
-      id: classMaterialLabel
-      text-align: center
-      anchors.top: classChanceLabel.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 4
-      font: verdana-11px-antialised
-      color: #c0c0c0
-
-    Label
-      id: classCostLabel
-      text-align: center
-      anchors.top: classMaterialLabel.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 4
-      font: verdana-11px-antialised
-      color: #ffcc00
+    ForgeRuneSlot
+      id: classProtRuneSlot
+      anchors.top: classTierRuneSlot.top
+      anchors.left: classTierRuneSlot.right
+      margin-left: 20
 
     UIWidget
       id: classBonusButton
       !text: tr('+20%%')
-      size: 96 75
+      size: 96 55
       image-source: /images/ui/imbue_green
       image-clip: 0 0 128 66
       image-size: 96 50
       image-color: #666666
-      anchors.top: classCostLabel.bottom
-      anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 4
+      anchors.top: classTierRuneSlot.top
+      anchors.left: classProtRuneSlot.right
+      margin-left: 30
       font: verdana-11px-antialised
       color: #aaaaaa
       text-offset: 0 -4
@@ -245,14 +291,46 @@ ForgeClassificationTab < Panel
       $pressed:
         image-color: #cccccc
 
+    Label
+      id: classChanceLabel
+      text-align: center
+      anchors.top: classTierRuneSlot.top
+      anchors.right: parent.right
+      margin-right: 30
+      margin-top: 8
+      width: 150
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+    Label
+      id: classCostLabel
+      text-align: center
+      anchors.top: classChanceLabel.bottom
+      anchors.left: classChanceLabel.left
+      anchors.right: classChanceLabel.right
+      margin-top: 6
+      font: verdana-11px-antialised
+      color: #ffcc00
+
+    Label
+      id: classMaterialLabel
+      text-align: center
+      anchors.top: classCostLabel.bottom
+      anchors.left: classChanceLabel.left
+      anchors.right: classChanceLabel.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+      text-wrap: true
+
     ProgressBar
       id: classProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: classBonusButton.bottom
+      anchors.bottom: classForgeButton.top
       margin-left: 60
       margin-right: 60
-      margin-top: 4
+      margin-bottom: 4
       height: 12
       background-color: #00aa00
       visible: false
@@ -260,7 +338,7 @@ ForgeClassificationTab < Panel
     Button
       id: classForgeButton
       !text: tr('Forge')
-      width: 80
+      width: 120
       anchors.bottom: parent.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-bottom: 8
@@ -275,16 +353,16 @@ ForgeAttributesTab < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 46
+    height: 52
     margin-top: 2
 
     Label
       id: attrInfoLabel
       anchors.fill: parent
-      margin: 5
+      margin: 5 8 5 8
       text-wrap: true
       text-auto-resize: true
-      !text: tr('Manage enchantments on your items. The item must have a tier to receive enchantments. Higher tiers have more slots available.')
+      !text: tr('Modify your item\'s attributes if it reaches level 1 or higher. You can choose a specific attribute to change or select one from a list. Selecting an attribute will cost more than selecting one randomly.')
       font: verdana-11px-antialised
       color: #c0c0c0
 
@@ -292,9 +370,10 @@ ForgeAttributesTab < Panel
     id: attrItemPanel
     anchors.top: attrInfoPanel.bottom
     anchors.left: parent.left
-    width: 295
-    height: 150
-    margin-top: 8
+    width: 290
+    anchors.bottom: attrResultPanel.top
+    margin-top: 6
+    margin-bottom: 6
 
     Label
       id: attrItemTitle
@@ -304,13 +383,15 @@ ForgeAttributesTab < Panel
       anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
 
     Panel
       id: attrItemContainer
       size: 36 36
       anchors.top: attrItemTitle.bottom
       anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 8
+      margin-top: 6
       image-source: /images/ui/slot
       image-size: 36 36
 
@@ -340,31 +421,15 @@ ForgeAttributesTab < Panel
       color: #c0c0c0
 
     Label
-      id: attrResultMessage
-      text-align: center
-      anchors.bottom: parent.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-bottom: 4
-      font: verdana-11px-antialised
-      color: #c0c0c0
-
-  FlatPanel
-    id: attrEnchantPanel
-    anchors.top: attrInfoPanel.bottom
-    anchors.right: parent.right
-    width: 355
-    height: 150
-    margin-top: 8
-
-    Label
       id: attrEnchantTitle
-      !text: tr('Enchantments')
+      !text: tr('Current Enchantments')
       text-align: center
-      anchors.top: parent.top
+      anchors.top: attrItemInfo.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 5
+      margin-top: 8
+      font: verdana-11px-antialised
+      color: #dfdfdf
 
     ScrollableFlatPanel
       id: attrEnchantList
@@ -372,7 +437,7 @@ ForgeAttributesTab < Panel
       anchors.left: parent.left
       anchors.right: attrEnchantScroll.left
       anchors.bottom: parent.bottom
-      margin: 5
+      margin: 4 0 6 8
       vertical-scrollbar: attrEnchantScroll
       layout:
         type: verticalBox
@@ -382,100 +447,138 @@ ForgeAttributesTab < Panel
       anchors.top: attrEnchantTitle.bottom
       anchors.bottom: parent.bottom
       anchors.right: parent.right
-      margin-top: 5
-      margin-bottom: 5
+      margin-top: 4
+      margin-bottom: 6
       step: 16
       pixels-scroll: true
 
   FlatPanel
     id: attrActionPanel
-    anchors.top: attrItemPanel.bottom
-    anchors.left: parent.left
+    anchors.top: attrInfoPanel.bottom
     anchors.right: parent.right
-    height: 115
-    margin-top: 8
+    width: 360
+    anchors.bottom: attrResultPanel.top
+    margin-top: 6
+    margin-bottom: 6
 
     Label
-      id: attrMaterialLabel
+      id: attrActionTitle
+      !text: tr('Enchantment Action')
       text-align: center
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
+      margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
+
+    Label
+      id: attrActionLabel
+      !text: tr('Action:')
+      anchors.top: attrActionTitle.bottom
+      anchors.left: parent.left
+      margin-top: 10
+      margin-left: 12
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+    ComboBox
+      id: attrActionCombo
+      anchors.top: attrActionLabel.top
+      anchors.left: attrActionLabel.right
+      anchors.right: parent.right
+      margin-left: 8
+      margin-right: 12
+      margin-top: -2
+
+    Label
+      id: attrRuneTitle
+      !text: tr('Required Rune:')
+      anchors.top: attrActionCombo.bottom
+      anchors.left: parent.left
+      margin-top: 14
+      margin-left: 12
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+    ForgeRuneSlot
+      id: attrRuneSlot
+      anchors.top: attrRuneTitle.bottom
+      anchors.left: parent.left
       margin-top: 4
+      margin-left: 25
+
+    Label
+      id: attrCostTitle
+      !text: tr('Total cost:')
+      anchors.top: attrRuneTitle.top
+      anchors.left: attrRuneSlot.right
+      margin-left: 20
       font: verdana-11px-antialised
       color: #c0c0c0
 
     Label
       id: attrCostLabel
-      text-align: center
-      anchors.top: attrMaterialLabel.bottom
-      anchors.left: parent.left
+      anchors.top: attrCostTitle.bottom
+      anchors.left: attrCostTitle.left
       anchors.right: parent.right
-      margin-top: 2
+      margin-top: 4
+      margin-right: 12
       font: verdana-11px-antialised
       color: #ffcc00
 
-    ProgressBar
-      id: attrProgressBar
+    Button
+      id: attrExecuteButton
+      !text: tr('Attribute!')
+      width: 120
       anchors.top: attrCostLabel.bottom
+      anchors.left: attrCostTitle.left
+      margin-top: 8
+      enabled: false
+
+    FlatPanel
+      id: attrDescPanel
+      anchors.top: attrRuneSlot.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 60
-      margin-right: 60
-      margin-top: 4
+      anchors.bottom: parent.bottom
+      margin: 8 8 8 8
+
+      Label
+        id: attrDescLabel
+        anchors.fill: parent
+        margin: 4
+        text-wrap: true
+        text-auto-resize: true
+        font: verdana-11px-antialised
+        color: #aaaaaa
+
+    ProgressBar
+      id: attrProgressBar
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: attrDescPanel.top
+      margin-left: 20
+      margin-right: 20
+      margin-bottom: 2
       height: 12
       background-color: #00aa00
       visible: false
 
-    Button
-      id: attrAddEnchant
-      !text: tr('Add Enchant')
-      width: 110
-      anchors.bottom: parent.bottom
-      anchors.left: parent.left
-      margin-bottom: 8
-      margin-left: 8
-      enabled: false
+  FlatPanel
+    id: attrResultPanel
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: 26
 
-    Button
-      id: attrRerollLast
-      !text: tr('Reroll Last')
-      width: 100
-      anchors.bottom: parent.bottom
-      anchors.left: attrAddEnchant.right
-      margin-bottom: 8
-      margin-left: 6
-      enabled: false
-
-    Button
-      id: attrRerollAll
-      !text: tr('Reroll All')
-      width: 100
-      anchors.bottom: parent.bottom
-      anchors.left: attrRerollLast.right
-      margin-bottom: 8
-      margin-left: 6
-      enabled: false
-
-    Button
-      id: attrRemoveLast
-      !text: tr('Remove Last')
-      width: 100
-      anchors.bottom: parent.bottom
-      anchors.left: attrRerollAll.right
-      margin-bottom: 8
-      margin-left: 6
-      enabled: false
-
-    Button
-      id: attrRemoveAll
-      !text: tr('Remove All')
-      width: 100
-      anchors.bottom: parent.bottom
-      anchors.left: attrRemoveLast.right
-      margin-bottom: 8
-      margin-left: 6
-      enabled: false
+    Label
+      id: attrResultMessage
+      text-align: center
+      anchors.fill: parent
+      margin: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
 
 // ========== TOOLS TAB (UPGRADE) ==========
 ForgeToolsTab < Panel
@@ -486,13 +589,13 @@ ForgeToolsTab < Panel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 46
+    height: 40
     margin-top: 2
 
     Label
       id: toolsInfoLabel
       anchors.fill: parent
-      margin: 5
+      margin: 5 8 5 8
       text-wrap: true
       text-auto-resize: true
       !text: tr('Upgrade your equipment to improve its stats. Higher upgrade levels have lower chances of success. Failed upgrades may downgrade the item.')
@@ -503,9 +606,9 @@ ForgeToolsTab < Panel
     id: toolsSourcePanel
     anchors.top: toolsInfoPanel.bottom
     anchors.left: parent.left
-    width: 295
-    height: 130
-    margin-top: 8
+    width: 290
+    height: 120
+    margin-top: 6
 
     Label
       id: toolsSourceTitle
@@ -515,6 +618,8 @@ ForgeToolsTab < Panel
       anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 5
+      font: verdana-11px-antialised
+      color: #dfdfdf
 
     Panel
       id: toolsItemContainer
@@ -562,8 +667,8 @@ ForgeToolsTab < Panel
     id: toolsResultPanel
     anchors.top: toolsSourcePanel.top
     anchors.right: parent.right
-    width: 295
-    height: 130
+    width: 290
+    height: 120
 
     Label
       id: toolsResultTitle
@@ -606,70 +711,56 @@ ForgeToolsTab < Panel
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-bottom: 8
+      margin-bottom: 4
       font: verdana-11px-antialised
       color: #c0c0c0
 
   FlatPanel
-    id: toolsChancePanel
+    id: toolsActionPanel
     anchors.top: toolsSourcePanel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 200
-    margin-top: 8
+    anchors.bottom: parent.bottom
+    margin-top: 6
 
     Label
-      id: toolsChanceTitle
-      !text: tr('Upgrade')
+      id: toolsMatTitle
+      !text: tr('Below are the items needed to upgrade. You can increase the chance by 20%%.')
       text-align: center
+      text-wrap: true
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 5
+      margin-top: 6
+      margin-left: 10
+      margin-right: 10
       font: verdana-11px-antialised
-      color: #dfdfdf
+      color: #aaaaaa
 
-    Label
-      id: toolsChanceLabel
-      text-align: center
-      anchors.top: toolsChanceTitle.bottom
+    ForgeRuneSlot
+      id: toolsUpgradeRuneSlot
+      anchors.top: toolsMatTitle.bottom
       anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 8
-      font: verdana-11px-antialised
-      color: #c0c0c0
+      margin-top: 10
+      margin-left: 60
 
-    Label
-      id: toolsMaterialLabel
-      text-align: center
-      anchors.top: toolsChanceLabel.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 4
-      font: verdana-11px-antialised
-      color: #c0c0c0
-
-    Label
-      id: toolsCostLabel
-      text-align: center
-      anchors.top: toolsMaterialLabel.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 4
-      font: verdana-11px-antialised
-      color: #ffcc00
+    ForgeRuneSlot
+      id: toolsProtRuneSlot
+      anchors.top: toolsUpgradeRuneSlot.top
+      anchors.left: toolsUpgradeRuneSlot.right
+      margin-left: 20
 
     UIWidget
       id: toolsBonusButton
       !text: tr('+20%%')
-      size: 96 75
+      size: 96 55
       image-source: /images/ui/imbue_green
       image-clip: 0 0 128 66
       image-size: 96 50
       image-color: #666666
-      anchors.top: toolsCostLabel.bottom
-      anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 4
+      anchors.top: toolsUpgradeRuneSlot.top
+      anchors.left: toolsProtRuneSlot.right
+      margin-left: 30
       font: verdana-11px-antialised
       color: #aaaaaa
       text-offset: 0 -4
@@ -682,14 +773,46 @@ ForgeToolsTab < Panel
       $pressed:
         image-color: #cccccc
 
+    Label
+      id: toolsChanceLabel
+      text-align: center
+      anchors.top: toolsUpgradeRuneSlot.top
+      anchors.right: parent.right
+      margin-right: 30
+      margin-top: 8
+      width: 150
+      font: verdana-11px-antialised
+      color: #c0c0c0
+
+    Label
+      id: toolsCostLabel
+      text-align: center
+      anchors.top: toolsChanceLabel.bottom
+      anchors.left: toolsChanceLabel.left
+      anchors.right: toolsChanceLabel.right
+      margin-top: 6
+      font: verdana-11px-antialised
+      color: #ffcc00
+
+    Label
+      id: toolsMaterialLabel
+      text-align: center
+      anchors.top: toolsCostLabel.bottom
+      anchors.left: toolsChanceLabel.left
+      anchors.right: toolsChanceLabel.right
+      margin-top: 4
+      font: verdana-11px-antialised
+      color: #c0c0c0
+      text-wrap: true
+
     ProgressBar
       id: toolsProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: toolsBonusButton.bottom
+      anchors.bottom: toolsForgeButton.top
       margin-left: 60
       margin-right: 60
-      margin-top: 4
+      margin-bottom: 4
       height: 12
       background-color: #00aa00
       visible: false
@@ -697,7 +820,7 @@ ForgeToolsTab < Panel
     Button
       id: toolsForgeButton
       !text: tr('Forge')
-      width: 80
+      width: 120
       anchors.bottom: parent.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       margin-bottom: 8
