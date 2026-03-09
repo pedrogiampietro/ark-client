@@ -822,6 +822,7 @@ local function parseShopHistory(entries)
             row:setText(line)
             row:setColor("#cccccc")
             row:setTextAlign(AlignLeft)
+            row:setMarginLeft(20)
         end
     end
 

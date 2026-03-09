@@ -416,10 +416,10 @@ UIWindow
 
   Separator
     id: botseparator
-    anchors.top: creature.bottom
+    anchors.top: historyButton.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 10
+    margin-top: 5
 
   OfferItem
     id: offer1
