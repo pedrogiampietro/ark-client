@@ -629,6 +629,10 @@ function parseShopOpen(data)
             panel.offerItem:clearItem()
             panel:setOn(false)
 
+            -- Limpar tooltip/hover antigos para não mostrar item em slot vazio
+            panel.offerItem.getLinkedTooltip = nil
+            panel.onHoverChange = nil
+
             if isOwnShop() then
                 panel.offerItem:setOn(true)
                 panel.offerItem:show()
@@ -783,6 +787,43 @@ end
 
 local function parseShopClose() hide() end
 
+local function parseShopHistory(entries)
+    if not MainWindow or not MainWindow.historyPanel then
+        return
+    end
+
+    local panel = MainWindow.historyPanel
+    local scroll = panel:getChildById('historyScroll')
+    if not scroll then
+        return
+    end
+
+    scroll:destroyChildren()
+
+    if not entries or #entries == 0 then
+        local row = g_ui.createWidget('Label', scroll)
+        row:setText(tr('No sales yet.'))
+        row:setTextAlign(AlignLeft)
+        return
+    end
+
+    for _, sale in ipairs(entries) do
+        local line = string.format("%s: %dx %s for %d gp%s",
+            sale.sold_at or "",
+            sale.count or 0,
+            sale.name or ('item ' .. (sale.itemid or 0)),
+            sale.price or 0,
+            sale.buyer and (" to " .. sale.buyer) or "")
+
+        local row = g_ui.createWidget('Label', scroll)
+        row:setText(line)
+        row:setColor("#cccccc")
+        row:setTextAlign(AlignLeft)
+    end
+
+    panel:show()
+end
+
 local function parseShop(protocol, opcode, buffer)
     if opcode ~= Config.opcode then return end
     buffer = json.decode(buffer)
@@ -791,8 +832,13 @@ local function parseShop(protocol, opcode, buffer)
     if not evt then return end
     if evt == 'SHOP_OPEN' then
         parseShopOpen(data)
+        if MainWindow.historyPanel then
+            MainWindow.historyPanel:hide()
+        end
     elseif evt == 'SHOP_CLOSE' then
         parseShopClose()
+    elseif evt == 'SHOP_HISTORY' then
+        parseShopHistory(data)
     end
 end
 
@@ -858,6 +904,25 @@ function init()
     MainWindow.contentInfo:hide()
 
     SelectItemWindow = MainWindow.selectItem
+
+    if MainWindow.historyButton then
+        MainWindow.historyButton.onClick = function()
+            if not isOwnShop() then
+                return
+            end
+
+            if MainWindow.historyPanel:isVisible() then
+                MainWindow.historyPanel:hide()
+                MainWindow.historyButton:setText(tr("History"))
+                return
+            end
+
+            -- solicitar histórico ao servidor
+            local payload = { e = 'SHOP_HISTORY' }
+            g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
+            MainWindow.historyButton:setText(tr("History..."))
+        end
+    end
 
     hide()
 

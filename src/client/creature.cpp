@@ -320,6 +320,30 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
     if (m_icon != Otc::NpcIconNone && m_iconTexture) {
         Rect iconRect = Rect(backgroundRect.x() + 13.5 + 12, backgroundRect.y() + 5, m_iconTexture->getSize());
         g_drawQueue->addTexturedRect(iconRect, m_iconTexture, Rect(0, 0, m_iconTexture->getSize()));
+    } else if (isNpc()) {
+        // Fallback: for player shop clones (name ending with #GUID), force-draw trade icon
+        bool isShopClone = false;
+        const std::string& name = m_name;
+        const std::size_t pos = name.rfind('#');
+        if (pos != std::string::npos && pos + 1 < name.size()) {
+            isShopClone = true;
+            for (std::size_t i = pos + 1; i < name.size(); ++i) {
+                if (!std::isdigit(static_cast<unsigned char>(name[i]))) {
+                    isShopClone = false;
+                    break;
+                }
+            }
+        }
+        if (isShopClone) {
+            static TexturePtr shopIconTexture;
+            if (!shopIconTexture) {
+                shopIconTexture = g_textures.getTexture("/images/game/npcicons/icon_trade");
+            }
+            if (shopIconTexture) {
+                Rect iconRect = Rect(backgroundRect.x() + 13.5 + 12, backgroundRect.y() + 5, shopIconTexture->getSize());
+                g_drawQueue->addTexturedRect(iconRect, shopIconTexture, Rect(0, 0, shopIconTexture->getSize()));
+            }
+        }
     }
 }
 

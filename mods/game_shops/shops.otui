@@ -405,6 +405,15 @@ UIWindow
     !text: tr("Close")
     @onClick: modules.shops.onShopClose()
 
+  Button
+    id: historyButton
+    size: 80 25
+    anchors.right: parent.right
+    anchors.top: closeButton.bottom
+    margin-right: 20
+    margin-top: 3
+    !text: tr("History")
+
   Separator
     id: botseparator
     anchors.top: creature.bottom
@@ -447,6 +456,20 @@ UIWindow
     anchors.top: offer4.bottom
     anchors.left: offer4.left
     margin-top: 8
+
+  Panel
+    id: historyPanel
+    anchors.top: botseparator.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-top: 10
+    visible: false
+
+    UIScrollArea
+      id: historyScroll
+      anchors.fill: parent
+      padding: 3
 
   SelectItemWindow
     id: selectItem
