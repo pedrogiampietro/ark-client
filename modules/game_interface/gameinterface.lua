@@ -590,26 +590,19 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
     end
   end
 
-  -- Player shop clones (NPC 'PlayerShop' with trade icon), Chimera-style
-  if creatureThing and creatureThing:isNpc() and creatureThing:getName() and creatureThing:getName() ~= '' and openShop then
-    local outfit = creatureThing:getOutfit()
-    if outfit then
-      if creatureThing:getName() == 'PlayerShop' or outfit.lookType == 137 or (creatureThing.getIcon and creatureThing:getIcon() == 2) then
-        menu:addOption(tr('Open Shop'), function()
-          local npcName = creatureThing:getName()
-          local guid = npcName:match("#(%d+)$")
-          if guid then
-            openShop(tonumber(guid))
-          else
-            local player = findPlayerByName and findPlayerByName(npcName)
-            if player then
-              openShop(player:getId())
-            else
-              openShop(creatureThing:getId())
-            end
-          end
-        end)
-      end
+  -- Player shop clones (NPC com nome no formato Nome#GUID)
+  if creatureThing and creatureThing:isNpc() and openShop then
+    local npcName = creatureThing:getName() or ''
+    -- detecta clones de shop pelo sufixo "#<digits>"
+    if npcName:match("#%d+$") then
+      menu:addOption(tr('Open Shop'), function()
+        local guid = npcName:match("#(%d+)$")
+        if guid then
+          openShop(tonumber(guid))
+        else
+          openShop(creatureThing:getId())
+        end
+      end)
     end
   end
 

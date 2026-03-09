@@ -200,6 +200,26 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
     if (g_game.getFeature(Otc::GameBlueNpcNameColor) && isNpc() && m_healthPercent == 100 && !useGray)
         fillColor = Color(0x66, 0xcc, 0xff);
 
+    // Player shop clone highlight: NPC cujo nome termina com "#<digits>"
+    if (!useGray && isNpc() && m_healthPercent == 100) {
+        bool isShopClone = false;
+        const std::string& name = m_name;
+        const std::size_t pos = name.rfind('#');
+        if (pos != std::string::npos && pos + 1 < name.size()) {
+            isShopClone = true;
+            for (std::size_t i = pos + 1; i < name.size(); ++i) {
+                if (!std::isdigit(static_cast<unsigned char>(name[i]))) {
+                    isShopClone = false;
+                    break;
+                }
+            }
+        }
+        if (isShopClone) {
+            // cor destacada para lojas de player (rosa suave)
+            fillColor = Color(0xFF, 0x69, 0xB4);
+        }
+    }
+
     if (drawFlags & Otc::DrawBars && (!isNpc() || !g_game.getFeature(Otc::GameHideNpcNames))) {
         if (healthBar) {
             TexturePtr barTexture = healthBar->getTexture();
