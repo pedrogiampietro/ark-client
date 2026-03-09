@@ -745,7 +745,12 @@ function onPressBuy(button)
             externalReference = string.format("shop_offer_%d", offerId)
         }
 
-        HTTP.postJSON(PIX_API_URL, payload, function(data, err)
+        local url = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
+        if url == "" then
+            displayInfoBox("PIX error", "PIX API URL is not configured.")
+            return
+        end
+        HTTP.postJSON(url, payload, function(data, err)
             if err then
                 displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
                 return
