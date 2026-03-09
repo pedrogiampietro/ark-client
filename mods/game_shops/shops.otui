@@ -1,0 +1,514 @@
+ContainerPanel < UIWindow
+  size: 192 200
+  image-source: /images/ui/menubox
+  focusable: false
+  padding-top: 10
+
+  Label
+    id: containerName
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.left: parent.left
+    text-align: center
+
+ConfirmActionWindow < MainWindow
+  !text: tr('Confirm action')
+  size: 380 95
+  modal: true
+  focusable: true
+  @onEscape: self:destroy()
+
+  Label
+    id: message
+    height: 30
+    padding-top: 7
+    text-align: center
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+
+  Button
+    id: buttonCancel
+    !text: tr('Cancel')
+    height: 20
+    anchors.left: message.horizontalCenter
+    anchors.right: message.right
+    anchors.top: message.bottom
+    margin-top: 12
+    focusable: true
+
+  Button
+    id: buttonOk
+    height: 20
+    anchors.right: message.horizontalCenter
+    anchors.left: message.left
+    anchors.top: message.bottom
+    margin-top: 12
+    margin-right: 6
+    focusable: true
+    enabled: false
+
+
+SelectItemWindow < MainWindow
+  id: amountWindow
+  size: 270 150
+  &price: 0
+  &count: 0
+  @onEscape: self:hide()
+
+  Item
+    id: item
+    text-offset: 0 22
+    text-align: right
+    anchors.left: parent.left
+    anchors.top: parent.top
+    margin-top: 2
+    margin-left: -4
+    focusable: false
+    virtual: true
+
+  HorizontalScrollBar
+    id: amountScrollBar
+    anchors.left: prev.right
+    anchors.right: parent.right
+    anchors.top: prev.top
+    margin-left: 10
+    margin-top: -2
+
+  Label
+    id: priceLabel
+    anchors.left: prev.left
+    anchors.right: prev.right
+    anchors.top: amountScrollBar.bottom
+    margin-top: 10
+    !text: tr('Enter price: ')
+
+  TextEdit
+    id: priceEdit
+    width: 30
+    anchors.left: priceLabel.left
+    anchors.right: priceLabel.right
+    anchors.top: priceLabel.bottom
+    margin-top: 5
+    max-length: 9
+    multiline: false
+    placeholder: Price per each piece
+    @onTextChange: |
+      if self:getText() == "" then 
+        self:getParent().buttonOk:setEnabled(false)
+        self:getParent().price = 0
+        self:getParent().priceLabel:setText('Enter price: ')
+        return
+      else
+        self:getParent().buttonOk:setEnabled(true)
+      end
+      self:setText(self:getText():gsub("[^%d]", ""))
+      local price = tonumber(self:getText())
+      self:getParent().price = price
+      self:getParent().priceLabel:setText('(total earnings: '..price * self:getParent().count..')')
+
+  Button
+    id: buttonCancel
+    !text: tr('Cancel')
+    height: 20
+    anchors.left: amountScrollBar.horizontalCenter
+    anchors.right: amountScrollBar.right
+    anchors.top: priceEdit.bottom
+    margin-top: 7
+    focusable: false
+
+  Button
+    id: buttonOk
+    !text: tr('Ok')
+    height: 20
+    anchors.right: amountScrollBar.horizontalCenter
+    anchors.left: amountScrollBar.left
+    anchors.top: priceEdit.bottom
+    margin-top: 7
+    margin-right: 6
+    focusable: false
+
+ConfirmBuyWindow < MainWindow
+  !text: tr('Purchase Item')
+  size: 270 110
+  modal: true
+  focusable: true
+  @onEscape: self:hide()
+
+  Item
+    id: item
+    text-offset: 0 22
+    text-align: right
+    anchors.left: parent.left
+    anchors.top: parent.top
+    margin-top: 2
+    margin-left: -4
+    focusable: false
+    virtual: true
+
+  HorizontalScrollBar
+    id: amountScrollBar
+    anchors.left: prev.right
+    anchors.right: parent.right
+    anchors.top: prev.top
+    margin-left: 10
+    margin-top: -2
+
+  Label
+    id: priceLabel
+    anchors.left: prev.left
+    anchors.right: prev.right
+    anchors.top: amountScrollBar.bottom
+    margin-top: 10
+
+  Button
+    id: buttonCancel
+    !text: tr('Cancel')
+    height: 20
+    anchors.left: amountScrollBar.horizontalCenter
+    anchors.right: amountScrollBar.right
+    anchors.top: priceLabel.bottom
+    margin-top: 7
+    focusable: true
+    @onClick: self:hide()
+
+  Button
+    id: buttonOk
+    !text: tr('Ok')
+    height: 20
+    anchors.right: amountScrollBar.horizontalCenter
+    anchors.left: amountScrollBar.left
+    anchors.top: priceLabel.bottom
+    margin-top: 7
+    margin-right: 6
+    focusable: true
+
+Separator < HorizontalSeparator
+  height: 2
+  margin-left: 20
+  margin-right: 20
+
+PriceLabel < Label
+  !text: tr("Price: ")
+
+  Label
+    id: amount
+    anchors.top: parent.top
+    anchors.left: parent.right
+    anchors.right: parent.right
+    color: green
+
+OfferItem < UIButton
+  size: 195 55
+  image-source: /images/ui/panel_content.png
+  border-color: #000000
+  border-width: 1
+  font: cipsoftFont
+  on: false
+  @onClick: modules.shops.onSelectOffer(self)
+
+  $checked on:
+    border-color: green
+  
+  $hover !checked on:
+    border-color: #FFFFFFFF
+
+  Item
+    id: offerItem
+    image-source: /images/ui/item
+    size: 40 40
+    anchors.left: parent.left
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 7
+    virtual: true
+    border-color: #FFFFFF
+
+    $on:
+      &selectable: true
+
+  Label
+    id: emptyLabel
+    anchors.centerIn: parent
+    text-align: center
+    !text: tr('Empty Slot')
+
+  Label
+    id: itemName
+    anchors.top: offerItem.top
+    anchors.left: offerItem.right
+    anchors.right: parent.right
+    margin-left: 5
+
+  Label
+    id: priceLabel
+    anchors.top: itemName.bottom
+    anchors.left: itemName.left
+    !text: tr('Price: ')
+
+  Label
+    id: price
+    color: yellow
+    anchors.top: priceLabel.top
+    anchors.left: priceLabel.right
+    anchors.right: parent.right
+    hidden: true
+
+  Label
+    id: weight
+    text-align: right
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    margin-bottom: 5
+    margin-right: 5
+
+EditShopWindow < UIWindow
+  id: editShop
+  anchors.centerIn: parent
+  size: 300 265
+  image-source: images/window
+  @onEscape: self:hide()
+
+  UIItem
+    id: parchment
+    size: 40 40
+    anchors.left: parent.left
+    anchors.top: parent.top
+    margin-left: 20
+    margin-top: 20
+    @onSetup: self:setItemId(4831)
+
+  Label
+    !text: tr("Edit Shop Message: ")
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.left: prev.right
+    margin-left: 20
+
+  Separator
+    id: topseparator
+    anchors.top: parchment.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  Label
+    id: shopNameChars
+    !text: ''
+    anchors.right: shopName.right
+    anchors.top: shopName.bottom
+    margin-top: 7
+
+  TextEdit
+    id: shopName
+    size: 260 100
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: topseparator.bottom
+    margin-top: 15
+    max-length: 100
+    multiline: false
+    text-wrap: true
+    auto-scroll: true
+    vertical-scrollbar: textScrollbar
+    placeholder: Good wares for excellent prices!
+    placeholder-align: topleft
+    placeholder-color: #242424
+    @onTextChange: |
+      local charsLeft = 100 - self:getCursorPos()
+      self:getParent().shopNameChars:setText(tr('(%02d/100 chars left)', charsLeft))
+
+  VerticalScrollBar
+    id: textScrollbar
+    step: 16
+    anchors.top: shopName.top
+    anchors.right: shopName.right
+    anchors.bottom: shopName.bottom
+    pixel-scroll: true
+
+  Button
+    !text: 'Save'
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: shopNameChars.bottom
+    margin-top: 18
+
+UIWindow
+  id: market
+  size: 450 350
+  anchors.centerIn: parent
+  !text: tr("A Shop")
+  text-offset: 0 8
+  padding: 2
+  image-source: /images/ui/window
+
+  UICreature
+    id: creature
+    anchors.left: parent.left
+    anchors.top: parent.top
+    size: 70 70
+    margin-top: 25
+    margin-left: 5
+    phantom: true
+
+  Label
+    id: earningsLabel
+    anchors.top: creature.top
+    anchors.left: creature.right
+    anchors.verticalCenter: creature.verticalCenter
+    margin-left: 10
+
+  Label
+    id: earnings
+    anchors.top: earningsLabel.top
+    anchors.left: earningsLabel.right
+    anchors.right: parent.right
+    border-color: white
+
+  Button
+    id: buyButton
+    size: 80 25
+    anchors.top: creature.top
+    anchors.right: parent.right
+    margin-right: 20
+    margin-top: 15
+    image-color: green
+    !text: tr("Buy")
+    enabled: false
+    @onClick: if self:isEnabled() then modules.shops.onPressBuy() end
+
+  Button
+    id: pauseButton
+    size: 80 25
+    anchors.top: buyButton.top
+    anchors.right: parent.right
+    image-color: #faf605
+    margin-right: 20
+    image-clip: 0 0 22 23
+    text-offset: 0 1
+    border-color: white
+    border-width: 0
+    on: false
+
+    $!on !disabled:
+      !text: tr("Paused")
+      image-clip: 0 46 22 23
+      text-offset: 1 1
+
+    $on:
+      !text: tr("Pause")
+
+  Button
+    id: closeButton
+    size: 80 25
+    anchors.right: parent.right
+    margin-right: 20
+    margin-top: 5
+    margin-bottom: 15
+    !text: tr("Close")
+    @onClick: modules.shops.onShopClose()
+
+  Separator
+    id: botseparator
+    anchors.top: creature.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  OfferItem
+    id: offer1
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    margin-top: 20
+    margin-left: 20
+
+  OfferItem
+    id: offer2
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 20
+
+  OfferItem
+    id: offer3
+    anchors.top: prev.bottom
+    anchors.left: offer1.left
+    margin-top: 8
+
+  OfferItem
+    id: offer4
+    anchors.top: offer3.top
+    anchors.left: offer2.left
+
+  OfferItem
+    id: offer5
+    anchors.top: offer3.bottom
+    anchors.left: offer3.left
+    margin-top: 8
+
+  OfferItem
+    id: offer6
+    anchors.top: offer4.bottom
+    anchors.left: offer4.left
+    margin-top: 8
+
+  SelectItemWindow
+    id: selectItem
+    hidden: true
+
+ConfirmBuyAmountWindow < MainWindow
+  !text: tr('Confirm Purchase')
+  size: 340 180
+  modal: true
+  focusable: true
+  @onEscape: self:hide()
+
+  Label
+    id: message
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    text-align: center
+
+  Label
+    id: amountLabel
+    anchors.top: message.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 8
+    text-align: center
+    !text: tr('Select the amount:')
+
+  HorizontalScrollBar
+    id: amountScrollBar
+    anchors.top: amountLabel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 6
+    margin-left: 30
+    margin-right: 30
+
+  Label
+    id: selectedLabel
+    anchors.top: amountScrollBar.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 6
+    text-align: center
+
+  Button
+    id: buttonOk
+    !text: tr('Ok')
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-left: 40
+    margin-bottom: 10
+    margin-top: 12
+    width: 90
+
+  Button
+    id: buttonCancel
+    !text: tr('Cancel')
+    anchors.left: buttonOk.right
+    anchors.bottom: parent.bottom
+    margin-left: 20
+    margin-bottom: 10
+    margin-top: 12
+    width: 90

@@ -1,0 +1,10 @@
+Module
+  name: shops
+  description: Player private shops
+  author: Bastian
+  autoload: true
+  sandboxed: false
+  dependencies: [ game_itemtooltip ]
+  scripts: [ shops ]
+  @onLoad: init()
+  @onUnload: terminate()
