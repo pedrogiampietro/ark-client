@@ -753,6 +753,10 @@ function onPressBuy(button)
             displayInfoBox("PIX error", "PIX API URL is not configured.")
             return
         end
+        -- C++ HTTP parser needs a full URL (scheme + host + path). If only path was set, prepend host.
+        if not url:find("://") then
+            url = "http://gravak.fun" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+        end
         HTTP.postJSON(url, payload, function(data, err)
             if err then
                 displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
