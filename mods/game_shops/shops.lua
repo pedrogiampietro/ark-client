@@ -759,7 +759,14 @@ function onPressBuy(button)
         end
         HTTP.postJSON(url, payload, function(data, err)
             if err then
-                displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
+                local msg = err
+                if type(data) == "table" and type(data.body) == "string" and data.body ~= "" then
+                    local ok, parsed = pcall(function() return json.decode(data.body) end)
+                    if ok and type(parsed) == "table" and parsed.error then
+                        msg = parsed.error
+                    end
+                end
+                displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. msg)
                 return
             end
             if not data or not data.qr_code then

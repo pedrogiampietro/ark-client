@@ -152,20 +152,22 @@ function HTTP.onPost(operationId, url, err, data)
   if operation == nil then
     return
   end
-  if err and err:len() == 0 then
+  if type(err) == "string" and err:len() == 0 then
     err = nil
   end
+  -- C++ passes the full result table (with .body) as 4th arg; get raw body for JSON decode
+  local rawBody = (type(data) == "table" and type(data.body) == "string") and data.body or (type(data) == "string" and data or "")
   if not err and operation.json then
-    if data:len() == 0 then
-      data = "null"
+    if rawBody == "" then
+      rawBody = "null"
     end
-    local status, result = pcall(function() return json.decode(data) end)
+    local status, result = pcall(function() return json.decode(rawBody) end)
     if not status then
-      err = "JSON ERROR: " .. result
-      if data and data:len() > 0 then
-        err = err .. " (" .. data:sub(1, 100) .. ")"
+      err = "JSON ERROR: " .. tostring(result)
+      if #rawBody > 0 then
+        err = err .. " (" .. rawBody:sub(1, 100) .. ")"
       end
-    end  
+    end
     data = result
   end
   if operation.callback then
