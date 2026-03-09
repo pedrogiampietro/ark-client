@@ -298,7 +298,14 @@ local function onSelectItemToSell(widget, draggedItem, mousePos, forced)
 
     SelectItemWindow:setText("Add Offer")
 
-    SelectItemWindow.priceLabel:setText('Enter price: ')
+    -- resetar moeda e UI
+    SelectItemWindow.currency = 'gold'
+    if SelectItemWindow.currencyGoldButton and SelectItemWindow.currencyPixButton then
+        SelectItemWindow.currencyGoldButton:setChecked(true)
+        SelectItemWindow.currencyPixButton:setChecked(false)
+    end
+
+    SelectItemWindow.priceLabel:setText('Enter price (gp): ')
     SelectItemWindow.priceEdit:clearText()
     SelectItemWindow.priceEdit:enable()
 
@@ -340,6 +347,16 @@ local function onSelectItemToSell(widget, draggedItem, mousePos, forced)
 
         panel.offerItem:setOn(false)
 
+        local currency = SelectItemWindow.currency or 'gold'
+        local price = SelectItemWindow.price or 0
+        local price_brl = 0
+
+        if currency == 'pix' then
+            -- interpretar número digitado como valor em reais e salvar em centavos
+            price_brl = price * 100
+            price = 0
+        end
+
         local payload = {
             e = 'SHOP_ADD_OFFER',
             d = {
@@ -347,7 +364,9 @@ local function onSelectItemToSell(widget, draggedItem, mousePos, forced)
                 subtype = widget:getItemSubType(),
                 count = SelectItemWindow.count,
                 pos = fromPos,
-                price = SelectItemWindow.price
+                price = price,
+                currency = currency,
+                price_brl = price_brl
             }
         }
 
@@ -930,6 +949,25 @@ function init()
     MainWindow.contentInfo:hide()
 
     SelectItemWindow = MainWindow.selectItem
+
+    -- Moeda padrão ao abrir a janela de oferta
+    SelectItemWindow.currency = 'gold'
+
+    if SelectItemWindow.currencyGoldButton and SelectItemWindow.currencyPixButton then
+        SelectItemWindow.currencyGoldButton.onClick = function()
+            SelectItemWindow.currency = 'gold'
+            SelectItemWindow.currencyGoldButton:setChecked(true)
+            SelectItemWindow.currencyPixButton:setChecked(false)
+            SelectItemWindow.priceLabel:setText('Enter price (gp): ')
+        end
+
+        SelectItemWindow.currencyPixButton.onClick = function()
+            SelectItemWindow.currency = 'pix'
+            SelectItemWindow.currencyGoldButton:setChecked(false)
+            SelectItemWindow.currencyPixButton:setChecked(true)
+            SelectItemWindow.priceLabel:setText('Enter price (BRL): ')
+        end
+    end
 
     if MainWindow.historyButton then
         MainWindow.historyButton.onClick = function()

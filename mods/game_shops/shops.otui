@@ -107,13 +107,39 @@ SelectItemWindow < MainWindow
       self:getParent().price = price
       self:getParent().priceLabel:setText('(total earnings: '..price * self:getParent().count..')')
 
+  Label
+    id: currencyLabel
+    anchors.left: priceLabel.left
+    anchors.top: priceEdit.bottom
+    margin-top: 5
+    !text: tr('Currency:')
+
+  Button
+    id: currencyGoldButton
+    size: 60 18
+    anchors.left: currencyLabel.right
+    anchors.top: currencyLabel.top
+    margin-left: 5
+    !text: tr('Gold')
+    checkable: true
+    checked: true
+
+  Button
+    id: currencyPixButton
+    size: 60 18
+    anchors.left: currencyGoldButton.right
+    anchors.top: currencyLabel.top
+    margin-left: 5
+    !text: tr('Pix')
+    checkable: true
+
   Button
     id: buttonCancel
     !text: tr('Cancel')
     height: 20
     anchors.left: amountScrollBar.horizontalCenter
     anchors.right: amountScrollBar.right
-    anchors.top: priceEdit.bottom
+    anchors.top: currencyLabel.bottom
     margin-top: 7
     focusable: false
 
@@ -123,7 +149,7 @@ SelectItemWindow < MainWindow
     height: 20
     anchors.right: amountScrollBar.horizontalCenter
     anchors.left: amountScrollBar.left
-    anchors.top: priceEdit.bottom
+    anchors.top: currencyLabel.bottom
     margin-top: 7
     margin-right: 6
     focusable: false
