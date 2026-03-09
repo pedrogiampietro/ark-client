@@ -33,6 +33,7 @@ function updateFeatures(version)
         g_game.enableFeature(GameLooktypeU16)
         g_game.enableFeature(GameMessageStatements)
         g_game.enableFeature(GameLoginPacketEncryption)
+        g_game.enableFeature(GamePlayerFoodTime)
     end
 
     if(version >= 780) then
@@ -83,7 +84,6 @@ function updateFeatures(version)
         g_game.enableFeature(GameTotalCapacity)
         g_game.enableFeature(GameSkillsBase)
         g_game.enableFeature(GamePlayerRegenerationTime)
-        g_game.enableFeature(GamePlayerFoodTime)
         g_game.enableFeature(GameChannelPlayerList)
         g_game.enableFeature(GameEnvironmentEffect)
         g_game.enableFeature(GameItemAnimationPhase)
