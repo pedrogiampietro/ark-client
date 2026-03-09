@@ -408,6 +408,7 @@ function parseShopOpen(data)
 
     MainWindow.currentShop.message = data.info
     MainWindow.currentShop.seller = data.seller
+    MainWindow.currentShop.shopId = data.shop_id
     MainWindow.currentShop.own = data.own
     MainWindow.currentShop.maxOffers = data.maxOffers
     MainWindow.currentShop.offers = 0
@@ -763,12 +764,16 @@ function onPressBuy(button)
             displayInfoBox("PIX error", "Invalid offer data (missing row_id). Please close and reopen the shop.")
             return
         end
+        local shopId = MainWindow.currentShop and MainWindow.currentShop.shopId
+        local offerIdForApi = panel.offerData and panel.offerData.id
         local payload = {
             amount = amount,
             description = description,
             email = "pedrogiampietro@hotmail.com",
             externalReference = string.format("shop_offer_%d", rowId),
-            shopOfferRowId = rowId
+            shopOfferRowId = rowId,
+            shop_id = shopId,
+            offer_id = offerIdForApi
         }
 
         local url = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
