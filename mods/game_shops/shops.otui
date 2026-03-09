@@ -389,7 +389,6 @@ UIWindow
 
     $!on !disabled:
       !text: tr("Paused")
-      image-clip: 0 46 22 23
       text-offset: 1 1
 
     $on:
