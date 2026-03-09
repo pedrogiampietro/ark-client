@@ -470,6 +470,8 @@ UIWindow
       id: historyScroll
       anchors.fill: parent
       padding: 3
+      layout: verticalBox
+      layout-spacing: 2
 
   SelectItemWindow
     id: selectItem
