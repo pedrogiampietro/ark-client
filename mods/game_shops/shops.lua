@@ -804,24 +804,39 @@ local function parseShopHistory(entries)
         local row = g_ui.createWidget('Label', scroll)
         row:setText(tr('No sales yet.'))
         row:setTextAlign(AlignLeft)
-        return
+    else
+        for _, sale in ipairs(entries) do
+            local when = sale.sold_at or ''
+            -- data curta (apenas yyyy-mm-dd hh:mm)
+            when = when:gsub('^(..............).*', '%1')
+
+            local itemName = sale.name or ('item ' .. (sale.itemid or 0))
+            local count = sale.count or 0
+            local price = sale.price or 0
+            local buyer = sale.buyer or ''
+
+            local line = string.format("%s | x%d %s | %d gp | %s",
+                when, count, itemName, price, buyer)
+
+            local row = g_ui.createWidget('Label', scroll)
+            row:setText(line)
+            row:setColor("#cccccc")
+            row:setTextAlign(AlignLeft)
+        end
     end
 
-    for _, sale in ipairs(entries) do
-        local line = string.format("%s: %dx %s for %d gp%s",
-            sale.sold_at or "",
-            sale.count or 0,
-            sale.name or ('item ' .. (sale.itemid or 0)),
-            sale.price or 0,
-            sale.buyer and (" to " .. sale.buyer) or "")
-
-        local row = g_ui.createWidget('Label', scroll)
-        row:setText(line)
-        row:setColor("#cccccc")
-        row:setTextAlign(AlignLeft)
+    -- Esconde os slots de oferta para deixar claro que estamos na aba de histórico
+    for i = 1, 6 do
+        local offerPanel = MainWindow:getChildById('offer' .. i)
+        if offerPanel then
+            offerPanel:hide()
+        end
     end
 
     panel:show()
+    if MainWindow.historyButton then
+        MainWindow.historyButton:setText(tr("Offers"))
+    end
 end
 
 local function parseShop(protocol, opcode, buffer)
@@ -834,6 +849,16 @@ local function parseShop(protocol, opcode, buffer)
         parseShopOpen(data)
         if MainWindow.historyPanel then
             MainWindow.historyPanel:hide()
+        end
+        -- sempre que abrir a loja, mostrar aba de ofertas
+        for i = 1, 6 do
+            local offerPanel = MainWindow:getChildById('offer' .. i)
+            if offerPanel then
+                offerPanel:show()
+            end
+        end
+        if MainWindow.historyButton then
+            MainWindow.historyButton:setText(tr("History"))
         end
     elseif evt == 'SHOP_CLOSE' then
         parseShopClose()
@@ -912,7 +937,14 @@ function init()
             end
 
             if MainWindow.historyPanel:isVisible() then
+                -- Voltar para a aba de ofertas
                 MainWindow.historyPanel:hide()
+                for i = 1, 6 do
+                    local offerPanel = MainWindow:getChildById('offer' .. i)
+                    if offerPanel then
+                        offerPanel:show()
+                    end
+                end
                 MainWindow.historyButton:setText(tr("History"))
                 return
             end
