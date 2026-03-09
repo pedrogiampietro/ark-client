@@ -488,7 +488,13 @@ void ProtocolGame::parseMessage(const InputMessagePtr& msg)
                 parseDailyRewardState(msg);
                 break;
             case Proto::GameServerOpenRewardWall:
-                parseOpenRewardWall(msg);
+                // Protocol 772 (and 770-779): server may send a short payload (7 bytes), not full OpenRewardWall (15 bytes). Consume only what is sent to avoid EOF.
+                if (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779) {
+                    for (int i = 0; i < 7 && !msg->eof(); ++i)
+                        msg->getU8();
+                } else {
+                    parseOpenRewardWall(msg);
+                }
                 break;
             case Proto::GameServerDailyReward:
                 parseDailyReward(msg);
@@ -1970,10 +1976,10 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
         soul = msg->getU8();
 
     // Protocol 770-779 (e.g. 772): server always sends 2-byte food time after soul.
-    // Always consume them to keep stream in sync; use only if feature is enabled.
+    // Also consume when version is 0 (first packet) to avoid desync.
     double foodTime = 0;
     uint16_t protoVersion = g_game.getProtocolVersion();
-    if (protoVersion >= 770 && protoVersion <= 779) {
+    if (protoVersion == 0 || (protoVersion >= 770 && protoVersion <= 779)) {
         foodTime = msg->getU16();
         if (!g_game.getFeature(Otc::GamePlayerFoodTime))
             foodTime = 0;
