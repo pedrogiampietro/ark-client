@@ -905,7 +905,7 @@ local function getPixStatusUrl(paymentId)
     return path
 end
 
-local function onPixPaymentApproved()
+local function onPixPaymentApproved(delivered)
     stopPixPolling()
     if MainWindow.pixPaymentWindow then
         MainWindow.pixPaymentWindow:destroy()
@@ -916,7 +916,11 @@ local function onPixPaymentApproved()
     local successWin = g_ui.createWidget('PixSuccessWindow', root)
     local msg = successWin:getChildById('successMessage')
     if msg then
-        msg:setText("Pagamento confirmado! Nos próximos 30 segundos o item será enviado.")
+        if delivered then
+            msg:setText(tr("Item entregue! Obrigado pela compra."))
+        else
+            msg:setText(tr("Pagamento confirmado! Nos próximos 30 segundos o item será enviado."))
+        end
     end
     successWin:show()
     successWin:raise()
@@ -939,7 +943,7 @@ local function pollPixStatus(paymentId, attempt)
             return
         end
         if data.status == "approved" then
-            onPixPaymentApproved()
+            onPixPaymentApproved(false) -- aprovado; entrega ainda pode estar pendente
             return
         end
         scheduleEvent(function() pollPixStatus(paymentId, attempt + 1) end, 2000)
@@ -1076,6 +1080,9 @@ local function parseShop(protocol, opcode, buffer)
         parseShopClose()
     elseif evt == 'SHOP_HISTORY' then
         parseShopHistory(data)
+    elseif evt == 'SHOP_PIX_DELIVERED' then
+        -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
+        onPixPaymentApproved(true)
     end
 end
 
