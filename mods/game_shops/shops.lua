@@ -452,7 +452,7 @@ function parseShopOpen(data)
 
         if MainWindow.balanceLabel then
             local brl = type(data.balance_brl) == "number" and data.balance_brl or (tonumber(data.balance_brl) or 0)
-            MainWindow.balanceLabel:setText(string.format(tr("You have R$ %.2f"), brl))
+            MainWindow.balanceLabel:setText(string.format("You have R$ %.2f", brl))
             MainWindow.balanceLabel:show()
         end
     else
