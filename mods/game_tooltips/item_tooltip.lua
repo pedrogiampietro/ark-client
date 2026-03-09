@@ -135,6 +135,8 @@ function terminate()
 end
 
 function onExtendedOpcode(protocol, code, buffer)
+    -- g_logger.info("Tooltip: Opcode recebido: " .. code)
+
     local json_status, json_data = pcall(function()
         return json.decode(buffer)
     end)
@@ -144,17 +146,22 @@ function onExtendedOpcode(protocol, code, buffer)
         return
     end
 
+    -- g_logger.info("Tooltip: Dados recebidos e decodificados com sucesso")
+
     local action = json_data.action
     local data = json_data.data
     if not action or not data then
-        g_logger.error("Tooltip: action or data missing in JSON")
+        g_logger.error("Tooltip: action ou data não encontrados no JSON")
         return
     end
+
+    -- g_logger.info("Tooltip: Action recebida: " .. action)
 
     if action == "new" then newTooltip(data) end
 end
 
 function newTooltip(data)
+
     local _itemUId = data.uid
     local _itemName = data.itemName
     local _itemDesc = data.desc
@@ -175,14 +182,12 @@ function newTooltip(data)
             _itemAttributes[i] = _itemAttributes[i]:gsub("%%%%", "%%")
         end
     end
-
     local _isStackable = data.stackable
     local _itemType = data.itemType
     local _firstStat = data.armor or data.attack or 0
     local _secondStat = data.hitChance or data.defense or 0
     local _thirdStat = data.shootRange or data.extraDefense or 0
     local _weight = data.weight
-
     cachedItems[_itemUId] = {
         last = os.time(),
         name = _itemName,
@@ -258,55 +263,369 @@ function onHoverChange(widget, hovered)
         return
     end
 
-    if not hovered then
-        tooltipWindow:hide()
-        hoveredItem = nil
-        showingVirtual = nil
-        return
-    end
-
-    player = g_game.getLocalPlayer()
-    if not player then return end
-
     local item = widget:getItem()
-    if not item then return end
-
-    hoveredItem = item
-
-    if not protocolGame then
+    if item and widget.getItemTooltip then
+        if hovered then
+            buildItemTooltip(widget:getItemTooltip())
+            showItemTooltip()
+        else
+            tooltipWindow:hide()
+        end
+        return
+    end
+    if not item or widget:getId() == "containerItemWidget" or widget:isVirtual() then
         return
     end
 
-    protocolGame:sendExtendedOpcode(
-        CODE_TOOLTIPS,
-        json.encode({player:getId(), item:getPosition(), item:getId(), item:getCount()})
-    )
-end
+    if player == nil then player = g_game.getLocalPlayer() end
 
-function buildItemTooltip(data)
-    -- minimal safe stub; full visual implementation can be added as needed
-    if not tooltipWindow or not labels then
-        return
+    if hovered then
+        hoveredItem = item
+        if protocolGame then
+            local pos = item:getPosition()
+            -- g_logger.info("Tooltip: Enviando solicitação com posição: " .. pos.x .. "," .. pos.y .. "," .. pos.z .. "," .. item:getStackPos())
+            protocolGame:sendExtendedOpcode(CODE_TOOLTIPS, json.encode(
+                                                {
+                    pos.x, pos.y, pos.z, item:getStackPos()
+                }))
+        else
+            g_logger.error("Tooltip: protocolGame é nil")
+        end
+    else
+        hoveredItem = nil
+        tooltipWindow:hide()
     end
-
-    labels:destroyChildren()
-
-    local nameLabel = g_ui.createWidget("Label", labels)
-    nameLabel:setText(data.name or "Item")
-    nameLabel:setColor(Colors.Default)
 end
 
 function showTooltip(uid)
-    if not cachedItems[uid] then
-        return
-    end
-    buildItemTooltip(cachedItems[uid])
+    local cachedItem = cachedItems[uid]
+
+    cachedItem.id = hoveredItem:getId()
+    cachedItem.count = hoveredItem:getCount()
+
+    buildItemTooltip(cachedItem)
     showItemTooltip()
 end
 
-function showItemTooltip()
-    if not tooltipWindow then return end
-    tooltipWindow:show()
-    tooltipWindow:raise()
+function buildItemTooltip(item)
+
+    if not tooltipWindow then
+        g_logger.error("tooltipWindow is nil in buildItemTooltip")
+        return
+    end
+    if not labels then
+        g_logger.error("labels is nil in buildItemTooltip")
+        return
+    end
+
+    tooltipWidth = 0
+    longestString = 0
+    tooltipWidthBase = BASE_WIDTH
+    tooltipHeight = BASE_HEIGHT
+    tooltipWindow:setWidth(tooltipWidth)
+    tooltipWindow:setHeight(tooltipHeight)
+
+    labels:destroyChildren()
+
+    local id = item.id
+    local name = item.name
+    local desc = item.desc
+    local iLvl = item.iLvl
+    local reqLvl = item.reqLvl or 0
+    local unidentified = item.unidentified
+    local mirrored = item.mirrored
+    local rarity = tonumber(item.rarity) or 0
+    local maxAttributes = item.maxAttributes
+    local attributes = item.attributes
+    local count = item.count
+    local type = item.type
+    local first = item.first
+    local second = item.second
+    local third = item.third
+    local weight = item.weight
+
+    -- Set rarity frame
+    local src = nil
+    if rarity == 1 then
+        src = "/images/ui/rarity_white"
+    elseif rarity == 2 then
+        src = "/images/ui/rarity_blue"
+    elseif rarity == 3 then
+        src = "/images/ui/rarity_purple"
+    elseif rarity == 4 then
+        src = "/images/ui/rarity_gold"
+    elseif rarity == 5 then
+        src = "/images/ui/rarity_red"
+    end
+    tooltipWindow.currentRaritySrc = src
+
+    itemWeightLabel:setText(formatWeight(weight))
+
+    itemSprite:setItemId(id)
+    itemSprite:setItemCount(count)
+
+    local itemNameColor
+    if unidentified then
+        itemNameColor = rarityColor[1].color
+    elseif item.uniqueName then
+        itemNameColor = "#dca01e"
+    elseif rarity > 1 and rarityColor[rarity] then
+        itemNameColor = rarityColor[rarity].color
+    else
+        itemNameColor = "#ffffff"
+    end
+
+    name = name:gsub("(%a)(%a+)", function(a, b)
+        return string.upper(a) .. string.lower(b)
+    end)
+    name = name:gsub("^a ", ""):gsub("^an ", "")  -- Remove "a " or "an " from start
+    if item.uLvl > 0 then name = name .. " +" .. item.uLvl end
+
+    if unidentified then
+        addString("Unidentified" .. " " .. name, rarityColor[1].color)
+    elseif item.uniqueName and item.uniqueName ~= "" then
+        addString(item.uniqueName .. " " .. name, "#dca01e", false, "verdana-11px-rounded")
+    elseif rarity > 1 and rarityColor[rarity] then
+        local fullName = rarityColor[rarity].name .. " " .. name
+        addString(fullName, rarityColor[rarity].color, false, "verdana-11px-rounded")
+    else
+        addString(name, itemNameColor)
+    end
+    -- addString(name, itemNameColor)
+
+    if iLvl > 0 then addString("Item Level " .. iLvl, Colors.ItemLevel) end
+
+    local firstText, secondText, thirdText
+    if (type == "Armor" or type == "Helmet" or type == "Legs" or type == "Ring" or
+        type == "Necklace" or type == "Boots") and first ~= 0 then
+        firstText = "Armor: " .. first
+    elseif type == "Two-Handed Sword" or type == "Two-Handed Club" or type ==
+        "Two-Handed Axe" or type == "Sword" or type == "Club" or type == "Axe" or
+        type == "Fist" or type == "Distance" or type == "Ammunition" then
+        firstText = "Attack: " .. first
+    elseif type == "Shield" then
+        firstText = "Defense: " .. second
+    end
+
+    if type == "Two-Handed Sword" or type == "Two-Handed Club" or type ==
+        "Two-Handed Axe" or type == "Sword" or type == "Club" or type == "Axe" or
+        type == "Fist" then
+        secondText = "Defense: " .. second
+    elseif type == "Distance" then
+        secondText = "Hit Chance: +" .. second .. "%"
+    end
+
+    if type == "Two-Handed Sword" or type == "Two-Handed Club" or type ==
+        "Two-Handed Axe" or type == "Sword" or type == "Club" or type == "Axe" or
+        type == "Fist" then
+        thirdText = "Extra-Defense: " .. third
+    elseif type == "Distance" then
+        thirdText = "Shoot Range: " .. third
+    end
+
+    if reqLvl > 0 then
+        addString("Required Level " .. reqLvl, Colors.ItemLevel)
+    end
+
+    if (firstText and (type == "Shield" or type == "Ring" or type == "Necklace")) or
+        (first ~= 0 and second == 0 and third == 0) then
+        addSeparator()
+        addEmpty(5)
+        addString(firstText, Colors.Default)
+    elseif first ~= 0 and second ~= 0 and third == 0 then
+        addSeparator()
+        addEmpty(5)
+        addString(firstText, Colors.Default)
+        addString(secondText, Colors.Default)
+    elseif first ~= 0 and second ~= 0 and third ~= 0 or type == "Distance" then
+        addSeparator()
+        addEmpty(5)
+        addString(firstText, Colors.Default)
+        addString(secondText, Colors.Default)
+        addString(thirdText, Colors.Default)
+    end
+
+    if item.imp then
+        if first ~= 0 or second ~= 0 or third ~= 0 or item.rarity ~= 0 then
+            addSeparator()
+            addEmpty(5)
+        end
+
+        for key, value in pairs(item.imp) do
+            local impText
+            if not implicits[key] then
+                impText = value
+            else
+                -- Formatar valores de tempo (ticks) de milissegundos para segundos
+                local formattedValue = value
+                local suffix = impPercent[key] and "%" or ""
+
+                if key == "hpticks" or key == "mpticks" then
+                    -- Converter milissegundos para segundos
+                    formattedValue = value / 1000
+                    suffix = "s"
+                end
+
+                impText = implicits[key] .. " " .. (value > 0 and "+" or "") ..
+                              formattedValue .. suffix
+            end
+            addString(impText, Colors.Implicit)
+        end
+    end
+
+    if item.rarity ~= 0 then
+        addSeparator()
+        addEmpty(5)
+        for i = 1, maxAttributes do
+            addString(attributes[i], Colors.Attribute)
+        end
+    end
+
+    if mirrored then
+        addEmpty(5)
+        addString("Mirrored", Colors.Mirrored)
+    end
+
+    if desc and desc:len() > 0 then
+        addEmpty(5)
+        addString(desc, Colors.Description, true)
+    end
+
+    shrinkSeparators()
+
+    -- Set tooltip size
+    tooltipWindow:setWidth(tooltipWidth)
+    tooltipWindow:setHeight(tooltipHeight)
+
+    -- Set rarity frame after layout adjustment
+    if tooltipWindow.currentRaritySrc then
+        if not itemSprite.rarityFrame then
+            itemSprite.rarityFrame =
+                g_ui.createWidget("UIWidget", tooltipWindow)
+            local size = itemSprite:getSize()
+            itemSprite.rarityFrame:setSize({
+                width = size.width + 8,
+                height = size.height + 8
+            })
+        end
+        itemSprite.rarityFrame:setImageSource(tooltipWindow.currentRaritySrc)
+        -- Position will be set after tooltip is moved
+    else
+        if itemSprite.rarityFrame then itemSprite.rarityFrame:hide() end
+    end
+
+    -- tooltipWindow:show()  -- Removed to show after positioning
+    -- tooltipWindow:raise()
+    -- Removed followMouse to keep tooltip static at calculated position
 end
 
+_G.buildItemTooltip = buildItemTooltip
+
+_G.showItemTooltip = showItemTooltip
+
+g_logger.info("Item tooltip mod loaded: buildItemTooltip and showItemTooltip set in _G")
+
+function addString(text, color, resize, font)
+    local label = g_ui.createWidget("TooltipLabel", labels)
+    label:setColor(color)
+    if font then label:setFont(font) end
+
+    if resize then
+        tooltipWindow:setWidth(tooltipWidth)
+        label:setTextWrap(true)
+        label:setTextAutoResize(true)
+        label:setText(text)
+        tooltipHeight = tooltipHeight + label:getTextSize().height + 4
+    else
+        label:setText(text)
+        local textSize = label:getTextSize()
+        if longestString == 0 then
+            longestString = textSize.width + itemWeightLabel:getWidth()
+            tooltipWidth = tooltipWidthBase + longestString
+            label:addAnchor(AnchorTop, "parent", AnchorTop)
+        elseif textSize.width > longestString then
+            longestString = textSize.width
+            tooltipWidth = tooltipWidthBase + longestString
+        end
+        tooltipHeight = tooltipHeight + textSize.height
+    end
+end
+
+function shrinkSeparators()
+    local children = labels:getChildren()
+    local m = math.max(60, math.floor(tooltipWidth / 4))
+    for _, child in ipairs(children) do
+        if child:getStyleName() == "TooltipSeparator" then
+            child:setMarginLeft(m)
+            child:setMarginRight(m)
+        end
+    end
+end
+
+function addSeparator()
+    local sep = g_ui.createWidget("TooltipSeparator", labels)
+    tooltipHeight = tooltipHeight + sep:getHeight() + sep:getMarginTop() +
+                        sep:getMarginBottom()
+end
+
+function addEmpty(height)
+    local empty = g_ui.createWidget("TooltipEmpty", labels)
+    empty:setHeight(height)
+    tooltipHeight = tooltipHeight + height
+end
+
+function showItemTooltip()
+    if not tooltipWindow then
+        g_logger.error("tooltipWindow is nil in showItemTooltip")
+        return
+    end
+    local mousePos = g_window.getMousePosition()
+    tooltipHeight = math.max(tooltipHeight, 40)
+    tooltipWindow:setWidth(tooltipWidth)
+    tooltipWindow:setHeight(tooltipHeight)
+
+    local windowSize = g_window.getSize()
+    local x = mousePos.x + 5
+    if x + tooltipWidth > windowSize.width then
+        x = mousePos.x - tooltipWidth - 5
+    end
+    x = math.max(0, math.min(windowSize.width - tooltipWidth, x))
+
+    local y = mousePos.y - tooltipHeight - 5
+    if y < 0 then y = mousePos.y + 5 end
+    y = math.max(0, math.min(windowSize.height - tooltipHeight, y))
+
+    tooltipWindow:move(x, y)
+    tooltipWindow:raise()
+
+    -- Set rarity frame position after moving the tooltip
+    if itemSprite.rarityFrame and tooltipWindow.currentRaritySrc then
+        local pos = itemSprite:getPosition()
+        itemSprite.rarityFrame:setPosition({x = pos.x - 4, y = pos.y - 4})
+        itemSprite.rarityFrame:show()
+        itemSprite:raise() -- Ensure item image is on top
+    end
+
+    local success, err = pcall(function() tooltipWindow:show() end)
+    if not success then
+        g_logger.error("Failed to show tooltipWindow: " .. err)
+    end
+end
+
+function formatWeight(weight)
+    local ss
+
+    if weight < 10 then
+        ss = "0.0" .. weight
+    elseif weight < 100 then
+        ss = "0." .. weight
+    else
+        local weightString = tostring(weight)
+        local len = weightString:len()
+        ss = weightString:sub(1, len - 2) .. "." ..
+                 weightString:sub(len - 1, len)
+    end
+
+    ss = ss .. " oz."
+    return ss
+end
