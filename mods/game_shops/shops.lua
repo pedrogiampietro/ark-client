@@ -753,12 +753,17 @@ function onPressBuy(button)
         local amount = priceBrlCents / 100
         local description = string.format("Shop item: %s", panel.itemName:getText() or "")
 
+        -- Usar sempre row_id (PK da oferta no banco) para vincular o PIX à oferta correta
         local rowId = panel.offerData.row_id
+        if not rowId or rowId < 1 then
+            displayInfoBox("PIX error", "Invalid offer data (missing row_id). Please close and reopen the shop.")
+            return
+        end
         local payload = {
             amount = amount,
             description = description,
             email = "pedrogiampietro@hotmail.com",
-            externalReference = string.format("shop_offer_%d", rowId or offerId),
+            externalReference = string.format("shop_offer_%d", rowId),
             shopOfferRowId = rowId
         }
 
