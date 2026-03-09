@@ -511,6 +511,8 @@ function parseShopOpen(data)
                     id = offerId,
                     cid = offer.cid,
                     price = offer.price,
+                    currency = offer.currency or 0,
+                    priceBrl = offer.price_brl or 0,
                     count = offer.count,
                     content = offer.content,
                     attr = offer.attr
@@ -605,7 +607,13 @@ function parseShopOpen(data)
                 panel.offerItem:setItemId(offer.cid)
                 panel.offerItem:setItemCount(offer.count)
 
-                panel.price:setText(formatNumber(offer.price))
+                local currency = offer.currency or 0 -- 0 = gold, 1 = pix
+                if currency == 0 then
+                    panel.price:setText(formatNumber(offer.price))
+                else
+                    local brl = (offer.price_brl or 0) / 100
+                    panel.price:setText(string.format("R$ %.2f", brl))
+                end
                 panel.price:show()
 
                 if not panel.offerItem:getItem():isStackable() then
@@ -626,7 +634,7 @@ function parseShopOpen(data)
                 panel.weight:show()
             end
 
-            if not isOwnShop() then
+            if not isOwnShop() and (offer.currency or 0) == 0 then
                 if offer.price > data.money then
                     panel.price:setColor("#ff1212")
                 else
@@ -717,6 +725,40 @@ function onPressBuy(button)
     local price = panel.offerData.price
     local count = panel.offerData.count
 
+    local currency = panel.offerData.currency or 0
+
+    -- Fluxo PIX: chamar API externa para gerar QRCode e exibir na janela
+    if currency ~= 0 then
+        local priceBrlCents = panel.offerData.priceBrl or 0
+        if priceBrlCents <= 0 then
+            return displayInfoBox("PIX error", "Invalid PIX price for this offer.")
+        end
+
+        local amount = priceBrlCents / 100
+        local description = string.format("Shop item: %s", panel.itemName:getText() or "")
+
+        local payload = {
+            amount = amount,
+            description = description,
+            -- Ajuste este e-mail para um e-mail válido que exista na tabela accounts
+            email = "pedrogiampietro@hotmail.com",
+            externalReference = string.format("shop_offer_%d", offerId)
+        }
+
+        HTTP.postJSON(PIX_API_URL, payload, function(data, err)
+            if err then
+                displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
+                return
+            end
+            if not data or not data.qr_code then
+                displayInfoBox("PIX error", "Invalid PIX response from server.")
+                return
+            end
+            showPixPaymentWindow(data)
+        end)
+        return
+    end
+
     local function requestBuy(selectedCount)
         local payload = {
             e = 'SHOP_BUY',
@@ -802,6 +844,36 @@ function onPressBuy(button)
     end, function() -- Escape
         if confirmBox then confirmBox:destroy() end
     end)
+end
+
+local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
+
+local function showPixPaymentWindow(result)
+    local root = g_ui.getRootWidget()
+    if not root then return end
+
+    if MainWindow.pixPaymentWindow then
+        MainWindow.pixPaymentWindow:destroy()
+        MainWindow.pixPaymentWindow = nil
+    end
+
+    local win = g_ui.createWidget('PixPaymentWindow', root)
+    MainWindow.pixPaymentWindow = win
+
+    local qrImage = win:getChildById('qrImage')
+    if qrImage and result.qr_code then
+        qrImage:setQRCode(result.qr_code, 1)
+    end
+
+    local infoLabel = win:getChildById('infoLabel')
+    if infoLabel then
+        infoLabel:setText(tr("Scan the QR code with your bank app or copy the code below."))
+    end
+
+    local codeEdit = win:getChildById('codeEdit')
+    if codeEdit and result.qr_code then
+        codeEdit:setText(result.qr_code)
+    end
 end
 
 local function parseShopClose() hide() end

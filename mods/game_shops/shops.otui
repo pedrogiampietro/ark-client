@@ -565,3 +565,47 @@ ConfirmBuyAmountWindow < MainWindow
     margin-bottom: 10
     margin-top: 12
     width: 90
+
+PixPaymentWindow < MainWindow
+  id: pixPaymentWindow
+  size: 320 360
+  modal: true
+  focusable: true
+  !text: tr('PIX Payment')
+  @onEscape: self:destroy()
+
+  UIWidget
+    id: qrImage
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 20
+    image-auto-resize: true
+
+  Label
+    id: infoLabel
+    anchors.top: qrImage.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    text-align: center
+
+  TextEdit
+    id: codeEdit
+    anchors.top: infoLabel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-left: 10
+    margin-right: 10
+    margin-top: 5
+    height: 80
+    multiline: true
+    read-only: true
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 10
+    width: 80
+    @onClick: self:getParent():destroy()
