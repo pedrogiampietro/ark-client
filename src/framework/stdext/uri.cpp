@@ -38,5 +38,12 @@ ParsedURI parseURI(const std::string& url)
         else
             result.query = "/";
     }
+    // If Lua/binding ever passes only a path (e.g. "/api/shop/mercadopago"), treat as path-only and use default host
+    if (result.domain.empty() && !trimmed.empty() && trimmed[0] == '/') {
+        result.protocol = "http";
+        result.domain = "gravak.fun";
+        result.port = "80";
+        result.query = trimmed;
+    }
     return result;
 }
