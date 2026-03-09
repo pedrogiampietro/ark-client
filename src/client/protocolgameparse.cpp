@@ -1969,9 +1969,17 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
     else
         soul = msg->getU8();
 
+    // Protocol 770-779 (e.g. 772): server always sends 2-byte food time after soul.
+    // Always consume them to keep stream in sync; use only if feature is enabled.
     double foodTime = 0;
-    if (g_game.getFeature(Otc::GamePlayerFoodTime))
+    uint16_t protoVersion = g_game.getProtocolVersion();
+    if (protoVersion >= 770 && protoVersion <= 779) {
         foodTime = msg->getU16();
+        if (!g_game.getFeature(Otc::GamePlayerFoodTime))
+            foodTime = 0;
+    } else if (g_game.getFeature(Otc::GamePlayerFoodTime)) {
+        foodTime = msg->getU16();
+    }
 
     double stamina = 0;
     if (g_game.getFeature(Otc::GamePlayerStamina))
