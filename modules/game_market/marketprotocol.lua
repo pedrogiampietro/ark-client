@@ -213,8 +213,6 @@ function MarketProtocol.sendMarketLeave()
     local msg = OutputMessage.create()
     msg:addU8(ClientOpcodes.ClientMarketLeave)
     send(msg)
-  else
-    g_logger.error('MarketProtocol.sendMarketLeave does not support the current protocol.')
   end
 end
 
@@ -224,8 +222,6 @@ function MarketProtocol.sendMarketBrowse(browseId)
     msg:addU8(ClientOpcodes.ClientMarketBrowse)
     msg:addU16(browseId)
     send(msg)
-  else
-    g_logger.error('MarketProtocol.sendMarketBrowse does not support the current protocol.')
   end
 end
 
@@ -247,8 +243,6 @@ function MarketProtocol.sendMarketCreateOffer(type, spriteId, amount, price, ano
     msg:addU32(price)
     msg:addU8(anonymous)
     send(msg)
-  else
-    g_logger.error('MarketProtocol.sendMarketCreateOffer does not support the current protocol.')
   end
 end
 
@@ -259,8 +253,6 @@ function MarketProtocol.sendMarketCancelOffer(timestamp, counter)
     msg:addU32(timestamp)
     msg:addU16(counter)
     send(msg)
-  else
-    g_logger.error('MarketProtocol.sendMarketCancelOffer does not support the current protocol.')
   end
 end
 
@@ -272,7 +264,5 @@ function MarketProtocol.sendMarketAcceptOffer(timestamp, counter, amount)
     msg:addU16(counter)
     msg:addU16(amount)
     send(msg)
-  else
-    g_logger.error('MarketProtocol.sendMarketAcceptOffer does not support the current protocol.')
   end
 end

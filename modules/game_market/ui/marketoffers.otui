@@ -45,7 +45,7 @@ Panel
     margin-top: 6
     margin-left: 6
 
-  MarketCharacter < UICreature
+  UICreature
     id: marketCharacter
     size: 80 80
     anchors.top: rightTabBar.bottom
