@@ -45,6 +45,14 @@ Panel
     margin-top: 6
     margin-left: 6
 
+  MarketCharacter < UICreature
+    id: marketCharacter
+    size: 80 80
+    anchors.top: rightTabBar.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 40
+    fixed-creature-size: true
+
   Label
     id: nameLabel
     !text: tr('No item selected.')

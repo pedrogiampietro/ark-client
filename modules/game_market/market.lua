@@ -39,6 +39,7 @@ myCurrentOffersTab = nil
 myOfferHistoryTab = nil
 offerHistoryPanel = nil
 itemsPanel = nil
+marketCharacter = nil
 selectedOffer = {}
 selectedMyOffer = {}
 
@@ -889,6 +890,7 @@ local function initInterface()
   -- setup selected item
   nameLabel = marketOffersPanel:getChildById('nameLabel')
   selectedItem = marketOffersPanel:getChildById('selectedItem')
+  marketCharacter = marketOffersPanel:getChildById('marketCharacter')
 
   -- setup create new offer
   totalPriceEdit = marketOffersPanel:getChildById('totalPriceEdit')
@@ -994,6 +996,18 @@ function init()
   marketWindow:hide()
 
   initInterface() -- build interface
+
+  -- Dev/test shortcut: Ctrl+M abre/fecha a janela do Market sem depender do servidor
+  g_keyboard.bindKeyDown('Ctrl+M', function()
+    if not marketWindow then return end
+    if marketWindow:isVisible() then
+      Market.close(false)
+    else
+      marketWindow:show()
+      marketWindow:raise()
+      marketWindow:focus()
+    end
+  end, rootWidget)
 end
 
 function terminate()
@@ -1369,6 +1383,12 @@ function Market.onMarketEnter(depotItems, offers, balance, vocation, items)
   local player = g_game.getLocalPlayer()
   if player then
     information.player = player
+    if marketCharacter then
+      local outfit = player:getOutfit()
+      marketCharacter:setOutfit(outfit)
+      marketCharacter:setFixedCreatureSize(true)
+      marketCharacter:setCenter(true)
+    end
   end
   if vocation == -1 then
     if player then
