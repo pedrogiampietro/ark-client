@@ -1,4 +1,7 @@
 skillsWindow = nil
+local foodTimeTickEvent = nil
+local lastFoodTimeReceived = 0
+local lastFoodTimeReceivedAt = 0
 
 function init()
   connect(LocalPlayer, {
@@ -12,6 +15,7 @@ function init()
     --onStaminaChange = onStaminaChange,
     onOfflineTrainingChange = onOfflineTrainingChange,
     onRegenerationChange = onRegenerationChange,
+    onFoodTimeChange = onFoodTimeChange,
     onSpeedChange = onSpeedChange,
     onBaseSpeedChange = onBaseSpeedChange,
     onMagicLevelChange = onMagicLevelChange,
@@ -48,6 +52,7 @@ function terminate()
     --onStaminaChange = onStaminaChange,
     onOfflineTrainingChange = onOfflineTrainingChange,
     onRegenerationChange = onRegenerationChange,
+    onFoodTimeChange = onFoodTimeChange,
     onSpeedChange = onSpeedChange,
     onBaseSpeedChange = onBaseSpeedChange,
     onMagicLevelChange = onMagicLevelChange,
@@ -195,6 +200,13 @@ function update()
   else
     regenerationTime:show()
   end
+
+  local foodTime = skillsWindow:recursiveGetChildById('foodTime')
+  if not g_game.getFeature(GamePlayerFoodTime) then
+    foodTime:hide()
+  else
+    foodTime:show()
+  end
 end
 
 function refresh()
@@ -214,6 +226,7 @@ function refresh()
   onMagicLevelChange(player, player:getMagicLevel(), player:getMagicLevelPercent())
   onOfflineTrainingChange(player, player:getOfflineTrainingTime())
   onRegenerationChange(player, player:getRegenerationTime())
+  onFoodTimeChange(player, player:getFoodTime())
   onSpeedChange(player, player:getSpeed())
 
   local hasAdditionalSkills = g_game.getFeature(GameAdditionalSkills)
@@ -239,6 +252,7 @@ end
 
 function offline()
   if expSpeedEvent then expSpeedEvent:cancel() expSpeedEvent = nil end
+  if foodTimeTickEvent then foodTimeTickEvent:cancel() foodTimeTickEvent = nil end
 end
 
 function toggle()
@@ -406,6 +420,43 @@ function onRegenerationChange(localPlayer, regenerationTime)
 
   setSkillValue('regenerationTime', minutes .. ":" .. seconds)
   checkAlert('regenerationTime', regenerationTime, false, 300)
+end
+
+function updateFoodTimeDisplay(remainingSeconds)
+  if not g_game.getFeature(GamePlayerFoodTime) or remainingSeconds < 0 then
+    return
+  end
+  local minutes = math.floor(remainingSeconds / 60)
+  local seconds = math.floor(remainingSeconds % 60)
+  local secStr = seconds < 10 and ('0' .. seconds) or tostring(seconds)
+  setSkillValue('foodTime', minutes .. ":" .. secStr)
+  checkAlert('foodTime', remainingSeconds, false, 300)
+end
+
+function onFoodTimeChange(localPlayer, foodTimeSeconds)
+  if not g_game.getFeature(GamePlayerFoodTime) or foodTimeSeconds < 0 then
+    return
+  end
+  lastFoodTimeReceived = foodTimeSeconds
+  lastFoodTimeReceivedAt = os.time()
+  updateFoodTimeDisplay(foodTimeSeconds)
+  if not foodTimeTickEvent and foodTimeSeconds > 0 then
+    foodTimeTickEvent = cycleEvent(function()
+      local player = g_game.getLocalPlayer()
+      if not player then return end
+      local elapsed = os.time() - lastFoodTimeReceivedAt
+      local remaining = math.max(0, lastFoodTimeReceived - elapsed)
+      updateFoodTimeDisplay(remaining)
+      if remaining <= 0 and foodTimeTickEvent then
+        foodTimeTickEvent:cancel()
+        foodTimeTickEvent = nil
+      end
+    end, 1000)
+  end
+  if foodTimeSeconds <= 0 and foodTimeTickEvent then
+    foodTimeTickEvent:cancel()
+    foodTimeTickEvent = nil
+  end
 end
 
 function onSpeedChange(localPlayer, speed)

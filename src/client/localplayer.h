@@ -68,6 +68,7 @@ public:
     void setPremium(bool premium);
     void setRegenerationTime(double regenerationTime);
     void setOfflineTrainingTime(double offlineTrainingTime);
+    void setFoodTime(double foodTime);
     void setSpells(const std::vector<int>& spells);
     void setBlessings(int blessings);
 
@@ -92,6 +93,7 @@ public:
     double getStamina() { return m_stamina; }
     double getRegenerationTime() { return m_regenerationTime; }
     double getOfflineTrainingTime() { return m_offlineTrainingTime; }
+    double getFoodTime() { return m_foodTime; }
     std::vector<int> getSpells() { return m_spells; }
     ItemPtr getInventoryItem(Otc::InventorySlot inventory) { return m_inventoryItems[inventory]; }
     int getBlessings() { return m_blessings; }
@@ -200,6 +202,7 @@ private:
     double m_stamina;
     double m_regenerationTime;
     double m_offlineTrainingTime;
+    double m_foodTime;
 };
 
 #endif

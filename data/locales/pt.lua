@@ -278,6 +278,7 @@ locale = {
     ["Refresh Offers"] = "Atualizar Ofertas",
     ["Refresh"] = "Atualizar",
     ["Regeneration Time"] = "Tempo de Regeneração",
+    ["Food Time"] = "Tempo de Comida",
     ["Reject"] = "Rejeitar",
     ["Reload All"] = "Recarregar Todos",
     ["Remember account and password when starts client"] = "Lembrar conta e senha quando iniciar o cliente",

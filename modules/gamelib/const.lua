@@ -176,6 +176,7 @@ GameTibia12Protocol = 89
 GameNewWalking = 90
 GameSlowerManualWalking = 91
 GameItemTooltip = 93
+GamePlayerFoodTime = 94
 
 GameBot = 95
 GameBiggerMapCache = 96

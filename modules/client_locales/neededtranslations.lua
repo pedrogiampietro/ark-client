@@ -240,6 +240,7 @@ neededTranslations = {
   "Refresh",
   "Refresh Offers",
   "Regeneration Time",
+  "Food Time",
   "Reject",
   "Reload All",
   "Remember account and password when starts client",

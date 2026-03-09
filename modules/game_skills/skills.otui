@@ -92,6 +92,13 @@ MiniWindow
       SkillValueLabel
 
     SkillButton
+      id: foodTime
+      height: 15
+      SkillNameLabel
+        !text: tr('Food Time')
+      SkillValueLabel
+
+    SkillButton
       id: speed
       height: 15
       SkillNameLabel

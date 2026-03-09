@@ -1969,6 +1969,10 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
     else
         soul = msg->getU8();
 
+    double foodTime = 0;
+    if (g_game.getFeature(Otc::GamePlayerFoodTime))
+        foodTime = msg->getU16();
+
     double stamina = 0;
     if (g_game.getFeature(Otc::GamePlayerStamina))
         stamina = msg->getU16();
@@ -2006,6 +2010,7 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
     m_localPlayer->setBaseSpeed(baseSpeed);
     m_localPlayer->setRegenerationTime(regeneration);
     m_localPlayer->setOfflineTrainingTime(training);
+    m_localPlayer->setFoodTime(foodTime);
 }
 
 void ProtocolGame::parsePlayerSkills(const InputMessagePtr& msg)

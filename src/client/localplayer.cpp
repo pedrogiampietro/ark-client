@@ -55,6 +55,7 @@ LocalPlayer::LocalPlayer()
     m_baseSpeed = -1;
     m_regenerationTime = -1;
     m_offlineTrainingTime = -1;
+    m_foodTime = -1;
     m_totalCapacity = -1;
 }
 
@@ -640,6 +641,16 @@ void LocalPlayer::setOfflineTrainingTime(double offlineTrainingTime)
         m_offlineTrainingTime = offlineTrainingTime;
 
         callLuaField("onOfflineTrainingChange", offlineTrainingTime, oldOfflineTrainingTime);
+    }
+}
+
+void LocalPlayer::setFoodTime(double foodTime)
+{
+    if(m_foodTime != foodTime) {
+        double oldFoodTime = m_foodTime;
+        m_foodTime = foodTime;
+
+        callLuaField("onFoodTimeChange", foodTime, oldFoodTime);
     }
 }
 
