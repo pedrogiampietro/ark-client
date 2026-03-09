@@ -512,6 +512,7 @@ function parseShopOpen(data)
 
                 panel.offerData = {
                     id = offerId,
+                    row_id = offer.row_id,
                     cid = offer.cid,
                     price = offer.price,
                     currency = offer.currency or 0,
@@ -745,7 +746,7 @@ function onPressBuy(button)
             description = description,
             -- Ajuste este e-mail para um e-mail válido que exista na tabela accounts
             email = "pedrogiampietro@hotmail.com",
-            externalReference = string.format("shop_offer_%d", offerId)
+            externalReference = string.format("shop_offer_%d", panel.offerData.row_id or offerId)
         }
 
         local url = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
