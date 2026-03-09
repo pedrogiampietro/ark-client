@@ -175,38 +175,45 @@ MiniWindow
       SkillValueLabel
       SkillPercentPanel
 
-    SmallSkillButton
+    SkillButton
       id: skillId7
+      SkillNameLabel
+        !text: tr('Harvesting')
+      SkillValueLabel
+      SkillPercentPanel
+
+    SmallSkillButton
+      id: skillId8
       SkillNameLabel
         !text: tr('Critical Hit Chance')
       SkillValueLabel
 
     SmallSkillButton
-      id: skillId8
+      id: skillId9
       SkillNameLabel
         !text: tr('Critical Hit Damage')
       SkillValueLabel
 
     SmallSkillButton
-      id: skillId9
+      id: skillId10
       SkillNameLabel
         !text: tr('Life Leech Chance')
       SkillValueLabel
 
     SmallSkillButton
-      id: skillId10
+      id: skillId11
       SkillNameLabel
         !text: tr('Life Leech Amount')
       SkillValueLabel
 
     SmallSkillButton
-      id: skillId11
+      id: skillId12
       SkillNameLabel
         !text: tr('Mana Leech Chance')
       SkillValueLabel
 
     SmallSkillButton
-      id: skillId12
+      id: skillId13
       SkillNameLabel
         !text: tr('Mana Leech Amount')
       SkillValueLabel

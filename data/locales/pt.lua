@@ -150,6 +150,7 @@ locale = {
     ["Filter list to match your vocation"] = "Filtrar a lista para a sua vocação",
     ["Find"] = "Procurar",
     ["Fishing"] = "Pesca",
+    ["Harvesting"] = "Recolheita",
     ["Fist Fighting"] = "Porrada",
     ["Follow"] = "Seguir",
     ["For Your Information"] = "Para sua informação",

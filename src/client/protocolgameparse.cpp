@@ -2010,7 +2010,7 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
 
 void ProtocolGame::parsePlayerSkills(const InputMessagePtr& msg)
 {
-    int lastSkill = Otc::Fishing + 1;
+    int lastSkill = Otc::Harvesting + 1;
     if (g_game.getFeature(Otc::GameAdditionalSkills))
         lastSkill = Otc::LastSkill;
 
@@ -2042,7 +2042,7 @@ void ProtocolGame::parsePlayerSkills(const InputMessagePtr& msg)
 
         int levelPercent = 0;
         // Critical, Life Leech and Mana Leech have no level percent
-        if (skill <= Otc::Fishing) {
+        if (skill <= Otc::Harvesting) {
             if (g_game.getFeature(Otc::GameTibia12Protocol))
                 msg->getU16(); // unknown
 

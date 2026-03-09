@@ -131,6 +131,7 @@ locale = {
     ["Filter list to match your vocation"] = false,
     ["Find:"] = false,
     ["Fishing"] = "Fischen",
+    ["Harvesting"] = "Ernte",
     ["Fist Fighting"] = "Faustkampf",
     ["Follow"] = "Verfolgen",
     ["Force Exit"] = false,

@@ -158,6 +158,7 @@ namespace Otc
         Distance,
         Shielding,
         Fishing,
+        Harvesting,
         CriticalChance,
         CriticalDamage,
         LifeLeechChance,

@@ -128,6 +128,7 @@ locale = {
     ["Filter list to match your vocation"] = "Wyswietl tylko odpowiednie dla mojej klasy",
     ["Find:"] = "Szukaj:",
     ["Fishing"] = "Wedkarstwo",
+    ["Harvesting"] = "Zbiory",
     ["Fist Fighting"] = "Walka wrecz",
     ["Follow"] = "Podazaj",
     ["Force Exit"] = "Wymus Zamkniecie",

@@ -53,12 +53,13 @@ Skill = {
   Distance = 4,
   Shielding = 5,
   Fishing = 6,
-  CriticalChance = 7,
-  CriticalDamage = 8,
-  LifeLeechChance = 9,
-  LifeLeechAmount = 10,
-  ManaLeechChance = 11,
-  ManaLeechAmount = 12
+  Harvesting = 7,
+  CriticalChance = 8,
+  CriticalDamage = 9,
+  LifeLeechChance = 10,
+  LifeLeechAmount = 11,
+  ManaLeechChance = 12,
+  ManaLeechAmount = 13
 }
 
 North = Directions.North

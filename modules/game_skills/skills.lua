@@ -221,7 +221,7 @@ function refresh()
     onSkillChange(player, i, player:getSkillLevel(i), player:getSkillLevelPercent(i))
     onBaseSkillChange(player, i, player:getSkillBaseLevel(i))
 
-    if i > Skill.Fishing then
+    if i > Skill.Harvesting then
       toggleSkill('skillId'..i, hasAdditionalSkills)
     end
   end

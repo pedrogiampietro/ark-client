@@ -132,6 +132,7 @@ locale = {
     ["Filter list to match your vocation"] = "Filtrera efter kallelse",
     ["Find:"] = false,
     ["Fishing"] = "Fiske",
+    ["Harvesting"] = "Skörd",
     ["Fist Fighting"] = "Hand Stridande",
     ["Follow"] = "Följ",
     ["Force Exit"] = false,

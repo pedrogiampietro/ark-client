@@ -134,6 +134,7 @@ locale = {
     ["Filter list to match your vocation"] = "Lista de filtros que coincida con el vocación",
     ["Find:"] = "Encontrar:",
     ["Fishing"] = "Pesca",
+    ["Harvesting"] = "Cosecha",
     ["Fist Fighting"] = "Combate con puños",
     ["Follow"] = "Seguir",
     ["Force Exit"] = "Forzar salida",
