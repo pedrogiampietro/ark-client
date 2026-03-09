@@ -621,7 +621,7 @@ PixPaymentWindow < MainWindow
     @onClick: self:getParent():destroy()
 
 PixSuccessWindow < MainWindow
-  size: 280 200
+  size: 300 240
   modal: true
   focusable: true
   !text: tr('Pagamento confirmado')
@@ -635,18 +635,6 @@ PixSuccessWindow < MainWindow
     image-source: /images/ui/check
     image-auto-resize: false
 
-  Label
-    id: successMessage
-    anchors.top: successCheckImage.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 12
-    margin-left: 15
-    margin-right: 15
-    text-align: center
-    text-wrap: true
-    !text: tr('Nos próximos 30 segundos o item será enviado.')
-
   Button
     id: successOkButton
     !text: tr('Ok')
@@ -655,3 +643,17 @@ PixSuccessWindow < MainWindow
     margin-bottom: 12
     width: 80
     @onClick: self:getParent():destroy()
+
+  Label
+    id: successMessage
+    anchors.top: successCheckImage.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: successOkButton.top
+    margin-top: 12
+    margin-left: 15
+    margin-right: 15
+    margin-bottom: 8
+    text-align: center
+    text-wrap: true
+    !text: tr('Nos próximos 30 segundos o item será enviado.')
