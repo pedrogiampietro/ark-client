@@ -460,6 +460,25 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
     local localPlayer = g_game.getLocalPlayer()
     menu:addSeparator()
 
+    -- Player private shop (Chimera-style)
+    if creatureThing:isPlayer() and openShop then
+      menu:addOption(tr('Open Shop'), function()
+        local npcName = creatureThing:getName()
+        local guid = npcName:match("#(%d+)$")
+        if guid then
+          openShop(tonumber(guid))
+        else
+          local player = g_game.getLocalPlayer()
+          if player and creatureThing:isLocalPlayer() then
+            openShop(player:getId())
+          else
+            openShop(creatureThing:getId())
+          end
+        end
+      end)
+      menu:addSeparator()
+    end
+
     if creatureThing:isLocalPlayer() then
       menu:addOption(tr('Set Outfit'), function() g_game.requestOutfit() end)
 
