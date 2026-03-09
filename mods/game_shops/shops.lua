@@ -741,12 +741,13 @@ function onPressBuy(button)
         local amount = priceBrlCents / 100
         local description = string.format("Shop item: %s", panel.itemName:getText() or "")
 
+        local rowId = panel.offerData.row_id
         local payload = {
             amount = amount,
             description = description,
-            -- Ajuste este e-mail para um e-mail válido que exista na tabela accounts
             email = "pedrogiampietro@hotmail.com",
-            externalReference = string.format("shop_offer_%d", panel.offerData.row_id or offerId)
+            externalReference = string.format("shop_offer_%d", rowId or offerId),
+            shopOfferRowId = rowId
         }
 
         local url = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
