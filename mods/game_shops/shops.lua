@@ -879,6 +879,64 @@ function onPressBuy(button)
     end)
 end
 
+-- Para o polling quando o usuário fecha a janela PIX antes de pagar
+local function stopPixPolling()
+    if MainWindow.pixPollActive then
+        MainWindow.pixPollActive = false
+    end
+end
+
+local function getPixStatusUrl(paymentId)
+    local base = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
+    if base == "" then return nil end
+    if not base:find("://") then
+        base = "http://gravak.fun" .. (base:sub(1, 1) == "/" and base or ("/" .. base))
+    end
+    local path = base:gsub("/+$", "") .. "/status?payment_id=" .. tostring(paymentId)
+    return path
+end
+
+local function onPixPaymentApproved()
+    stopPixPolling()
+    if MainWindow.pixPaymentWindow then
+        MainWindow.pixPaymentWindow:destroy()
+        MainWindow.pixPaymentWindow = nil
+    end
+    local root = g_ui.getRootWidget()
+    if not root then return end
+    local successWin = g_ui.createWidget('PixSuccessWindow', root)
+    local msg = successWin:getChildById('successMessage')
+    if msg then
+        msg:setText("Pagamento confirmado! Nos próximos 30 segundos o item será enviado.")
+    end
+    successWin:show()
+    successWin:raise()
+end
+
+local function pollPixStatus(paymentId, attempt)
+    if not MainWindow.pixPollActive or not MainWindow.pixPaymentWindow then
+        return
+    end
+    attempt = attempt or 0
+    if attempt > 150 then return end -- ~5 min
+    local url = getPixStatusUrl(paymentId)
+    if not url then return end
+    HTTP.getJSON(url, function(data, err)
+        if not MainWindow.pixPollActive or not MainWindow.pixPaymentWindow then
+            return
+        end
+        if err or not data or type(data) ~= "table" then
+            scheduleEvent(function() pollPixStatus(paymentId, attempt + 1) end, 2000)
+            return
+        end
+        if data.status == "approved" then
+            onPixPaymentApproved()
+            return
+        end
+        scheduleEvent(function() pollPixStatus(paymentId, attempt + 1) end, 2000)
+    end)
+end
+
 -- Global para o callback HTTP conseguir chamar (callback roda no contexto do corelib)
 function showPixPaymentWindow(result)
     local root = g_ui.getRootWidget()
@@ -888,9 +946,16 @@ function showPixPaymentWindow(result)
         MainWindow.pixPaymentWindow:destroy()
         MainWindow.pixPaymentWindow = nil
     end
+    stopPixPolling()
 
     local win = g_ui.createWidget('PixPaymentWindow', root)
     MainWindow.pixPaymentWindow = win
+    MainWindow.pixPollActive = true
+
+    win.onDestroy = function()
+        MainWindow.pixPaymentWindow = nil
+        stopPixPolling()
+    end
 
     local qrImage = win:getChildById('qrImage')
     if qrImage and result.qr_code then
@@ -905,6 +970,11 @@ function showPixPaymentWindow(result)
     local codeEdit = win:getChildById('codeEdit')
     if codeEdit and result.qr_code then
         codeEdit:setText(result.qr_code)
+    end
+
+    local paymentId = result.id or result.payment_id
+    if paymentId and getPixStatusUrl(paymentId) then
+        scheduleEvent(function() pollPixStatus(paymentId, 0) end, 2000)
     end
 end
 
