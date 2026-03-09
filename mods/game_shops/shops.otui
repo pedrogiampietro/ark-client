@@ -377,10 +377,11 @@ UIWindow
   Button
     id: pauseButton
     size: 80 25
-    anchors.top: buyButton.top
+    anchors.top: buyButton.bottom
     anchors.right: parent.right
     image-source: /images/ui/buttons-gold
     margin-right: 20
+    margin-top: 3
     text-offset: 0 1
     border-color: white
     border-width: 0
@@ -397,9 +398,10 @@ UIWindow
   Button
     id: closeButton
     size: 80 25
+    anchors.top: pauseButton.bottom
     anchors.right: parent.right
     margin-right: 20
-    margin-top: 5
+    margin-top: 3
     margin-bottom: 15
     image-source: /images/ui/buttons-red
     !text: tr("Close")
