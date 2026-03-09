@@ -388,6 +388,16 @@ UIWindow
     anchors.right: parent.right
     border-color: white
 
+  Label
+    id: balanceLabel
+    anchors.top: earnings.bottom
+    anchors.left: creature.right
+    anchors.right: parent.right
+    margin-left: 10
+    margin-top: 2
+    color: #b8e086
+    visible: false
+
   Button
     id: buyButton
     size: 80 25

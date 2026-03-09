@@ -422,6 +422,7 @@ function parseShopOpen(data)
 
         MainWindow.buyButton:disable()
         MainWindow.buyButton:setHeight(0)
+        MainWindow.buyButton:hide()
 
         MainWindow.pauseButton:show()
         MainWindow.pauseButton:enable()
@@ -448,10 +449,17 @@ function parseShopOpen(data)
         else
             MainWindow.earnings:setColor("green")
         end
+
+        if MainWindow.balanceLabel then
+            local brl = type(data.balance_brl) == "number" and data.balance_brl or (tonumber(data.balance_brl) or 0)
+            MainWindow.balanceLabel:setText(string.format(tr("You have R$ %.2f"), brl))
+            MainWindow.balanceLabel:show()
+        end
     else
         MainWindow.pauseButton:hide()
         MainWindow.earningsLabel:setText("Your funds: ")
 
+        MainWindow.buyButton:show()
         MainWindow.buyButton:setHeight(25)
         MainWindow.buyButton:disable()
 
@@ -467,6 +475,10 @@ function parseShopOpen(data)
             MainWindow.currentShop.funds = 0
             MainWindow.earnings:setText("?")
             MainWindow.earnings:setColor("white")
+        end
+
+        if MainWindow.balanceLabel then
+            MainWindow.balanceLabel:hide()
         end
     end
 
@@ -925,9 +937,18 @@ local function parseShopHistory(entries)
             local count = sale.count or 0
             local price = sale.price or 0
             local buyer = sale.buyer or ''
+            local payMethod = sale.payment_method or 'gold'
+            local priceBrl = sale.price_brl
 
-            local line = string.format("%s | x%d %s | %d gp | %s",
-                when, count, itemName, price, buyer)
+            local payStr
+            if payMethod == 'pix' and priceBrl and priceBrl > 0 then
+                payStr = string.format("PIX R$ %.2f", priceBrl)
+            else
+                payStr = string.format("%d gp", price)
+            end
+
+            local line = string.format("%s | x%d %s | %s | %s",
+                when, count, itemName, payStr, buyer)
 
             local row = g_ui.createWidget('Label', scroll)
             row:setText(line)
