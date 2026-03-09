@@ -757,6 +757,11 @@ function onPressBuy(button)
         if not url:find("://") then
             url = "http://gravak.fun" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
         end
+
+        -- Debug: show which URL is being used for the PIX request
+        -- (remove or comment this after tudo estiver testado)
+        -- displayInfoBox("PIX debug", "Requesting:\n" .. url)
+
         HTTP.postJSON(url, payload, function(data, err)
             if err then
                 displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
