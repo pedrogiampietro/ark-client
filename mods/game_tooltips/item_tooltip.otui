@@ -1,0 +1,35 @@
+ItemTooltipWindow < MainWindow
+  id: itemTooltipWindow
+  text: Item
+  size: 200 100
+  draggable: false
+  resizeable: false
+  @onEscape: tooltipWindow:hide()
+
+  Panel
+    id: container
+    anchors.fill: parent
+    margin: 4
+
+    UIItem
+      id: itemSprite
+      anchors.top: parent.top
+      anchors.left: parent.left
+      size: 32 32
+
+    Label
+      id: itemWeightLabel
+      anchors.top: parent.top
+      anchors.left: itemSprite.right
+      anchors.right: parent.right
+      margin-left: 4
+      text: ''
+
+    VerticalLayout
+      id: labels
+      anchors.top: itemSprite.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin-top: 4
+
