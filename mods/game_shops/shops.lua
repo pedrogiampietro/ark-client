@@ -760,7 +760,7 @@ function onPressBuy(button)
 
         -- Debug: show which URL is being used for the PIX request
         -- (remove or comment this after tudo estiver testado)
-        -- displayInfoBox("PIX debug", "Requesting:\n" .. url)
+        displayInfoBox("PIX debug", "Requesting:\n" .. url)
 
         HTTP.postJSON(url, payload, function(data, err)
             if err then
