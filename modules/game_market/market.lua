@@ -996,6 +996,9 @@ function init()
   marketWindow:hide()
 
   initInterface() -- build interface
+
+  -- Atalho de teste no cliente: Ctrl+M abre/fecha o Market
+  g_keyboard.bindKeyDown('Ctrl+M', Market.toggle)
 end
 
 function Market.toggle()
@@ -1009,9 +1012,6 @@ function Market.toggle()
   end
 end
 
--- Atalho de teste no cliente: Ctrl+M abre/fecha o Market
-g_keyboard.bindKeyDown('Ctrl+M', Market.toggle)
-
 function terminate()
   Market.close()
 
@@ -1022,6 +1022,8 @@ function terminate()
   disconnect(g_game, { onGameEnd = Market.close })
   disconnect(g_game, { onGameStart = Market.updateCategories })
   disconnect(g_game, { onCoinBalance = Market.onCoinBalance })
+
+  g_keyboard.unbindKeyDown('Ctrl+M')
 
   destroyAmountWindow()
   marketWindow:destroy()
