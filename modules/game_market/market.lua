@@ -996,19 +996,21 @@ function init()
   marketWindow:hide()
 
   initInterface() -- build interface
-
-  -- Dev/test shortcut: Ctrl+M abre/fecha a janela do Market sem depender do servidor
-  g_keyboard.bindKeyDown('Ctrl+M', function()
-    if not marketWindow then return end
-    if marketWindow:isVisible() then
-      Market.close(false)
-    else
-      marketWindow:show()
-      marketWindow:raise()
-      marketWindow:focus()
-    end
-  end, rootWidget)
 end
+
+function Market.toggle()
+  if not marketWindow then return end
+  if marketWindow:isVisible() then
+    Market.close(false)
+  else
+    marketWindow:show()
+    marketWindow:raise()
+    marketWindow:focus()
+  end
+end
+
+-- Atalho de teste no cliente: Ctrl+M abre/fecha o Market
+g_keyboard.bindKeyDown('Ctrl+M', Market.toggle)
 
 function terminate()
   Market.close()
