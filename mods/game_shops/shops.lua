@@ -5,6 +5,9 @@ Config = Config or {}
 Config.opcode = 220
 Config.money = Config.money or {2148, 2152, 2160} -- gold, platinum, crystal coins
 
+-- PIX API endpoint used for creating QR code payments
+local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
+
 local function onGameStart()
     if not MainWindow then return end
     hide()
@@ -850,8 +853,6 @@ function onPressBuy(button)
         if confirmBox then confirmBox:destroy() end
     end)
 end
-
-local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
 
 local function showPixPaymentWindow(result)
     local root = g_ui.getRootWidget()
