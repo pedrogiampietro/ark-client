@@ -865,7 +865,8 @@ function onPressBuy(button)
     end)
 end
 
-local function showPixPaymentWindow(result)
+-- Global para o callback HTTP conseguir chamar (callback roda no contexto do corelib)
+function showPixPaymentWindow(result)
     local root = g_ui.getRootWidget()
     if not root then return end
 
