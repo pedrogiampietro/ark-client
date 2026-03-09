@@ -975,6 +975,7 @@ local function initInterface()
 end
 
 function init()
+  g_logger.info('[game_market] init() called')
   g_ui.importStyle('market')
   g_ui.importStyle('ui/general/markettabs')
   g_ui.importStyle('ui/general/marketbuttons')
@@ -1002,6 +1003,7 @@ function init()
 end
 
 function Market.toggle()
+  g_logger.info('[game_market] Market.toggle() invoked')
   if not marketWindow then return end
   if marketWindow:isVisible() then
     Market.close(false)
