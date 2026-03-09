@@ -533,6 +533,8 @@ function parseShopOpen(data)
                     content = offer.content,
                     attr = offer.attr
                 }
+                -- Log: oferta recebida do servidor (row_id = PK no banco para PIX)
+                print(string.format("[SHOP_CLIENT] offer received: offer_id=%s row_id=%s cid=%s (panel %d)", tostring(offerId), tostring(offer.row_id), tostring(offer.cid), i))
 
                 -- Decodificar attr para tooltip
                 local attrData = {}
@@ -755,6 +757,8 @@ function onPressBuy(button)
 
         -- Usar sempre row_id (PK da oferta no banco) para vincular o PIX à oferta correta
         local rowId = panel.offerData.row_id
+        -- Log: dados da oferta no momento do clique em comprar (PIX)
+        print(string.format("[SHOP_CLIENT] PIX buy attempt: row_id=%s id=%s cid=%s priceBrl=%s (raw offerData.row_id type=%s)", tostring(rowId), tostring(panel.offerData.id), tostring(panel.offerData.cid), tostring(panel.offerData.priceBrl), type(panel.offerData.row_id)))
         if not rowId or rowId < 1 then
             displayInfoBox("PIX error", "Invalid offer data (missing row_id). Please close and reopen the shop.")
             return
