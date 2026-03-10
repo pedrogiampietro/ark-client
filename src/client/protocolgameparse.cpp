@@ -2451,7 +2451,19 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
         int outfitCount = g_game.getFeature(Otc::GameTibia12Protocol) ? msg->getU16() : msg->getU8();
         for (int i = 0; i < outfitCount; i++) {
             int outfitId = msg->getU16();
-            std::string outfitName = msg->getString();
+            int nameLen = msg->getU16();
+            std::string outfitName;
+            if (nameLen > 50) {
+                // Server sent old format (no locked byte): we read lookType as length; next 2 bytes are real length.
+                nameLen = msg->getU16();
+                if (nameLen > 64)
+                    nameLen = 0;
+            }
+            if (nameLen > 0) {
+                outfitName.reserve(static_cast<size_t>(nameLen));
+                for (int j = 0; j < nameLen; ++j)
+                    outfitName += static_cast<char>(msg->getU8());
+            }
             int outfitAddons = msg->getU8();
             if (g_game.getFeature(Otc::GameTibia12Protocol)) {
                 bool locked = msg->getU8() > 0;
