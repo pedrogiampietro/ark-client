@@ -1077,9 +1077,17 @@ end
 
 local function parseShop(protocol, opcode, buffer)
     if opcode ~= Config.opcode then return end
-    buffer = json.decode(buffer)
+    local ok, decoded = pcall(json.decode, buffer)
+    if not ok or not decoded then
+        print("[SHOP_DEBUG_CLIENT] parseShop: json decode failed")
+        return
+    end
+    buffer = decoded
     local data = buffer.d
     local evt = buffer.e
+    if evt == 'SHOP_NEARBY' then
+        print(string.format("[SHOP_DEBUG_CLIENT] parseShop evt=%s", tostring(evt)))
+    end
     if not evt then return end
     if evt == 'SHOP_OPEN' then
         parseShopOpen(data)
@@ -1105,24 +1113,37 @@ local function parseShop(protocol, opcode, buffer)
         onPixPaymentApproved(true)
     elseif evt == 'SHOP_NEARBY' then
         -- Mensagem fixa acima do nome da loja (quadradinho, não say)
+        print(string.format("[SHOP_DEBUG_CLIENT] SHOP_NEARBY received data=%s", type(data) == "table" and json.encode(data) or tostring(data)))
         if type(data) == "table" then
             for _, seller in ipairs(data) do
                 local sellerId = seller.id or seller.seller or seller[1]
                 local info = seller.info or ""
+                print(string.format("[SHOP_DEBUG_CLIENT] seller id=%s info='%s'", tostring(sellerId), tostring(info)))
                 if type(sellerId) == "number" and info ~= "" then
                     local creature = g_map.getCreatureById(sellerId)
+                    print(string.format("[SHOP_DEBUG_CLIENT] getCreatureById(%s)=%s", sellerId, creature and "found" or "nil"))
                     if creature then
                         local pos = creature:getPosition()
+                        print(string.format("[SHOP_DEBUG_CLIENT] pos=%s", pos and string.format("(%d,%d,%d)", pos.x, pos.y, pos.z) or "nil"))
                         if pos then
                             local staticText = StaticText.create()
                             staticText:setText(info)
                             staticText:setFont("cipsoftFont")
                             staticText:setColor("#ffdf00")
                             g_map.addThing(staticText, pos, -1)
+                            print(string.format("[SHOP_DEBUG_CLIENT] StaticText added at pos, text='%s'", info))
+                        else
+                            print("[SHOP_DEBUG_CLIENT] pos nil, skipping")
                         end
+                    else
+                        print("[SHOP_DEBUG_CLIENT] creature not found in map, skipping")
                     end
+                else
+                    print(string.format("[SHOP_DEBUG_CLIENT] skip: sellerId=%s info empty=%s", tostring(sellerId), info == ""))
                 end
             end
+        else
+            print("[SHOP_DEBUG_CLIENT] SHOP_NEARBY data is not table")
         end
     end
 end
@@ -1305,8 +1326,11 @@ function init()
 end
 
 function onCreatureAppear(creature)
-    local payload = {e = 'ASK', d = creature.id}
-
-    g_game.getProtocolGame():sendExtendedOpcode(Config.opcode,
-                                                json.encode(payload))
+    local id = creature and creature.id
+    local name = creature and creature.getName and creature:getName() or "?"
+    local payload = {e = 'ASK', d = id}
+    print(string.format("[SHOP_DEBUG_CLIENT] onCreatureAppear id=%s name=%s", tostring(id), tostring(name)))
+    if g_game.getProtocolGame() then
+        g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
+    end
 end
