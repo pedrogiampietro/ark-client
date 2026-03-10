@@ -485,7 +485,25 @@ function parseShopOpen(data)
 
     MainWindow.earningsLabel:resizeToText()
 
-    -- MainWindow.earnings:addAnchor(AnchorLeft, 'earningsLabel', AnchorRight)
+    -- desenhar mensagem fixa acima da cabeça do vendedor/clone para quem abriu a janela
+    local seller = g_map.getCreatureById(data.seller)
+    if seller and ((seller.isPlayer and seller:isPlayer()) or (seller.isNpc and seller:isNpc())) then
+        local info = MainWindow.currentShop.message or message
+        if type(info) == "string" and info ~= "" then
+            local pos = seller:getPosition()
+            if pos then
+                local staticText = StaticText.create()
+                if MessageModes and MessageModes.Say then
+                    staticText:addMessage("", MessageModes.Say, info)
+                else
+                    staticText:setText(info)
+                end
+                staticText:setFont("cipsoftFont")
+                staticText:setColor("#ffdf00")
+                g_map.addThing(staticText, pos, -1)
+            end
+        end
+    end
 
     for i = 1, 6 do
         local offer = data.offers[i]
