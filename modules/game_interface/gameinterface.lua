@@ -480,7 +480,11 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
     end
 
     if creatureThing:isLocalPlayer() then
-      menu:addOption(tr('Set Outfit'), function() g_game.requestOutfit() end)
+      menu:addOption(tr('Set Outfit'), function()
+        print("[OUTFIT] Menu 'Set Outfit' clicked, calling g_game.requestOutfit()")
+        g_game.requestOutfit()
+        print("[OUTFIT] g_game.requestOutfit() returned")
+      end)
 
       if g_game.getFeature(GamePlayerMounts) then
         if not localPlayer:isMounted() then

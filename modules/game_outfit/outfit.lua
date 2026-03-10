@@ -177,11 +177,14 @@ local PreviewOptions = {
 }
 
 function create(currentOutfit, outfitList, mountList, wingList, auraList, shaderList, healthBarList, manaBarList)
+  print("[OUTFIT] create() called")
   if ignoreNextOutfitWindow and g_clock.millis() < ignoreNextOutfitWindow + 1000 then
+    print("[OUTFIT] create() ignored (ignoreNextOutfitWindow)")
     return
   end
 
   if window then
+    print("[OUTFIT] create() destroying previous window")
     destroy()
   end
 
@@ -203,21 +206,30 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
   currentOutfit.legs = currentOutfit.legs or 0
   currentOutfit.feet = currentOutfit.feet or 0
   currentOutfit.addons = currentOutfit.addons or 0
+  print(string.format("[OUTFIT] create() #outfitList=%s lookType=%s", tostring(#outfitList), tostring(currentOutfit.lookType or currentOutfit.type)))
 
+  print("[OUTFIT] create() calling g_ui.displayUI('outfitwindow')")
   window = g_ui.displayUI("outfitwindow")
+  print("[OUTFIT] create() displayUI done")
 
   local creatureWidget = window:recursiveGetChildById("creature")
   if creatureWidget then
+    print("[OUTFIT] create() setting creature outfit")
     creatureWidget:setOutfit(currentOutfit)
+    print("[OUTFIT] create() setOutfit done")
+  else
+    print("[OUTFIT] create() WARNING: no creature widget")
   end
 
   tempOutfit = table.copy(currentOutfit)
 
   if not window.colorBoxPanel then
+    print("[OUTFIT] create() no colorBoxPanel, destroying and returning")
     destroy()
     return
   end
 
+  print("[OUTFIT] create() creating colorBoxGroup")
   colorBoxGroup = UIRadioGroup.create()
   for j = 0, 6 do
     for i = 0, 18 do
@@ -236,8 +248,10 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
   end
 
   colorBoxGroup.onSelectionChange = onColorCheckChange
+  print("[OUTFIT] create() colorBoxGroup done")
 
   if window.head and window.body and window.legs and window.feet then
+    print("[OUTFIT] create() creating colorModeGroup")
     colorModeGroup = UIRadioGroup.create()
     colorModeGroup:addWidget(window.head)
     colorModeGroup:addWidget(window.body)
@@ -271,9 +285,11 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
 
   -- Só configura addons/opções se o layout tiver os widgets (evita crash no layout simples)
   if window.configure and window.configure.addon1 and window.configure.addon2 then
+    print("[OUTFIT] create() calling configureAddons")
     configureAddons(currentOutfit.addons or 0)
   end
 
+  print("[OUTFIT] create() finished successfully")
   --[[
 
   if currentOutfit.shader == "" then
