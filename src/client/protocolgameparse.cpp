@@ -2448,7 +2448,10 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
     std::vector<std::tuple<int, std::string, int> > outfitList;
 
     if (g_game.getFeature(Otc::GameNewOutfitProtocol)) {
-        int outfitCount = g_game.getFeature(Otc::GameTibia12Protocol) ? msg->getU16() : msg->getU8();
+        // OTClient servers (e.g. protocol 770-779) send U16 for counts like Tibia12, but client may not have GameTibia12Protocol
+        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) ||
+            (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        int outfitCount = useU16Counts ? msg->getU16() : msg->getU8();
         for (int i = 0; i < outfitCount; i++) {
             int outfitId = msg->getU16();
             int nameLen = msg->getU16();
@@ -2465,7 +2468,7 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
                     outfitName += static_cast<char>(msg->getU8());
             }
             int outfitAddons = msg->getU8();
-            if (g_game.getFeature(Otc::GameTibia12Protocol)) {
+            if (useU16Counts) {
                 bool locked = msg->getU8() > 0;
                 if (locked) {
                     msg->getU32(); // store offer id
@@ -2494,11 +2497,13 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
     std::vector<std::tuple<int, std::string> > healthBarList;
     std::vector<std::tuple<int, std::string> > manaBarList;
     if (g_game.getFeature(Otc::GamePlayerMounts)) {
-        int mountCount = g_game.getFeature(Otc::GameTibia12Protocol) ? msg->getU16() : msg->getU8();
+        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) ||
+            (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        int mountCount = useU16Counts ? msg->getU16() : msg->getU8();
         for (int i = 0; i < mountCount; ++i) {
             int mountId = msg->getU16(); // mount type
             std::string mountName = msg->getString(); // mount name
-            if (g_game.getFeature(Otc::GameTibia12Protocol)) {
+            if (useU16Counts) {
                 bool locked = msg->getU8() > 0;
                 if (locked) {
                     msg->getU32(); // store offer id
@@ -2549,7 +2554,8 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
         }
     }
 
-    if (g_game.getFeature(Otc::GameTibia12Protocol)) {
+    if (g_game.getFeature(Otc::GameTibia12Protocol) ||
+        (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779)) {
         msg->getU8(); // tryOnMount, tryOnOutfit
         msg->getU8(); // mounted?
     }
