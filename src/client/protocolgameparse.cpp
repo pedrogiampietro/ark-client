@@ -2448,9 +2448,9 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
     std::vector<std::tuple<int, std::string, int> > outfitList;
 
     if (g_game.getFeature(Otc::GameNewOutfitProtocol)) {
-        // OTClient servers (e.g. protocol 770-779) send U16 for counts like Tibia12, but client may not have GameTibia12Protocol
-        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) ||
-            (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        // Protocol 770-779: server sends U8 counts and no locked byte per outfit (OTCv8 / otserv format)
+        const bool proto772 = (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) && !proto772;
         int outfitCount = useU16Counts ? msg->getU16() : msg->getU8();
         for (int i = 0; i < outfitCount; i++) {
             int outfitId = msg->getU16();
@@ -2497,8 +2497,8 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
     std::vector<std::tuple<int, std::string> > healthBarList;
     std::vector<std::tuple<int, std::string> > manaBarList;
     if (g_game.getFeature(Otc::GamePlayerMounts)) {
-        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) ||
-            (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        const bool proto772 = (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
+        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) && !proto772;
         int mountCount = useU16Counts ? msg->getU16() : msg->getU8();
         for (int i = 0; i < mountCount; ++i) {
             int mountId = msg->getU16(); // mount type
@@ -2554,8 +2554,7 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
         }
     }
 
-    if (g_game.getFeature(Otc::GameTibia12Protocol) ||
-        (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779)) {
+    if (g_game.getFeature(Otc::GameTibia12Protocol)) {
         msg->getU8(); // tryOnMount, tryOnOutfit
         msg->getU8(); // mounted?
     }
