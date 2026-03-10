@@ -485,6 +485,8 @@ function parseShopOpen(data)
 
     MainWindow.earningsLabel:resizeToText()
 
+    -- MainWindow.earnings:addAnchor(AnchorLeft, 'earningsLabel', AnchorRight)
+
     for i = 1, 6 do
         local offer = data.offers[i]
         local panel = MainWindow:getChildById('offer' .. i)
@@ -722,22 +724,6 @@ function parseShopOpen(data)
             MainWindow:setText("Your Shop")
         else
             MainWindow:setText(seller:getName() .. "'s shop")
-        end
-        -- desenhar mensagem fixa acima da cabeça para quem abriu a janela
-        local info = MainWindow.currentShop.message or message
-        if type(info) == "string" and info ~= "" then
-            local pos = seller:getPosition()
-            if pos then
-                local staticText = StaticText.create()
-                if MessageModes and MessageModes.Say then
-                    staticText:addMessage("", MessageModes.Say, info)
-                else
-                    staticText:setText(info)
-                end
-                staticText:setFont("cipsoftFont")
-                staticText:setColor("#ffdf00")
-                g_map.addThing(staticText, pos, -1)
-            end
         end
     end
 
@@ -1077,17 +1063,9 @@ end
 
 local function parseShop(protocol, opcode, buffer)
     if opcode ~= Config.opcode then return end
-    local ok, decoded = pcall(json.decode, buffer)
-    if not ok or not decoded then
-        print("[SHOP_DEBUG_CLIENT] parseShop: json decode failed")
-        return
-    end
-    buffer = decoded
+    buffer = json.decode(buffer)
     local data = buffer.d
     local evt = buffer.e
-    if evt == 'SHOP_NEARBY' then
-        print(string.format("[SHOP_DEBUG_CLIENT] parseShop evt=%s", tostring(evt)))
-    end
     if not evt then return end
     if evt == 'SHOP_OPEN' then
         parseShopOpen(data)
@@ -1111,104 +1089,14 @@ local function parseShop(protocol, opcode, buffer)
     elseif evt == 'SHOP_PIX_DELIVERED' then
         -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
         onPixPaymentApproved(true)
-    elseif evt == 'SHOP_NEARBY' then
-        -- Mensagem fixa acima do nome da loja (quadradinho, não say)
-        print(string.format("[SHOP_DEBUG_CLIENT] SHOP_NEARBY received data=%s", type(data) == "table" and json.encode(data) or tostring(data)))
-        if type(data) == "table" then
-            for _, seller in ipairs(data) do
-                local sellerId = seller.id or seller.seller or seller[1]
-                local info = seller.info or ""
-                print(string.format("[SHOP_DEBUG_CLIENT] seller id=%s info='%s'", tostring(sellerId), tostring(info)))
-                if type(sellerId) == "number" and info ~= "" then
-                    local creature = g_map.getCreatureById(sellerId)
-                    print(string.format("[SHOP_DEBUG_CLIENT] getCreatureById(%s)=%s", sellerId, creature and "found" or "nil"))
-                    if creature then
-                        local pos = creature:getPosition()
-                        print(string.format("[SHOP_DEBUG_CLIENT] pos=%s", pos and string.format("(%d,%d,%d)", pos.x, pos.y, pos.z) or "nil"))
-                        if pos then
-                            local staticText = StaticText.create()
-                            staticText:setText(info)
-                            staticText:setFont("cipsoftFont")
-                            staticText:setColor("#ffdf00")
-                            g_map.addThing(staticText, pos, -1)
-                            print(string.format("[SHOP_DEBUG_CLIENT] StaticText added at pos, text='%s'", info))
-                        else
-                            print("[SHOP_DEBUG_CLIENT] pos nil, skipping")
-                        end
-                    else
-                        print("[SHOP_DEBUG_CLIENT] creature not found in map, skipping")
-                    end
-                else
-                    print(string.format("[SHOP_DEBUG_CLIENT] skip: sellerId=%s info empty=%s", tostring(sellerId), info == ""))
-                end
-            end
-        else
-            print("[SHOP_DEBUG_CLIENT] SHOP_NEARBY data is not table")
-        end
     end
 end
 
 function onEditShop()
-    if not isOwnShop() then
-        return displayInfoBox("Error", "You can only edit your own shop message.")
-    end
-
-    local message = ""
-    if MainWindow.currentShop and type(MainWindow.currentShop.message) == "string" then
-        message = MainWindow.currentShop.message
-    end
-
-    local input = EditShopWindow:getChildById('shopName')
-    local counter = EditShopWindow:getChildById('shopNameChars')
-    if input then
-        input:setText(message)
-        local len = string.len(message or "")
-        local left = 100 - len
-        if counter then
-            counter:setText(string.format("(%02d/100 chars left)", math.max(0, left)))
-        end
-    end
-
     EditShopWindow:show()
+
     EditShopWindow:raise()
     EditShopWindow:focus()
-end
-
-function onSaveShopMessage()
-    if not isOwnShop() then
-        displayInfoBox("Error", "You can only edit your own shop message.")
-        return
-    end
-
-    if not EditShopWindow or not MainWindow or not MainWindow.currentShop then
-        return
-    end
-
-    local input = EditShopWindow:getChildById('shopName')
-    if not input then
-        return
-    end
-
-    local text = input:getText() or ""
-    -- limpar espaços extras nas pontas
-    text = text:gsub("^%s+", ""):gsub("%s+$", "")
-    -- limitar tamanho no cliente também (servidor faz sua própria validação)
-    if #text > 100 then
-        text = string.sub(text, 1, 100)
-    end
-
-    MainWindow.currentShop.message = text
-
-    local payload = {
-        e = 'SHOP_SET_INFO',
-        d = {
-            message = text
-        }
-    }
-
-    g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
-
-    EditShopWindow:hide()
 end
 
 local function parseShopClose(data)
@@ -1321,16 +1209,11 @@ function init()
 
     if g_game.isOnline() then onGameStart() end
     ProtocolGame.registerExtendedOpcode(Config.opcode, parseShop)
-
-    connect(Creature, { onAppear = onCreatureAppear })
 end
 
-function onCreatureAppear(creature)
-    local id = creature and creature.id
-    local name = creature and creature.getName and creature:getName() or "?"
-    local payload = {e = 'ASK', d = id}
-    print(string.format("[SHOP_DEBUG_CLIENT] onCreatureAppear id=%s name=%s", tostring(id), tostring(name)))
-    if g_game.getProtocolGame() then
-        g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
-    end
+local function onCreatureAppear(creature)
+    local payload = {e = 'ASK', d = creature.id}
+
+    g_game.getProtocolGame():sendExtendedOpcode(Config.opcode,
+                                                json.encode(payload))
 end

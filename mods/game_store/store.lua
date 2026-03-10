@@ -346,9 +346,6 @@ function hideHistory()
 end
 
 function addOffers(offerData)
-  if not offerData or type(offerData) ~= "table" or #offerData == 0 then
-    return
-  end
   for i = 1, #offerData do
     local offer = offerData[i]
     local panel = g_ui.createWidget("OfferWidget")
