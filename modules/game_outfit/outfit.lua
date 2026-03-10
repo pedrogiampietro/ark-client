@@ -185,11 +185,38 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
     destroy()
   end
 
+  -- Garantir tabelas e outfit válidos (evita crash se servidor enviar nil ou formato diferente)
+  currentOutfit = currentOutfit or {}
+  outfitList = outfitList or {}
+  mountList = mountList or {}
+  wingList = wingList or {}
+  auraList = auraList or {}
+  shaderList = shaderList or {}
+  healthBarList = healthBarList or {}
+  manaBarList = manaBarList or {}
+  -- Alguns servidores enviam "type", outros "lookType"
+  if not currentOutfit.lookType and currentOutfit.type then
+    currentOutfit.lookType = currentOutfit.type
+  end
+  currentOutfit.head = currentOutfit.head or 0
+  currentOutfit.body = currentOutfit.body or 0
+  currentOutfit.legs = currentOutfit.legs or 0
+  currentOutfit.feet = currentOutfit.feet or 0
+  currentOutfit.addons = currentOutfit.addons or 0
+
   window = g_ui.displayUI("outfitwindow")
 
-  window:recursiveGetChildById("creature"):setOutfit(currentOutfit)
+  local creatureWidget = window:recursiveGetChildById("creature")
+  if creatureWidget then
+    creatureWidget:setOutfit(currentOutfit)
+  end
 
   tempOutfit = table.copy(currentOutfit)
+
+  if not window.colorBoxPanel then
+    destroy()
+    return
+  end
 
   colorBoxGroup = UIRadioGroup.create()
   for j = 0, 6 do
@@ -210,17 +237,18 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
 
   colorBoxGroup.onSelectionChange = onColorCheckChange
 
-  colorModeGroup = UIRadioGroup.create()
-  colorModeGroup:addWidget(window.head)
-  colorModeGroup:addWidget(window.body)
-  colorModeGroup:addWidget(window.legs)
-  colorModeGroup:addWidget(window.feet)
-
-  colorModeGroup.onSelectionChange = onColorModeChange
-  colorModeGroup:selectWidget(window.head)
+  if window.head and window.body and window.legs and window.feet then
+    colorModeGroup = UIRadioGroup.create()
+    colorModeGroup:addWidget(window.head)
+    colorModeGroup:addWidget(window.body)
+    colorModeGroup:addWidget(window.legs)
+    colorModeGroup:addWidget(window.feet)
+    colorModeGroup.onSelectionChange = onColorModeChange
+    colorModeGroup:selectWidget(window.head)
+  end
 
   for index, outfit in ipairs(outfitList) do
-    if outfit[1] == currentOutfit.lookType then
+    if outfit and outfit[1] == (currentOutfit.lookType or currentOutfit.type) then
       currentOutfitIndex = index
       break
     end
@@ -228,14 +256,23 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
 
   ServerData = {
     currentOutfit = currentOutfit,
-    outfits = outfitList,
-    mounts = mountList,
-    wings = wingList,
-    auras = auraList,
-    shaders = shaderList,
-    healthBars = healthBarList,
-    manaBars = manaBarList
+    outfits = outfitList or {},
+    mounts = mountList or {},
+    wings = wingList or {},
+    auras = auraList or {},
+    shaders = shaderList or {},
+    healthBars = healthBarList or {},
+    manaBars = manaBarList or {}
   }
+
+  -- Referência ao creature da pré-visualização (layout completo tem window.preview.panel.creature; layout simples usa o creature principal)
+  previewCreature = window.preview and window.preview.panel and window.preview.panel.creature
+      and window.preview.panel.creature or window:recursiveGetChildById("creature")
+
+  -- Só configura addons/opções se o layout tiver os widgets (evita crash no layout simples)
+  if window.configure and window.configure.addon1 and window.configure.addon2 then
+    configureAddons(currentOutfit.addons or 0)
+  end
 
   --[[
 
@@ -390,16 +427,21 @@ function destroy()
   if window then
     window:destroy()
     window = nil
+  end
 
+  if colorModeGroup then
     colorModeGroup:destroy()
     colorModeGroup = nil
+  end
+  if colorBoxGroup then
     colorBoxGroup:destroy()
     colorBoxGroup = nil
+  end
 
-    colorBoxes = {}
-    currentColorBox = nil
-
-    currentOutfitIndex = 1
+  colorBoxes = {}
+  currentColorBox = nil
+  currentOutfitIndex = 1
+  previewCreature = nil
 
     --[[floor = nil
     movementCheck = nil
@@ -417,13 +459,24 @@ function destroy()
 end
 
 function nextOutfit()
+  if not ServerData or not ServerData.outfits or #ServerData.outfits == 0 then
+    return
+  end
   currentOutfitIndex = currentOutfitIndex + 1
   if currentOutfitIndex > #ServerData.outfits then
     currentOutfitIndex = 1
   end
-
-  tempOutfit.type = ServerData.outfits[currentOutfitIndex][1]
-  window:recursiveGetChildById("creature"):setOutfit(tempOutfit)
+  local outfitData = ServerData.outfits[currentOutfitIndex]
+  if not outfitData or not outfitData[1] then
+    return
+  end
+  tempOutfit.type = outfitData[1]
+  tempOutfit.lookType = outfitData[1]
+  tempOutfit.addons = outfitData[3] or 0
+  local creatureWidget = window and window:recursiveGetChildById("creature")
+  if creatureWidget then
+    creatureWidget:setOutfit(tempOutfit)
+  end
 end
 
 function configureAddons(addons)
@@ -1107,8 +1160,11 @@ function onColorModeChange(widget, selectedWidget)
 end
 
 function onColorCheckChange(widget, selectedWidget)
+  if not selectedWidget or not window then return end
   local colorId = selectedWidget.colorId
-  local colorMode = colorModeGroup:getSelectedWidget():getText():lower()
+  local colorModeWidget = colorModeGroup and colorModeGroup:getSelectedWidget()
+  if not colorModeWidget then return end
+  local colorMode = colorModeWidget:getText():lower()
   if colorMode == "head" then
     tempOutfit.head = colorId
   elseif colorMode == "body" then
@@ -1119,7 +1175,10 @@ function onColorCheckChange(widget, selectedWidget)
     tempOutfit.feet = colorId
   end
 
-  window:recursiveGetChildById("creature"):setOutfit(tempOutfit)
+  local creatureWidget = window:recursiveGetChildById("creature")
+  if creatureWidget then
+    creatureWidget:setOutfit(tempOutfit)
+  end
 
   --[[updatePreview()
 

@@ -1030,7 +1030,8 @@ local function parseShopHistory(entries)
 
             local payStr
             if payMethod == 'pix' and priceBrl and priceBrl > 0 then
-                payStr = string.format("PIX R$ %.2f", priceBrl)
+                -- price_brl vem em centavos (100 = R$ 1,00)
+                payStr = string.format("PIX R$ %.2f", priceBrl / 100)
             else
                 payStr = string.format("%d gp", price)
             end
