@@ -1106,8 +1106,7 @@ local function parseShop(protocol, opcode, buffer)
         -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
         onPixPaymentApproved(true)
     elseif evt == 'SHOP_NEARBY' then
-        -- Mostrar mensagem fixa acima dos vendedores com loja ativa
-        print("[SHOP_CLIENT] SHOP_NEARBY received")
+        -- Mostrar mensagem fixa acima dos vendedores com loja ativa (clones ou players)
         if type(data) == "table" then
             for _, seller in ipairs(data) do
                 local sellerId = seller.id or seller.seller or seller[1]
