@@ -1326,11 +1326,14 @@ function init()
 end
 
 function onCreatureAppear(creature)
-    local id = creature and creature.id
-    local name = creature and creature.getName and creature:getName() or "?"
+    if not creature then return end
+    local id = creature.getId and creature:getId() or creature.id
+    local name = creature.getName and creature:getName() or "?"
     local payload = {e = 'ASK', d = id}
     print(string.format("[SHOP_DEBUG_CLIENT] onCreatureAppear id=%s name=%s", tostring(id), tostring(name)))
-    if g_game.getProtocolGame() then
+    if id and g_game.getProtocolGame() then
         g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
+    else
+        print("[SHOP_DEBUG_CLIENT] onCreatureAppear: id nil, not sending ASK")
     end
 end
