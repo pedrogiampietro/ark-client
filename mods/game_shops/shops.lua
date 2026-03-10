@@ -493,11 +493,8 @@ function parseShopOpen(data)
             local pos = seller:getPosition()
             if pos then
                 local staticText = StaticText.create()
-                if MessageModes and MessageModes.Say then
-                    staticText:addMessage("", MessageModes.Say, info)
-                else
-                    staticText:setText(info)
-                end
+                -- usar texto estático, não mensagem de fala
+                staticText:setText(info)
                 staticText:setFont("cipsoftFont")
                 staticText:setColor("#ffdf00")
                 g_map.addThing(staticText, pos, -1)
