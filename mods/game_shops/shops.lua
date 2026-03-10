@@ -485,23 +485,6 @@ function parseShopOpen(data)
 
     MainWindow.earningsLabel:resizeToText()
 
-    -- desenhar mensagem fixa acima da cabeça do vendedor/clone para quem abriu a janela
-    local seller = g_map.getCreatureById(data.seller)
-    if seller and ((seller.isPlayer and seller:isPlayer()) or (seller.isNpc and seller:isNpc())) then
-        local info = MainWindow.currentShop.message or message
-        if type(info) == "string" and info ~= "" then
-            local pos = seller:getPosition()
-            if pos then
-                local staticText = StaticText.create()
-                -- usar texto estático, não mensagem de fala
-                staticText:setText(info)
-                staticText:setFont("cipsoftFont")
-                staticText:setColor("#ffdf00")
-                g_map.addThing(staticText, pos, -1)
-            end
-        end
-    end
-
     for i = 1, 6 do
         local offer = data.offers[i]
         local panel = MainWindow:getChildById('offer' .. i)
@@ -1121,7 +1104,7 @@ local function parseShop(protocol, opcode, buffer)
         -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
         onPixPaymentApproved(true)
     elseif evt == 'SHOP_NEARBY' then
-        -- Mostrar mensagem fixa acima dos vendedores com loja ativa (clones ou players)
+        -- Mensagem fixa acima do nome da loja (quadradinho, não say)
         if type(data) == "table" then
             for _, seller in ipairs(data) do
                 local sellerId = seller.id or seller.seller or seller[1]
@@ -1132,12 +1115,7 @@ local function parseShop(protocol, opcode, buffer)
                         local pos = creature:getPosition()
                         if pos then
                             local staticText = StaticText.create()
-                            -- usa o mesmo fluxo de criação de textos da console
-                            if MessageModes and MessageModes.Say then
-                                staticText:addMessage("", MessageModes.Say, info)
-                            else
-                                staticText:setText(info)
-                            end
+                            staticText:setText(info)
                             staticText:setFont("cipsoftFont")
                             staticText:setColor("#ffdf00")
                             g_map.addThing(staticText, pos, -1)
@@ -1322,9 +1300,11 @@ function init()
 
     if g_game.isOnline() then onGameStart() end
     ProtocolGame.registerExtendedOpcode(Config.opcode, parseShop)
+
+    connect(Creature, { onAppear = onCreatureAppear })
 end
 
-local function onCreatureAppear(creature)
+function onCreatureAppear(creature)
     local payload = {e = 'ASK', d = creature.id}
 
     g_game.getProtocolGame():sendExtendedOpcode(Config.opcode,
