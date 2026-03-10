@@ -504,12 +504,25 @@ UIWindow
     margin-top: 10
     visible: false
 
+    VerticalScrollBar
+      id: historyScrollbar
+      step: 16
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      margin-right: 4
+      pixel-scroll: true
+
     UIScrollArea
       id: historyScroll
-      anchors.fill: parent
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      anchors.right: historyScrollbar.left
       padding: 3
       layout: verticalBox
       layout-spacing: 2
+      vertical-scrollbar: historyScrollbar
 
   SelectItemWindow
     id: selectItem
