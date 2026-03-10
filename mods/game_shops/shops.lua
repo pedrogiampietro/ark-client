@@ -725,6 +725,22 @@ function parseShopOpen(data)
         else
             MainWindow:setText(seller:getName() .. "'s shop")
         end
+        -- desenhar mensagem fixa acima da cabeça para quem abriu a janela
+        local info = MainWindow.currentShop.message or message
+        if type(info) == "string" and info ~= "" then
+            local pos = seller:getPosition()
+            if pos then
+                local staticText = StaticText.create()
+                if MessageModes and MessageModes.Say then
+                    staticText:addMessage("", MessageModes.Say, info)
+                else
+                    staticText:setText(info)
+                end
+                staticText:setFont("cipsoftFont")
+                staticText:setColor("#ffdf00")
+                g_map.addThing(staticText, pos, -1)
+            end
+        end
     end
 
     show()
