@@ -2444,40 +2444,16 @@ void ProtocolGame::parseFloorChangeDown(const InputMessagePtr& msg)
 
 void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
 {
-    const int proto = g_game.getProtocolVersion();
-    g_logger.info(stdext::format("[OutfitWindow] parse start proto=%d unread=%d", proto, msg->getUnreadSize()));
-
     Outfit currentOutfit = getOutfit(msg);
-    g_logger.info(stdext::format("[OutfitWindow] after getOutfit unread=%d", msg->getUnreadSize()));
-
     std::vector<std::tuple<int, std::string, int> > outfitList;
 
     if (g_game.getFeature(Otc::GameNewOutfitProtocol)) {
-        // Protocol 770-779: server sends U8 counts and no locked byte per outfit (OTCv8 / otserv format)
-        const bool proto772 = (proto >= 770 && proto <= 779);
-        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) && !proto772;
-        g_logger.info(stdext::format("[OutfitWindow] proto772=%d useU16Counts=%d", proto772 ? 1 : 0, useU16Counts ? 1 : 0));
-
-        int outfitCount = useU16Counts ? msg->getU16() : msg->getU8();
-        g_logger.info(stdext::format("[OutfitWindow] outfitCount=%d unread=%d", outfitCount, msg->getUnreadSize()));
-
+        int outfitCount = g_game.getFeature(Otc::GameTibia12Protocol) ? msg->getU16() : msg->getU8();
         for (int i = 0; i < outfitCount; i++) {
             int outfitId = msg->getU16();
-            int nameLen = msg->getU16();
-            std::string outfitName;
-            if (nameLen > 50) {
-                // Server sent old format (no locked byte): we read lookType as length; next 2 bytes are real length.
-                nameLen = msg->getU16();
-                if (nameLen > 64)
-                    nameLen = 0;
-            }
-            if (nameLen > 0) {
-                outfitName.reserve(static_cast<size_t>(nameLen));
-                for (int j = 0; j < nameLen; ++j)
-                    outfitName += static_cast<char>(msg->getU8());
-            }
+            std::string outfitName = msg->getString();
             int outfitAddons = msg->getU8();
-            if (useU16Counts) {
+            if (g_game.getFeature(Otc::GameTibia12Protocol)) {
                 bool locked = msg->getU8() > 0;
                 if (locked) {
                     msg->getU32(); // store offer id
@@ -2485,7 +2461,6 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
             }
             outfitList.push_back(std::make_tuple(outfitId, outfitName, outfitAddons));
         }
-        g_logger.info(stdext::format("[OutfitWindow] after outfits (%d) unread=%d", (int)outfitList.size(), msg->getUnreadSize()));
     } else {
         int outfitStart, outfitEnd;
         if (g_game.getFeature(Otc::GameLooktypeU16)) {
@@ -2507,13 +2482,11 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
     std::vector<std::tuple<int, std::string> > healthBarList;
     std::vector<std::tuple<int, std::string> > manaBarList;
     if (g_game.getFeature(Otc::GamePlayerMounts)) {
-        const bool proto772 = (g_game.getProtocolVersion() >= 770 && g_game.getProtocolVersion() <= 779);
-        const bool useU16Counts = g_game.getFeature(Otc::GameTibia12Protocol) && !proto772;
-        int mountCount = useU16Counts ? msg->getU16() : msg->getU8();
+        int mountCount = g_game.getFeature(Otc::GameTibia12Protocol) ? msg->getU16() : msg->getU8();
         for (int i = 0; i < mountCount; ++i) {
-            int mountId = msg->getU16(); // mount type
-            std::string mountName = msg->getString(); // mount name
-            if (useU16Counts) {
+            int mountId = msg->getU16();
+            std::string mountName = msg->getString();
+            if (g_game.getFeature(Otc::GameTibia12Protocol)) {
                 bool locked = msg->getU8() > 0;
                 if (locked) {
                     msg->getU32(); // store offer id
@@ -2522,7 +2495,6 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
 
             mountList.push_back(std::make_tuple(mountId, mountName));
         }
-        g_logger.info(stdext::format("[OutfitWindow] after mounts (%d) unread=%d", (int)mountList.size(), msg->getUnreadSize()));
     }
 
     if (g_game.getFeature(Otc::GameWingsAndAura)) {
@@ -2538,7 +2510,6 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
             std::string auraName = msg->getString();
             auraList.push_back(std::make_tuple(auraId, auraName));
         }
-        g_logger.info(stdext::format("[OutfitWindow] after wings/auras unread=%d", msg->getUnreadSize()));
     }
 
     if (g_game.getFeature(Otc::GameOutfitShaders)) {
@@ -2564,7 +2535,6 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
             std::string name = msg->getString();
             manaBarList.push_back(std::make_tuple(id, name));
         }
-        g_logger.info(stdext::format("[OutfitWindow] after health/mana unread=%d", msg->getUnreadSize()));
     }
 
     if (g_game.getFeature(Otc::GameTibia12Protocol)) {
@@ -2572,7 +2542,6 @@ void ProtocolGame::parseOpenOutfitWindow(const InputMessagePtr& msg)
         msg->getU8(); // mounted?
     }
 
-    g_logger.info(stdext::format("[OutfitWindow] parse done unread=%d outfits=%d", msg->getUnreadSize(), (int)outfitList.size()));
     g_game.processOpenOutfitWindow(currentOutfit, outfitList, mountList, wingList, auraList, shaderList, healthBarList, manaBarList);
 }
 
