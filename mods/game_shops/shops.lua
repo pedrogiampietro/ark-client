@@ -1138,7 +1138,10 @@ end
 local function onShopCreate(player, data) end
 
 function onPositionChange(player, newPos, oldPos)
-    if player:isLocalPlayer() then show() end
+    -- Do not auto-show the shop UI just because the local player moved.
+    -- The server controls whether the shop is active (open/paused) and
+    -- the UI is shown explicitly when the player opens a shop window.
+    -- This avoids confusing the player by popping the window on every login.
 end
 
 function init()

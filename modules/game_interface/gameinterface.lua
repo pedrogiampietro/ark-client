@@ -460,7 +460,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
     local localPlayer = g_game.getLocalPlayer()
     menu:addSeparator()
 
-    -- Player private shop (Chimera-style)
+    -- Player private shop (Eldera-style)
     if creatureThing:isPlayer() and openShop then
       menu:addOption(tr('Open Shop'), function()
         local npcName = creatureThing:getName()
