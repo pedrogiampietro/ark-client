@@ -443,19 +443,18 @@ function destroy()
   currentOutfitIndex = 1
   previewCreature = nil
 
-    --[[floor = nil
-    movementCheck = nil
-    showFloorCheck = nil
-    showOutfitCheck = nil
-    showMountCheck = nil
-    showWingsCheck = nil
-    showAuraCheck = nil
-    showShaderCheck = nil
-    showBarsCheck = nil
+  --[[floor = nil
+  movementCheck = nil
+  showFloorCheck = nil
+  showOutfitCheck = nil
+  showMountCheck = nil
+  showWingsCheck = nil
+  showAuraCheck = nil
+  showShaderCheck = nil
+  showBarsCheck = nil
 
-    appearanceGroup:destroy()
-    appearanceGroup = nil]]
-  end
+  appearanceGroup:destroy()
+  appearanceGroup = nil]]
 end
 
 function nextOutfit()
