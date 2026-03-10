@@ -1089,14 +1089,91 @@ local function parseShop(protocol, opcode, buffer)
     elseif evt == 'SHOP_PIX_DELIVERED' then
         -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
         onPixPaymentApproved(true)
+    elseif evt == 'SHOP_NEARBY' then
+        -- Mostrar mensagem fixa acima dos vendedores com loja ativa
+        if type(data) == "table" then
+            for _, seller in ipairs(data) do
+                local sellerId = seller.id or seller.seller or seller[1]
+                local info = seller.info or ""
+                if type(sellerId) == "number" and info ~= "" then
+                    local creature = g_map.getCreatureById(sellerId)
+                    if creature then
+                        local pos = creature:getPosition()
+                        if pos then
+                            local staticText = StaticText.create()
+                            staticText:setText(info)
+                            staticText:setFont("cipsoftFont")
+                            staticText:setColor("#ffdf00")
+                            g_map.addThing(staticText, pos, -1)
+                        end
+                    end
+                end
+            end
+        end
     end
 end
 
 function onEditShop()
-    EditShopWindow:show()
+    if not isOwnShop() then
+        return displayInfoBox("Error", "You can only edit your own shop message.")
+    end
 
+    local message = ""
+    if MainWindow.currentShop and type(MainWindow.currentShop.message) == "string" then
+        message = MainWindow.currentShop.message
+    end
+
+    local input = EditShopWindow:getChildById('shopName')
+    local counter = EditShopWindow:getChildById('shopNameChars')
+    if input then
+        input:setText(message)
+        local len = string.len(message or "")
+        local left = 100 - len
+        if counter then
+            counter:setText(string.format("(%02d/100 chars left)", math.max(0, left)))
+        end
+    end
+
+    EditShopWindow:show()
     EditShopWindow:raise()
     EditShopWindow:focus()
+end
+
+function onSaveShopMessage()
+    if not isOwnShop() then
+        displayInfoBox("Error", "You can only edit your own shop message.")
+        return
+    end
+
+    if not EditShopWindow or not MainWindow or not MainWindow.currentShop then
+        return
+    end
+
+    local input = EditShopWindow:getChildById('shopName')
+    if not input then
+        return
+    end
+
+    local text = input:getText() or ""
+    -- limpar espaços extras nas pontas
+    text = text:gsub("^%s+", ""):gsub("%s+$", "")
+    -- limitar tamanho no cliente também (servidor faz sua própria validação)
+    if #text > 100 then
+        text = string.sub(text, 1, 100)
+    end
+
+    MainWindow.currentShop.message = text
+
+    local payload = {
+        e = 'SHOP_SET_INFO',
+        d = {
+            message = text
+        }
+    }
+
+    g_game.getProtocolGame():sendExtendedOpcode(Config.opcode, json.encode(payload))
+
+    EditShopWindow:hide()
 end
 
 local function parseShopClose(data)

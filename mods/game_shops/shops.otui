@@ -355,6 +355,7 @@ EditShopWindow < UIWindow
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: shopNameChars.bottom
     margin-top: 18
+    @onClick: modules.shops.onSaveShopMessage()
 
 UIWindow
   id: market
