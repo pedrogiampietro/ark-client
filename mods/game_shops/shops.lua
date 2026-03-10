@@ -1091,6 +1091,7 @@ local function parseShop(protocol, opcode, buffer)
         onPixPaymentApproved(true)
     elseif evt == 'SHOP_NEARBY' then
         -- Mostrar mensagem fixa acima dos vendedores com loja ativa
+        print("[SHOP_CLIENT] SHOP_NEARBY received")
         if type(data) == "table" then
             for _, seller in ipairs(data) do
                 local sellerId = seller.id or seller.seller or seller[1]
@@ -1101,7 +1102,12 @@ local function parseShop(protocol, opcode, buffer)
                         local pos = creature:getPosition()
                         if pos then
                             local staticText = StaticText.create()
-                            staticText:setText(info)
+                            -- usa o mesmo fluxo de criação de textos da console
+                            if MessageModes and MessageModes.Say then
+                                staticText:addMessage("", MessageModes.Say, info)
+                            else
+                                staticText:setText(info)
+                            end
                             staticText:setFont("cipsoftFont")
                             staticText:setColor("#ffdf00")
                             g_map.addThing(staticText, pos, -1)
