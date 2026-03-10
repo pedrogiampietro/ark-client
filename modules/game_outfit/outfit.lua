@@ -51,7 +51,17 @@ function init()
   connect(
     g_game,
     {
-      onOpenOutfitWindow = create,
+      onOpenOutfitWindow = function(currentOutfit, outfitList, mountList, wingList, auraList, shaderList, healthBarList, manaBarList)
+        -- Adiar criação para o próximo frame; crash costuma ocorrer ao desenhar no mesmo frame do pacote
+        print("[OUTFIT] onOpenOutfitWindow received, scheduling create() for next frame")
+        scheduleEvent(function()
+          print("[OUTFIT] running deferred create()")
+          create(currentOutfit, outfitList, mountList, wingList, auraList, shaderList, healthBarList, manaBarList)
+          scheduleEvent(function()
+            print("[OUTFIT] post-create delay (500ms) - if you see this, crash is after first draw")
+          end, 500)
+        end, 0)
+      end,
       onGameEnd = destroy
     }
   )
@@ -214,9 +224,14 @@ function create(currentOutfit, outfitList, mountList, wingList, auraList, shader
 
   local creatureWidget = window:recursiveGetChildById("creature")
   if creatureWidget then
-    print("[OUTFIT] create() setting creature outfit")
-    creatureWidget:setOutfit(currentOutfit)
-    print("[OUTFIT] create() setOutfit done")
+    -- Definir outfit no próximo frame para evitar crash no draw (mesmo frame do pacote)
+    print("[OUTFIT] create() scheduling setOutfit for next frame")
+    scheduleEvent(function()
+      if not window or not window:recursiveGetChildById("creature") then return end
+      print("[OUTFIT] create() setting creature outfit (deferred)")
+      creatureWidget:setOutfit(currentOutfit)
+      print("[OUTFIT] create() setOutfit done (deferred)")
+    end, 0)
   else
     print("[OUTFIT] create() WARNING: no creature widget")
   end
