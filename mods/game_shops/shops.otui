@@ -444,10 +444,21 @@ UIWindow
     @onClick: modules.shops.onShopClose()
 
   Button
-    id: historyButton
+    id: editButton
     size: 80 25
     anchors.right: parent.right
     anchors.top: closeButton.bottom
+    margin-right: 20
+    margin-top: 3
+    image-source: /images/ui/buttons-blue
+    !text: tr("Edit")
+    @onClick: modules.shops.onEditShop()
+
+  Button
+    id: historyButton
+    size: 80 25
+    anchors.right: parent.right
+    anchors.top: editButton.bottom
     margin-right: 20
     margin-top: 3
     image-source: /images/ui/buttons-blue
