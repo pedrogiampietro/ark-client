@@ -503,6 +503,14 @@ function nextOutfit()
   tempOutfit.type = outfitData[1]
   tempOutfit.lookType = outfitData[1]
   tempOutfit.addons = outfitData[3] or 0
+  -- Manter cores e campos obrigatórios para o creature não ficar invisível
+  tempOutfit.head = tempOutfit.head or 0
+  tempOutfit.body = tempOutfit.body or 0
+  tempOutfit.legs = tempOutfit.legs or 0
+  tempOutfit.feet = tempOutfit.feet or 0
+  tempOutfit.mount = tempOutfit.mount or 0
+  tempOutfit.wings = tempOutfit.wings or 0
+  tempOutfit.aura = tempOutfit.aura or 0
   local creatureWidget = window and window:recursiveGetChildById("creature")
   if creatureWidget then
     creatureWidget:setOutfit(tempOutfit)
