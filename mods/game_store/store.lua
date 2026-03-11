@@ -1,8 +1,8 @@
 local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
--- Mesmo endpoint PIX usado no sistema de player shops
-local PIX_API_URL = "https://eldera.pro/api/shop/mercadopago"
+-- Endpoint PIX da API web (coins)
+local PIX_API_URL = "http://eldera.pro/api/shop/mercadopago"
 
 gameStoreWindow = nil
 offersGrid = nil
@@ -500,13 +500,10 @@ local function openPixCoinsPurchase()
       coins = coins
     }
 
-    local url = PIX_API_URL
-    if not url or url == "" then
+    local url = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
+    if url == "" then
       displayInfoBox("PIX error", "PIX API URL is not configured.")
       return
-    end
-    if not url:find("://") then
-      url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
     end
 
     HTTP.postJSON(url, payload, function(data, err)
