@@ -1,5 +1,4 @@
 local GAME_STORE_CODE = 102
-local PIX_COINS_OPCODE = 225
 local DONATION_URL = nil
 
 -- Endpoint PIX da API web (coins)
@@ -29,7 +28,6 @@ function init()
   )
 
   ProtocolGame.registerExtendedOpcode(GAME_STORE_CODE, onExtendedOpcode)
-  ProtocolGame.registerExtendedJSONOpcode(PIX_COINS_OPCODE, onPixCoinsOpcode)
 
   if g_game.isOnline() then
     create()
@@ -46,7 +44,6 @@ function terminate()
   )
 
   ProtocolGame.unregisterExtendedOpcode(GAME_STORE_CODE, onExtendedOpcode)
-  ProtocolGame.unregisterExtendedJSONOpcode(PIX_COINS_OPCODE)
 
   destroy()
 end
@@ -79,6 +76,30 @@ function onExtendedOpcode(protocol, code, buffer)
     onGameStoreUpdateHistory(data)
   elseif action == "msg" then
     onGameStoreMsg(data)
+  elseif action == "COINS_PIX_SUCCESS" then
+    -- Notificação do servidor: pagamento PIX de coins aprovado
+    local amount = tonumber(data.amount) or 0
+
+    if coinsPixPaymentWindow then
+      coinsPixPaymentWindow:destroy()
+      coinsPixPaymentWindow = nil
+    end
+    coinsPixPollActive = false
+
+    local root = g_ui.getRootWidget()
+    if not root then return true end
+
+    local successWin = g_ui.createWidget('PixSuccessWindow', root)
+    local msg = successWin:getChildById('successMessage')
+    if msg then
+      if amount > 0 then
+        msg:setText(string.format("Pagamento confirmado! %d coins foram adicionadas à sua conta.", amount))
+      else
+        msg:setText(tr("Pagamento confirmado! Obrigado pela compra."))
+      end
+    end
+    successWin:show()
+    successWin:raise()
   end
 end
 
