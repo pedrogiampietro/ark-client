@@ -514,17 +514,39 @@ local function openPixCoinsPurchase()
     print(string.format("[STORE_PIX] Payload: %s", json.encode(payload)))
 
     HTTP.postJSON(url, payload, function(data, err)
+      -- Log detalhado do retorno HTTP no cliente
+      local debugSummary = {
+        err = err,
+        dataType = type(data),
+      }
+      if type(data) == "table" then
+        debugSummary.status = data.status
+        debugSummary.error = data.error or data.message
+      end
+      print(string.format("[STORE_PIX] HTTP callback: %s", json.encode(debugSummary)))
+
       if err then
         local msg = err
+        -- Quando a camada C++ retorna o resultado bruto (sem json=true), data.body pode conter o JSON
         if type(data) == "table" and type(data.body) == "string" and data.body ~= "" then
           local ok, parsed = pcall(function() return json.decode(data.body) end)
           if ok and type(parsed) == "table" and parsed.error then
             msg = parsed.error
           end
+        elseif type(data) == "table" and type(data.error) == "string" and data.error ~= "" then
+          -- Se o backend retornou { error: "..." } já decodificado
+          msg = data.error
         end
         displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. msg)
         return
       end
+
+      -- data aqui normalmente já é o JSON decodificado ({ id, status, qr_code, ... } ou { error: ... })
+      if type(data) == "table" and data.error and not data.qr_code then
+        displayInfoBox("PIX error", "Server returned an error:\n" .. tostring(data.error))
+        return
+      end
+
       if not data or not data.qr_code then
         displayInfoBox("PIX error", "Invalid PIX response from server.")
         return

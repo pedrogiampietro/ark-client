@@ -786,6 +786,17 @@ function onPressBuy(button)
             url = "https://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
         end
         HTTP.postJSON(url, payload, function(data, err)
+            -- Log detalhado do retorno HTTP para debug do cliente
+            local debugSummary = {
+                err = err,
+                dataType = type(data),
+            }
+            if type(data) == "table" then
+                debugSummary.status = data.status
+                debugSummary.error = data.error or data.message
+            end
+            print(string.format("[SHOP_PIX] HTTP callback: %s", json.encode(debugSummary)))
+
             if err then
                 local msg = err
                 if type(data) == "table" and type(data.body) == "string" and data.body ~= "" then
@@ -793,10 +804,18 @@ function onPressBuy(button)
                     if ok and type(parsed) == "table" and parsed.error then
                         msg = parsed.error
                     end
+                elseif type(data) == "table" and type(data.error) == "string" and data.error ~= "" then
+                    msg = data.error
                 end
                 displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. msg)
                 return
             end
+
+            if type(data) == "table" and data.error and not data.qr_code then
+                displayInfoBox("PIX error", "Server returned an error:\n" .. tostring(data.error))
+                return
+            end
+
             if not data or not data.qr_code then
                 displayInfoBox("PIX error", "Invalid PIX response from server.")
                 return
