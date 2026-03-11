@@ -78,7 +78,7 @@ function onExtendedOpcode(protocol, code, buffer)
     onGameStoreMsg(data)
   elseif action == "COINS_PIX_SUCCESS" then
     -- Notificação do servidor: pagamento PIX de coins aprovado
-    local amount = tonumber(data.amount) or 0
+    local coins = tonumber(data.coins) or 0
 
     if coinsPixPaymentWindow then
       coinsPixPaymentWindow:destroy()
@@ -92,8 +92,8 @@ function onExtendedOpcode(protocol, code, buffer)
     local successWin = g_ui.createWidget('PixSuccessWindow', root)
     local msg = successWin:getChildById('successMessage')
     if msg then
-      if amount > 0 then
-        msg:setText(string.format("Pagamento confirmado! %d coins foram adicionadas à sua conta.", amount))
+      if coins > 0 then
+        msg:setText(string.format("Pagamento confirmado! %d coins foram adicionadas à sua conta.", coins))
       else
         msg:setText(tr("Pagamento confirmado! Obrigado pela compra."))
       end
@@ -646,22 +646,7 @@ local function openPixCoinsPurchase()
       url = "https://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
     end
 
-    -- Log local no cliente para debug
-    print(string.format("[STORE_PIX] URL: %s", url))
-    print(string.format("[STORE_PIX] Payload: %s", json.encode(payload)))
-
     HTTP.postJSON(url, payload, function(data, err)
-      -- Log detalhado do retorno HTTP no cliente
-      local debugSummary = {
-        err = err,
-        dataType = type(data),
-      }
-      if type(data) == "table" then
-        debugSummary.status = data.status
-        debugSummary.error = data.error or data.message
-      end
-      print(string.format("[STORE_PIX] HTTP callback: %s", json.encode(debugSummary)))
-
       if err then
         local msg = err
         -- Quando a camada C++ retorna o resultado bruto (sem json=true), data.body pode conter o JSON
