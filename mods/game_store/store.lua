@@ -2,7 +2,7 @@ local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
 -- Endpoint PIX da API web (coins)
-local PIX_API_URL = "http://eldera.pro/api/shop/mercadopago"
+local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
 
 gameStoreWindow = nil
 offersGrid = nil
@@ -483,9 +483,12 @@ local function openPixCoinsPurchase()
     local amount = coins
     local player = g_game.getLocalPlayer()
     local name = player and player:getName() or "player"
+    local email = (G and G.account) or ""
 
-    -- TEMP: e-mail hardcoded para testes
-    local email = "pedrogiampietro@hotmail.com"
+    if email == "" then
+      displayInfoBox("PIX", "Não foi possível identificar o e-mail da sua conta.\nFaça login usando o e-mail cadastrado no site para gerar o PIX corretamente.")
+      return
+    end
 
     local description = string.format("Coins purchase for %s (%d coins)", name, coins)
 

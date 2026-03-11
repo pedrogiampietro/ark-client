@@ -6,7 +6,7 @@ Config.opcode = 220
 Config.money = Config.money or {2148, 2152, 2160} -- gold, platinum, crystal coins
 
 -- PIX API endpoint used for creating QR code payments
-local PIX_API_URL = "http://eldera.pro/api/shop/mercadopago"
+local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
 
 local function onGameStart()
     if not MainWindow then return end
