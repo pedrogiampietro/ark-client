@@ -1,4 +1,5 @@
 local GAME_STORE_CODE = 102
+local PIX_COINS_OPCODE = 225
 local DONATION_URL = nil
 
 -- Endpoint PIX da API web (coins)
@@ -28,6 +29,7 @@ function init()
   )
 
   ProtocolGame.registerExtendedOpcode(GAME_STORE_CODE, onExtendedOpcode)
+  ProtocolGame.registerExtendedJSONOpcode(PIX_COINS_OPCODE, onPixCoinsOpcode)
 
   if g_game.isOnline() then
     create()
@@ -44,6 +46,7 @@ function terminate()
   )
 
   ProtocolGame.unregisterExtendedOpcode(GAME_STORE_CODE, onExtendedOpcode)
+  ProtocolGame.unregisterExtendedJSONOpcode(PIX_COINS_OPCODE)
 
   destroy()
 end
@@ -440,6 +443,37 @@ end
 local coinsPixPaymentWindow = nil
 local coinsPixPollActive = false
 
+local function onPixCoinsOpcode(protocol, opcode, data)
+  if not data or type(data) ~= "table" then
+    return
+  end
+
+  -- Apenas tratar créditos de coins via PIX
+  local amount = tonumber(data.amount) or 0
+
+  -- Fechar janela de QRCode, se ainda estiver aberta
+  if coinsPixPaymentWindow then
+    coinsPixPaymentWindow:destroy()
+    coinsPixPaymentWindow = nil
+  end
+  coinsPixPollActive = false
+
+  local root = g_ui.getRootWidget()
+  if not root then return end
+
+  local successWin = g_ui.createWidget('PixSuccessWindow', root)
+  local msg = successWin:getChildById('successMessage')
+  if msg then
+    if amount > 0 then
+      msg:setText(string.format("Pagamento confirmado! %d coins foram adicionadas à sua conta.", amount))
+    else
+      msg:setText(tr("Pagamento confirmado! Obrigado pela compra."))
+    end
+  end
+  successWin:show()
+  successWin:raise()
+end
+
 local function getCoinsPixStatusUrl(paymentId)
   local base = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
   if base == "" then return nil end
@@ -472,32 +506,9 @@ local function onCoinsPixPaymentApproved()
 end
 
 local function pollCoinsPixStatus(paymentId, attempt)
-  if not coinsPixPollActive or not coinsPixPaymentWindow then
-    return
-  end
-  attempt = attempt or 0
-  if attempt > 150 then return end -- ~5 min
-  local url = getCoinsPixStatusUrl(paymentId)
-  if not url then return end
-  -- Alguns builds do cliente não possuem suporte a HTTP.get/HTTP.getJSON (g_http ausente).
-  -- Nesse caso, evitamos quebrar o cliente e apenas não fazemos o polling.
-  if not HTTP or type(HTTP.getJSON) ~= "function" then
-    return
-  end
-  HTTP.getJSON(url, function(data, err)
-    if not coinsPixPollActive or not coinsPixPaymentWindow then
-      return
-    end
-    if err or not data or type(data) ~= "table" then
-      scheduleEvent(function() pollCoinsPixStatus(paymentId, attempt + 1) end, 2000)
-      return
-    end
-    if data.status == "approved" then
-      onCoinsPixPaymentApproved()
-      return
-    end
-    scheduleEvent(function() pollCoinsPixStatus(paymentId, attempt + 1) end, 2000)
-  end)
+  -- Polling desabilitado neste cliente para evitar erros na camada HTTP (g_http).
+  -- A aprovação do pagamento e o crédito das coins já são feitos via webhook no servidor.
+  return
 end
 
 local function showCoinsPixPaymentWindow(result)
@@ -535,9 +546,7 @@ local function showCoinsPixPaymentWindow(result)
   end
 
   local paymentId = result.id or result.payment_id
-  if paymentId and getCoinsPixStatusUrl(paymentId) then
-    scheduleEvent(function() pollCoinsPixStatus(paymentId, 0) end, 2000)
-  end
+  -- Polling desabilitado; o servidor já credita as coins via webhook.
 end
 
 local function openPixCoinsPurchase()
