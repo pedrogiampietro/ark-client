@@ -466,11 +466,7 @@ local function openPixCoinsPurchase()
       selectedLabel:setText(string.format("Selecionado: %d coins", value))
     end
     if msgLabel then
-      msgLabel:setText(string.format(
-        "Valor total: R$ %.2f (%d coins)\n1 coin = 1 real.",
-        value,
-        value
-      ))
+      msgLabel:setText(string.format("Valor total: R$ %.2f (%d coins)", value, value))
     end
   end
 
@@ -510,7 +506,7 @@ local function openPixCoinsPurchase()
       return
     end
     if not url:find("://") then
-      url = "http://gravak.fun" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+      url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
     end
 
     HTTP.postJSON(url, payload, function(data, err)
