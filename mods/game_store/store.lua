@@ -2,7 +2,7 @@ local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
 -- Endpoint PIX da API web (coins)
-local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
+local PIX_API_URL = "https://eldera.pro/api/shop/mercadopago"
 
 gameStoreWindow = nil
 offersGrid = nil
@@ -506,7 +506,7 @@ local function openPixCoinsPurchase()
       return
     end
     if not url:find("://") then
-      url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+      url = "https://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
     end
 
     -- Log local no cliente para debug

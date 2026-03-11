@@ -783,7 +783,7 @@ function onPressBuy(button)
         end
         -- C++ HTTP parser needs a full URL (scheme + host + path). If only path was set, prepend host.
         if not url:find("://") then
-            url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+            url = "https://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
         end
         HTTP.postJSON(url, payload, function(data, err)
             if err then
@@ -904,7 +904,7 @@ local function getPixStatusUrl(paymentId)
     local base = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
     if base == "" then return nil end
     if not base:find("://") then
-        base = "http://eldera.pro" .. (base:sub(1, 1) == "/" and base or ("/" .. base))
+        base = "https://eldera.pro" .. (base:sub(1, 1) == "/" and base or ("/" .. base))
     end
     local path = base:gsub("/+$", "") .. "/status?payment_id=" .. tostring(paymentId)
     return path
