@@ -505,6 +505,9 @@ local function openPixCoinsPurchase()
       displayInfoBox("PIX error", "PIX API URL is not configured.")
       return
     end
+    if not url:find("://") then
+      url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+    end
 
     HTTP.postJSON(url, payload, function(data, err)
       if err then
