@@ -479,6 +479,11 @@ local function pollCoinsPixStatus(paymentId, attempt)
   if attempt > 150 then return end -- ~5 min
   local url = getCoinsPixStatusUrl(paymentId)
   if not url then return end
+  -- Alguns builds do cliente não possuem suporte a HTTP.get/HTTP.getJSON (g_http ausente).
+  -- Nesse caso, evitamos quebrar o cliente e apenas não fazemos o polling.
+  if not HTTP or type(HTTP.getJSON) ~= "function" then
+    return
+  end
   HTTP.getJSON(url, function(data, err)
     if not coinsPixPollActive or not coinsPixPaymentWindow then
       return
