@@ -436,6 +436,105 @@ function onSearch()
   )
 end
 
+-- Controle local do fluxo PIX para Buy Coins
+local coinsPixPaymentWindow = nil
+local coinsPixPollActive = false
+
+local function getCoinsPixStatusUrl(paymentId)
+  local base = (PIX_API_URL and type(PIX_API_URL) == "string") and PIX_API_URL:match("^%s*(.-)%s*$") or ""
+  if base == "" then return nil end
+  if not base:find("://") then
+    base = "http://eldera.pro" .. (base:sub(1, 1) == "/" and base or ("/" .. base))
+  end
+  local path = base:gsub("/+$", "") .. "/status?payment_id=" .. tostring(paymentId)
+  return path
+end
+
+local function stopCoinsPixPolling()
+  coinsPixPollActive = false
+end
+
+local function onCoinsPixPaymentApproved()
+  stopCoinsPixPolling()
+  if coinsPixPaymentWindow then
+    coinsPixPaymentWindow:destroy()
+    coinsPixPaymentWindow = nil
+  end
+  local root = g_ui.getRootWidget()
+  if not root then return end
+  local successWin = g_ui.createWidget('PixSuccessWindow', root)
+  local msg = successWin:getChildById('successMessage')
+  if msg then
+    msg:setText(tr("Pagamento confirmado! Obrigado pela compra."))
+  end
+  successWin:show()
+  successWin:raise()
+end
+
+local function pollCoinsPixStatus(paymentId, attempt)
+  if not coinsPixPollActive or not coinsPixPaymentWindow then
+    return
+  end
+  attempt = attempt or 0
+  if attempt > 150 then return end -- ~5 min
+  local url = getCoinsPixStatusUrl(paymentId)
+  if not url then return end
+  HTTP.getJSON(url, function(data, err)
+    if not coinsPixPollActive or not coinsPixPaymentWindow then
+      return
+    end
+    if err or not data or type(data) ~= "table" then
+      scheduleEvent(function() pollCoinsPixStatus(paymentId, attempt + 1) end, 2000)
+      return
+    end
+    if data.status == "approved" then
+      onCoinsPixPaymentApproved()
+      return
+    end
+    scheduleEvent(function() pollCoinsPixStatus(paymentId, attempt + 1) end, 2000)
+  end)
+end
+
+local function showCoinsPixPaymentWindow(result)
+  local root = g_ui.getRootWidget()
+  if not root then return end
+
+  if coinsPixPaymentWindow then
+    coinsPixPaymentWindow:destroy()
+    coinsPixPaymentWindow = nil
+  end
+  stopCoinsPixPolling()
+
+  local win = g_ui.createWidget('PixPaymentWindow', root)
+  coinsPixPaymentWindow = win
+  coinsPixPollActive = true
+
+  win.onDestroy = function()
+    coinsPixPaymentWindow = nil
+    stopCoinsPixPolling()
+  end
+
+  local qrImage = win:getChildById('qrImage')
+  if qrImage and result.qr_code then
+    qrImage:setQRCode(result.qr_code, 1)
+  end
+
+  local infoLabel = win:getChildById('infoLabel')
+  if infoLabel then
+    infoLabel:setText(tr("Escaneie o QR Code com o app do seu banco ou copie o código abaixo."))
+  end
+
+  local codeEdit = win:getChildById('codeEdit')
+  if codeEdit and result.qr_code then
+    codeEdit:setText(result.qr_code)
+  end
+
+  local paymentId = result.id or result.payment_id
+  if paymentId and getCoinsPixStatusUrl(paymentId) then
+    scheduleEvent(function() pollCoinsPixStatus(paymentId, 0) end, 2000)
+  end
+end
+
 local function openPixCoinsPurchase()
   local root = g_ui.getRootWidget()
   if not root then
@@ -555,11 +654,7 @@ local function openPixCoinsPurchase()
         return
       end
 
-      if showPixPaymentWindow then
-        showPixPaymentWindow(data)
-      else
-        displayInfoBox("PIX", "Pagamento criado, mas a janela de QRCode não pôde ser aberta.")
-      end
+      showCoinsPixPaymentWindow(data)
     end)
   end
 
