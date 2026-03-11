@@ -509,6 +509,10 @@ local function openPixCoinsPurchase()
       url = "http://eldera.pro" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
     end
 
+    -- Log local no cliente para debug
+    print(string.format("[STORE_PIX] URL: %s", url))
+    print(string.format("[STORE_PIX] Payload: %s", json.encode(payload)))
+
     HTTP.postJSON(url, payload, function(data, err)
       if err then
         local msg = err
