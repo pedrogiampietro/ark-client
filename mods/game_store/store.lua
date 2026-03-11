@@ -2,7 +2,7 @@ local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
 -- Mesmo endpoint PIX usado no sistema de player shops
-local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
+local PIX_API_URL = "https://eldera.pro/api/shop/mercadopago"
 
 gameStoreWindow = nil
 offersGrid = nil
@@ -467,7 +467,7 @@ local function openPixCoinsPurchase()
     end
     if msgLabel then
       msgLabel:setText(string.format(
-        "Você está comprando %d coins.\nValor total: R$ %.2f\n\n1 coin = 1 real.",
+        "Valor total: R$ %.2f (%d coins)\n1 coin = 1 real.",
         value,
         value
       ))
