@@ -594,7 +594,8 @@ function buyPoints()
     "2) Pix: gera QR Code dentro do jogo.\n\n" ..
     "Lembre-se: 1 coin = 1 real."
 
-  displayGeneralBox(
+  local box
+  box = displayGeneralBox(
     title,
     msg,
     {
@@ -604,19 +605,30 @@ function buyPoints()
           if DONATION_URL and DONATION_URL ~= "" then
             g_platform.openUrl(DONATION_URL)
           end
+          if box then box:destroy() end
         end
       },
       {
         text = "Pix",
         callback = function()
           openPixCoinsPurchase()
+          if box then box:destroy() end
         end
       },
-      {text = "Fechar", callback = defaultCallback},
+      {
+        text = "Fechar",
+        callback = function()
+          if box then box:destroy() end
+        end
+      },
       anchor = AnchorHorizontalCenter
     },
-    defaultCallback,
-    defaultCallback
+    function()
+      if box then box:destroy() end
+    end,
+    function()
+      if box then box:destroy() end
+    end
   )
 end
 
