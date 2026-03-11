@@ -949,6 +949,14 @@ local function onPixPaymentApproved(delivered)
     end
     successWin:show()
     successWin:raise()
+
+  -- Fechar janelas relacionadas à compra após sucesso (shop e buy coins)
+  if MainWindow and MainWindow.hide then
+    MainWindow:hide()
+  end
+  if gameStoreWindow and gameStoreWindow.hide then
+    gameStoreWindow:hide()
+  end
 end
 
 local function pollPixStatus(paymentId, attempt)
