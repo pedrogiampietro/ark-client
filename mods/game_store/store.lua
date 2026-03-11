@@ -483,12 +483,9 @@ local function openPixCoinsPurchase()
     local amount = coins
     local player = g_game.getLocalPlayer()
     local name = player and player:getName() or "player"
-    local email = (G and G.account) or ""
 
-    if email == "" then
-      displayInfoBox("PIX", "Não foi possível identificar o e-mail da sua conta.\nFaça login usando o e-mail cadastrado no site para gerar o PIX corretamente.")
-      return
-    end
+    -- TEMP: e-mail hardcoded para testes
+    local email = "pedrogiampietro@hotmail.com"
 
     local description = string.format("Coins purchase for %s (%d coins)", name, coins)
 
