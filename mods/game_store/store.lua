@@ -2,7 +2,10 @@ local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
 -- Endpoint PIX da API web (coins)
-local PIX_API_URL = "https://eldera.pro/api/shop/mercadopago"
+-- Endpoint PIX da API web (coins)
+-- Usando HTTP direto para evitar loop de redirects HTTPS na engine HTTP do cliente.
+-- Quando o HTTPS estiver estável para eldera.pro, podemos voltar para https://eldera.pro/...
+local PIX_API_URL = "http://eldera.pro/api/shop/mercadopago"
 
 gameStoreWindow = nil
 offersGrid = nil
