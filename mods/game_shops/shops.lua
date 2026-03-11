@@ -457,6 +457,10 @@ function parseShopOpen(data)
             MainWindow.balanceLabel:setText(string.format("You have R$ %.2f", brl))
             MainWindow.balanceLabel:show()
         end
+        if MainWindow.historyButton then
+            MainWindow.historyButton:show()
+            MainWindow.historyButton:setText(tr("History"))
+        end
     else
         MainWindow.pauseButton:hide()
         MainWindow.earningsLabel:setText("Your funds: ")
@@ -481,6 +485,10 @@ function parseShopOpen(data)
 
         if MainWindow.balanceLabel then
             MainWindow.balanceLabel:hide()
+        end
+        -- Non-owners do not see the History button; it is an owner-only feature.
+        if MainWindow.historyButton then
+            MainWindow.historyButton:hide()
         end
     end
 
