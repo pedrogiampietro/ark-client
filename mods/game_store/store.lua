@@ -1,6 +1,9 @@
 local GAME_STORE_CODE = 102
 local DONATION_URL = nil
 
+-- Mesmo endpoint PIX usado no sistema de player shops
+local PIX_API_URL = "http://gravak.fun/api/shop/mercadopago"
+
 gameStoreWindow = nil
 offersGrid = nil
 msgWindow = nil
@@ -430,8 +433,159 @@ function onSearch()
   )
 end
 
+local function openPixCoinsPurchase()
+  local root = g_ui.getRootWidget()
+  if not root then
+    return
+  end
+
+  local coins = 10
+  local maxCoins = 1000
+
+  local win = g_ui.createWidget("ConfirmBuyAmountWindow", root)
+  win:setText("Comprar coins via PIX")
+
+  local msgLabel = win:getChildById("message")
+  local amountLabel = win:getChildById("amountLabel")
+  local scrollbar = win:getChildById("amountScrollBar")
+  local selectedLabel = win:getChildById("selectedLabel")
+
+  if amountLabel then
+    amountLabel:setText("Selecione a quantidade de coins:")
+  end
+
+  if scrollbar then
+    scrollbar:setMinimum(1)
+    scrollbar:setMaximum(maxCoins)
+    scrollbar:setValue(coins)
+  end
+
+  local function updateLabels(value)
+    coins = value
+    if selectedLabel then
+      selectedLabel:setText(string.format("Selecionado: %d coins", value))
+    end
+    if msgLabel then
+      msgLabel:setText(string.format(
+        "Você está comprando %d coins.\nValor total: R$ %.2f\n\n1 coin = 1 real.",
+        value,
+        value
+      ))
+    end
+  end
+
+  updateLabels(coins)
+
+  if scrollbar then
+    scrollbar.onValueChange = function(self, value)
+      updateLabels(value)
+      scrollbar:setText(value)
+    end
+  end
+
+  local function createPixPayment()
+    local amount = coins
+    local player = g_game.getLocalPlayer()
+    local name = player and player:getName() or "player"
+    local email = (G and G.account) or ""
+
+    if email == "" then
+      displayInfoBox("PIX", "Não foi possível identificar o e-mail da sua conta.\nFaça login usando o e-mail cadastrado no site para gerar o PIX corretamente.")
+      return
+    end
+
+    local description = string.format("Coins purchase for %s (%d coins)", name, coins)
+
+    local payload = {
+      amount = amount,
+      description = description,
+      email = email,
+      externalReference = string.format("coins_%s_%d", name, os.time()),
+      coins = coins
+    }
+
+    local url = PIX_API_URL
+    if not url or url == "" then
+      displayInfoBox("PIX error", "PIX API URL is not configured.")
+      return
+    end
+    if not url:find("://") then
+      url = "http://gravak.fun" .. (url:sub(1, 1) == "/" and url or ("/" .. url))
+    end
+
+    HTTP.postJSON(url, payload, function(data, err)
+      if err then
+        displayInfoBox("PIX error", "Failed to create PIX payment:\n" .. err)
+        return
+      end
+      if not data or not data.qr_code then
+        displayInfoBox("PIX error", "Invalid PIX response from server.")
+        return
+      end
+
+      if showPixPaymentWindow then
+        showPixPaymentWindow(data)
+      else
+        displayInfoBox("PIX", "Pagamento criado, mas a janela de QRCode não pôde ser aberta.")
+      end
+    end)
+  end
+
+  local okButton = win:getChildById("buttonOk")
+  if okButton then
+    okButton.onClick = function()
+      createPixPayment()
+      win:hide()
+    end
+  end
+
+  local cancelButton = win:getChildById("buttonCancel")
+  if cancelButton then
+    cancelButton.onClick = function()
+      win:hide()
+    end
+  end
+
+  win:show()
+  win:raise()
+  local defaultOk = win:getChildById("buttonOk")
+  if defaultOk then
+    defaultOk:focus()
+  end
+end
+
 function buyPoints()
-  g_platform.openUrl(DONATION_URL)
+  local title = "Buy Coins"
+  local msg =
+    "Como você quer comprar coins?\n\n" ..
+    "1) Site: abre a loja no navegador.\n" ..
+    "2) Pix: gera QR Code dentro do jogo.\n\n" ..
+    "Lembre-se: 1 coin = 1 real."
+
+  displayGeneralBox(
+    title,
+    msg,
+    {
+      {
+        text = "Site",
+        callback = function()
+          if DONATION_URL and DONATION_URL ~= "" then
+            g_platform.openUrl(DONATION_URL)
+          end
+        end
+      },
+      {
+        text = "Pix",
+        callback = function()
+          openPixCoinsPurchase()
+        end
+      },
+      {text = "Fechar", callback = defaultCallback},
+      anchor = AnchorHorizontalCenter
+    },
+    defaultCallback,
+    defaultCallback
+  )
 end
 
 function toggle()
