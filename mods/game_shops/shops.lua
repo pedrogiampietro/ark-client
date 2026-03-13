@@ -1,6 +1,9 @@
 local EditShopWindow, SelectItemWindow
 MainWindow = {}
 
+-- Tabela de cards flutuantes indexada por creature id
+local shopCards = {}
+
 Config = Config or {}
 Config.opcode = 220
 Config.money = Config.money or {2148, 2152, 2160} -- gold, platinum, crystal coins
@@ -16,6 +19,8 @@ end
 
 local function onGameEnd()
     if not MainWindow then return end
+    -- Limpar todos os cards flutuantes ao desconectar
+    shopCards = {}
     hide()
 end
 
@@ -1104,6 +1109,50 @@ local function parseShopHistory(entries)
     end
 end
 
+-- Cria ou atualiza o card flutuante persistente acima do NPC clone
+local function parseShopCard(data)
+    if not data or not data.id or not data.msg then return end
+
+    local creature = g_map.getCreatureById(data.id)
+    if not creature then return end
+
+    -- Remover card anterior deste clone se existir
+    if shopCards[data.id] then
+        creature:removeTopWidget(shopCards[data.id])
+        shopCards[data.id] = nil
+    end
+
+    local card = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
+    card:getChildById('cardText'):setText(data.msg)
+
+    creature:addTopWidget(card)
+    -- Desanexar do root para não renderizar duplicado na UI normal
+    card:setParent(nil)
+
+    shopCards[data.id] = card
+end
+
+-- Quando um NPC clone aparece no mapa, solicita o card ao servidor
+local function onShopCreatureAppear(creature)
+    if not creature or not creature:isNpc() then return end
+    local name = creature:getName() or ""
+    -- Clones de shop seguem o padrão "Nome#guid"
+    if name:match('#%d+$') then
+        local payload = {e = 'SHOP_CARD_REQUEST', d = creature:getId()}
+        g_game.getProtocolGame():sendExtendedOpcode(Config.opcode,
+                                                    json.encode(payload))
+    end
+end
+
+-- Limpa o card quando o NPC clone sai do mapa
+local function onShopCreatureDisappear(creature)
+    if not creature then return end
+    local id = creature:getId()
+    if shopCards[id] then
+        shopCards[id] = nil
+    end
+end
+
 local function parseShop(protocol, opcode, buffer)
     if opcode ~= Config.opcode then return end
     buffer = json.decode(buffer)
@@ -1132,6 +1181,8 @@ local function parseShop(protocol, opcode, buffer)
     elseif evt == 'SHOP_PIX_DELIVERED' then
         -- Item PIX entregue no jogo: fechar modal do PIX e mostrar janela de sucesso
         onPixPaymentApproved(true)
+    elseif evt == 'SHOP_CARD' then
+        parseShopCard(data)
     end
 end
 
@@ -1199,7 +1250,12 @@ function onPositionChange(player, newPos, oldPos)
 end
 
 function init()
-    connect(g_game, {onGameEnd = onGameEnd, onGameStart = onGameStart})
+    connect(g_game, {
+        onGameEnd = onGameEnd,
+        onGameStart = onGameStart,
+        onCreatureAppear = onShopCreatureAppear,
+        onCreatureDisappear = onShopCreatureDisappear
+    })
 
     MainWindow = g_ui.loadUI('shops', g_ui.getRootWidget())
     EditShopWindow = g_ui.createWidget('EditShopWindow', g_ui.getRootWidget())
