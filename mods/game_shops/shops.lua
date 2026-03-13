@@ -1124,23 +1124,11 @@ local function parseShopCard(data)
 
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
-    local bg    = card:getChildById('cardBg')
 
-    -- Truncar mensagens longas
+    -- cipsoftFont = 8px por glifo, 94px úteis → ~15 chars visíveis
     local msg = data.msg or ""
-    if #msg > 30 then msg = msg:sub(1, 27) .. "..." end
+    if #msg > 16 then msg = msg:sub(1, 13) .. "..." end
     label:setText(msg)
-
-    -- Dimensionar pelo tamanho real do texto (cipsoftFont = 8px por glifo)
-    label:resizeToText()
-    local tw     = label:getWidth()
-    local bgW    = tw + 6      -- 3px respiro cada lado
-    local totalW = bgW + 2     -- 1px borda cada lado
-
-    card:setWidth(totalW)
-    bg:setWidth(bgW)
-    label:setWidth(tw)
-    label:setHeight(12)   -- restaura altura fixa do OTUI
 
     creature:addTopWidget(card)
     -- Desanexar do root para não renderizar duplicado na UI normal
