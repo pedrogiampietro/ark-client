@@ -1122,13 +1122,26 @@ local function parseShopCard(data)
         shopCards[data.id] = nil
     end
 
+    local msg = data.msg or ""
+    if #msg > 30 then msg = msg:sub(1, 27) .. "..." end
+
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
+    local bg    = card:getChildById('cardBg')
 
-    -- card 140px, cipsoftFont ~7px/char → cabe ~18 chars
-    local msg = data.msg or ""
-    if #msg > 20 then msg = msg:sub(1, 17) .. "..." end
     label:setText(msg)
+    label:resizeToText()
+
+    -- Auto-size card to fit text with padding
+    local padW = 12  -- 6px each side
+    local padH = 6   -- 3px each side
+    local bgW = label:getWidth() + padW
+    local bgH = label:getHeight() + padH
+
+    bg:setWidth(bgW)
+    bg:setHeight(bgH)
+    card:setWidth(bgW)
+    -- height stays tall (76) to push card above creature name label
 
     creature:addTopWidget(card)
     -- Desanexar do root para não renderizar duplicado na UI normal
