@@ -686,40 +686,42 @@ PixSuccessWindow < MainWindow
 ShopCardWidget < UIWidget
   width: 10
   height: 28
-  background-color: #00000000
+  background-color: #000000AA
+  border-width: 1
+  border-color: #8B6914AA
 
   Label
     id: cardText
     anchors.fill: parent
     text-align: center
-    color: #d4aa60ff
+    color: #FFD700FF
     font: verdana-11px-rounded
-    padding: 6 18
+    padding: 6 20
 
   UIWidget
     anchors.top: parent.top
     anchors.left: parent.left
-    size: 22 22
+    size: 28 28
     image-source: /data/images/ui/corner.png
     image-clip: 0 0 70 70
 
   UIWidget
     anchors.top: parent.top
     anchors.right: parent.right
-    size: 22 22
+    size: 28 28
     image-source: /data/images/ui/corner.png
     image-clip: 290 0 70 70
 
   UIWidget
     anchors.bottom: parent.bottom
     anchors.left: parent.left
-    size: 22 22
+    size: 28 28
     image-source: /data/images/ui/corner.png
     image-clip: 0 290 70 70
 
   UIWidget
     anchors.bottom: parent.bottom
     anchors.right: parent.right
-    size: 22 22
+    size: 28 28
     image-source: /data/images/ui/corner.png
     image-clip: 290 290 70 70
