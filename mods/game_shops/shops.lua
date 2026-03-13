@@ -1125,9 +1125,9 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
 
-    -- cipsoftFont = 8px por glifo, 94px úteis → ~15 chars visíveis
+    -- card 140px, cipsoftFont ~7px/char → cabe ~18 chars
     local msg = data.msg or ""
-    if #msg > 16 then msg = msg:sub(1, 13) .. "..." end
+    if #msg > 20 then msg = msg:sub(1, 17) .. "..." end
     label:setText(msg)
 
     creature:addTopWidget(card)
