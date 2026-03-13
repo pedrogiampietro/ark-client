@@ -1131,16 +1131,16 @@ local function parseShopCard(data)
     if #msg > 30 then msg = msg:sub(1, 27) .. "..." end
     label:setText(msg)
 
-    -- Medir a largura real do texto e aplicar largura mínima de 90px
+    -- Dimensionar pelo tamanho real do texto (cipsoftFont = 8px por glifo)
     label:resizeToText()
     local tw     = label:getWidth()
-    local bgW    = math.max(tw + 8, 90)   -- min 90px, 4px respiro cada lado
-    local totalW = bgW + 2                -- 1px borda cada lado
+    local bgW    = tw + 6      -- 3px respiro cada lado
+    local totalW = bgW + 2     -- 1px borda cada lado
 
     card:setWidth(totalW)
     bg:setWidth(bgW)
-    label:setWidth(bgW - 8)
-    label:setHeight(15)   -- restaura altura fixa do OTUI
+    label:setWidth(tw)
+    label:setHeight(12)   -- restaura altura fixa do OTUI
 
     creature:addTopWidget(card)
     -- Desanexar do root para não renderizar duplicado na UI normal
