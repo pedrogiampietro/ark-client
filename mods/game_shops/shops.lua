@@ -1127,21 +1127,15 @@ local function parseShopCard(data)
 
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
-    local bg    = card:getChildById('cardBg')
 
     label:setText(msg)
     label:resizeToText()
 
-    -- Auto-size card to fit text with padding
-    local padW = 12  -- 6px each side
-    local padH = 6   -- 3px each side
-    local bgW = label:getWidth() + padW
-    local bgH = label:getHeight() + padH
-
-    bg:setWidth(bgW)
-    bg:setHeight(bgH)
-    card:setWidth(bgW)
-    -- height stays tall (76) to push card above creature name label
+    -- Auto-size card to hug the text
+    local cardW = label:getWidth() + 12   -- 6px padding each side
+    local cardH = label:getHeight() + 6   -- 3px padding top/bottom
+    card:setWidth(cardW)
+    card:setHeight(cardH)
 
     creature:addTopWidget(card)
     -- Desanexar do root para não renderizar duplicado na UI normal

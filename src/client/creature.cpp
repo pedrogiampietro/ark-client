@@ -108,8 +108,6 @@ void Creature::draw(const Point& dest, bool animate, LightView* lightView)
         g_drawQueue->setMark(drawQueueSize, updatedMarkedColor());
     }
 
-    drawTopWidgets(creatureCenter, m_walking ? m_walkDirection : m_direction);
-
     Light light = rawGetThingType()->getLight();
     if (m_light.intensity != light.intensity || m_light.color != light.color)
         light = m_light;
@@ -163,6 +161,17 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
     Size nameSize = m_nameCache.getTextSize();
     Rect textRect = Rect(point.x + m_informationOffset.x - nameSize.width() / 2.0, point.y + m_informationOffset.y - 12, nameSize);
     textRect.bind(parentRect);
+
+    // Draw top widgets at screen coordinates, just above the creature name
+    for (auto& widget : m_topWidgets) {
+        int w = widget->getWidth();
+        int h = widget->getHeight();
+        int x = textRect.horizontalCenter() - w / 2;
+        int y = textRect.top() - 3 - h;
+        Rect wr = Rect(x, y, w, h);
+        widget->setRect(wr);
+        widget->draw(wr, Fw::ForegroundPane);
+    }
 
     // distance them
     uint32 offset = 12;
