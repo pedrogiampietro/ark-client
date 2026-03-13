@@ -687,8 +687,6 @@ ShopCardWidget < UIWidget
   width: 10
   height: 28
   background-color: #00000000
-  image-source: /data/images/ui/corner.png
-  image-border: 70
 
   Label
     id: cardText
@@ -697,3 +695,31 @@ ShopCardWidget < UIWidget
     color: #d4aa60ff
     font: verdana-11px-rounded
     padding: 6 18
+
+  UIWidget
+    anchors.top: parent top
+    anchors.left: parent left
+    size: 22 22
+    image-source: /data/images/ui/corner.png
+    image-clip: 0 0 70 70
+
+  UIWidget
+    anchors.top: parent top
+    anchors.right: parent right
+    size: 22 22
+    image-source: /data/images/ui/corner.png
+    image-clip: 290 0 70 70
+
+  UIWidget
+    anchors.bottom: parent bottom
+    anchors.left: parent left
+    size: 22 22
+    image-source: /data/images/ui/corner.png
+    image-clip: 0 290 70 70
+
+  UIWidget
+    anchors.bottom: parent bottom
+    anchors.right: parent right
+    size: 22 22
+    image-source: /data/images/ui/corner.png
+    image-clip: 290 290 70 70
