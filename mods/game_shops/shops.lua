@@ -1126,19 +1126,21 @@ local function parseShopCard(data)
     local label = card:getChildById('cardText')
     local bg    = card:getChildById('cardBg')
 
-    -- Truncar mensagens muito longas
+    -- Truncar mensagens longas
     local msg = data.msg or ""
-    if #msg > 32 then msg = msg:sub(1, 29) .. "..." end
+    if #msg > 28 then msg = msg:sub(1, 25) .. "..." end
     label:setText(msg)
 
-    -- Auto-dimensionar pelo tamanho real do texto
+    -- Medir largura real do texto e calcular proporcionalmente
     label:resizeToText()
-    local tw     = label:getWidth()
-    local bgW    = tw + 10      -- padding horizontal interno
-    local totalW = bgW + 4      -- margem externa
+    local tw     = label:getWidth()   -- largura exata do texto
+    local bgW    = tw + 6             -- 3px de respiro cada lado
+    local totalW = bgW + 2            -- 1px de borda cada lado
+
     card:setWidth(totalW)
     bg:setWidth(bgW)
-    label:setWidth(bgW - 6)
+    label:setWidth(tw)
+    label:setHeight(13)   -- restaura altura fixa do OTUI
 
     creature:addTopWidget(card)
     -- Desanexar do root para não renderizar duplicado na UI normal

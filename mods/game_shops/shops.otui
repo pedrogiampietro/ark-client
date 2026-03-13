@@ -685,7 +685,7 @@ PixSuccessWindow < MainWindow
 
 ShopCardWidget < UIWidget
   width: 60
-  height: 58
+  height: 50
   background-color: #00000000
 
   UIWidget
@@ -693,18 +693,18 @@ ShopCardWidget < UIWidget
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     width: 60
-    height: 16
-    background-color: #0a0a0ad7
+    height: 13
+    background-color: #000000cc
     border-width: 1
-    border-color: #c8a000
+    border-color: #d4af3766
 
   Label
     id: cardText
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 54
-    height: 16
+    width: 56
+    height: 13
     text-align: center
-    color: #FFD700
-    font: verdana-9px-bold
-    padding: 1 4
+    color: #e8d08a
+    font: cipsoftFont
+    padding: 1 3
