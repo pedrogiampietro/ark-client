@@ -429,6 +429,10 @@ function parseShopOpen(data)
         MainWindow.pauseButton:show()
         MainWindow.pauseButton:enable()
 
+        if MainWindow.msgButton then
+            MainWindow.msgButton:show()
+        end
+
         MainWindow.currentShop.open = data.open
 
         if data.open then
@@ -463,6 +467,9 @@ function parseShopOpen(data)
         end
     else
         MainWindow.pauseButton:hide()
+        if MainWindow.msgButton then
+            MainWindow.msgButton:hide()
+        end
         MainWindow.earningsLabel:setText("Your funds: ")
 
         MainWindow.buyButton:show()
@@ -1129,8 +1136,19 @@ local function parseShop(protocol, opcode, buffer)
 end
 
 function onEditShop()
-    EditShopWindow:show()
+    if EditShopWindow.shopName then
+        EditShopWindow.shopName:setText(MainWindow.currentShop.message or "")
+    end
 
+    EditShopWindow.saveMessage.onClick = function()
+        local msg = EditShopWindow.shopName:getText()
+        local payload = {e = 'SHOP_SET_MESSAGE', d = msg}
+        g_game.getProtocolGame():sendExtendedOpcode(Config.opcode,
+                                                    json.encode(payload))
+        EditShopWindow:hide()
+    end
+
+    EditShopWindow:show()
     EditShopWindow:raise()
     EditShopWindow:focus()
 end
@@ -1210,6 +1228,14 @@ function init()
             SelectItemWindow.currencyGoldButton:setChecked(false)
             SelectItemWindow.currencyPixButton:setChecked(true)
             SelectItemWindow.priceLabel:setText('Enter price (BRL): ')
+        end
+    end
+
+    if MainWindow.msgButton then
+        MainWindow.msgButton.onClick = function()
+            if isOwnShop() then
+                onEditShop()
+            end
         end
     end
 

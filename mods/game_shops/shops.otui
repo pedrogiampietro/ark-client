@@ -351,6 +351,7 @@ EditShopWindow < UIWindow
     pixel-scroll: true
 
   Button
+    id: saveMessage
     !text: 'Save'
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: shopNameChars.bottom
@@ -452,9 +453,20 @@ UIWindow
     image-source: /images/ui/buttons-blue
     !text: tr("History")
 
+  Button
+    id: msgButton
+    size: 80 25
+    anchors.right: parent.right
+    anchors.top: historyButton.bottom
+    margin-right: 20
+    margin-top: 3
+    image-source: /images/ui/buttons-blue
+    !text: tr("Message")
+    visible: false
+
   Separator
     id: botseparator
-    anchors.top: historyButton.bottom
+    anchors.top: msgButton.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 5
