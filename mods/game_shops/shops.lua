@@ -15,6 +15,25 @@ local PIX_API_URL = "http://eldera.pro/api/shop/mercadopago"
 local function onGameStart()
     if not MainWindow then return end
     hide()
+    -- Após login/relog, re-solicitar cards para todos os clones visíveis.
+    -- O delay garante que o protocolo esteja pronto antes de enviar os requests.
+    scheduleEvent(function()
+        if not g_game.isOnline() then return end
+        local proto = g_game.getProtocolGame()
+        if not proto then return end
+        local localPlayer = g_game.getLocalPlayer()
+        if not localPlayer then return end
+        local spectators = g_map.getSpectators(localPlayer:getPosition(), false)
+        for _, creature in ipairs(spectators) do
+            if creature:isNpc() then
+                local name = creature:getName() or ""
+                if name:match('#%d+$') then
+                    local payload = {e = 'SHOP_CARD_REQUEST', d = creature:getId()}
+                    proto:sendExtendedOpcode(Config.opcode, json.encode(payload))
+                end
+            end
+        end
+    end, 2000)
 end
 
 local function onGameEnd()
