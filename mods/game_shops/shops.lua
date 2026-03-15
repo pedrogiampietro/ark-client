@@ -750,18 +750,26 @@ function parseShopOpen(data)
 
     -- Busca o vendedor pelo GUID (agora sempre é o GUID, não o sessionId)
     local shopOutfitType = (data.sex == 0) and 256 or 255 -- 0=female→256, 1=male→255
+    local colors = data.colors or {}
+    local shopOutfit = {
+        lookType = shopOutfitType,
+        lookHead = colors.head or 0,
+        lookBody = colors.body or 0,
+        lookLegs = colors.legs or 0,
+        lookFeet = colors.feet or 0,
+    }
 
     local seller = g_map.getCreatureById(data.seller)
     if not seller or not seller:isPlayer() then
         -- Vendedor offline: exibe outfit padrão e nome genérico
-        MainWindow.creature:setOutfit({lookType = shopOutfitType})
+        MainWindow.creature:setOutfit(shopOutfit)
         if isOwnShop() then
             MainWindow:setText("Your Shop")
         else
             MainWindow:setText("Shop de jogador offline")
         end
     else
-        MainWindow.creature:setOutfit({lookType = shopOutfitType})
+        MainWindow.creature:setOutfit(shopOutfit)
         if isOwnShop() then
             MainWindow:setText("Your Shop")
         else
