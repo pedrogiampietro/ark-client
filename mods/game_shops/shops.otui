@@ -359,7 +359,7 @@ EditShopWindow < UIWindow
 
 UIWindow
   id: market
-  size: 450 350
+  size: 450 380
   anchors.centerIn: parent
   !text: tr("A Shop")
   text-offset: 0 8
