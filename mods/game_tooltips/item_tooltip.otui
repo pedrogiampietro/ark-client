@@ -84,6 +84,4 @@ FlatPanel
     background-color: #0f0f0f
     anchors.fill: parent
     margin-top: 56
-    margin-bottom: 2
-    margin-left: 2
-    margin-right: 2
+    margin-bottom: 0

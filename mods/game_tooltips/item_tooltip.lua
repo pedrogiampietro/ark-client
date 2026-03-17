@@ -403,6 +403,7 @@ function buildItemTooltip(item)
     end
 
     -- ── Body ──────────────────────────────────────────────────────────────────
+    addEmpty(5)
 
     -- Item level / required level
     if iLvl > 0 then
