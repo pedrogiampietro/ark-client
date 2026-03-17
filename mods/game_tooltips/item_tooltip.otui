@@ -28,6 +28,7 @@ TooltipEmpty < UIWidget
 
 FlatPanel
   background-color: #0f0f0f
+  padding: 0
 
   UIWidget
     id: tooltipHeader
@@ -82,7 +83,7 @@ FlatPanel
     id: labels
     background-color: #0f0f0f
     anchors.fill: parent
-    margin-top: 61
-    margin-bottom: 5
-    margin-left: 4
-    margin-right: 4
+    margin-top: 56
+    margin-bottom: 2
+    margin-left: 2
+    margin-right: 2

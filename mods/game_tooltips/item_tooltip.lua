@@ -352,7 +352,7 @@ function buildItemTooltip(item)
         tooltipHeader:setBackgroundColor(rarityHeaderBg[rarity] or rarityHeaderBg[0])
     end
     tooltipWindow:setBorderColor(rarityBorderColor[rarity] or rarityBorderColor[0])
-    tooltipWindow:setBorderWidth(2)
+    tooltipWindow:setBorderWidth(3)
 
     itemWeightLabel:setText(formatWeight(weight))
     itemSprite:setItemId(id)
