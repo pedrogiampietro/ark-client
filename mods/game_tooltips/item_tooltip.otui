@@ -46,9 +46,9 @@ UIWidget
     Label
       id: itemNameLabel
       anchors.top: parent.top
-      anchors.left: itemSprite.right
+      anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 8
+      margin-left: 56
       margin-top: 9
       margin-right: 6
       font: verdana-11px-rounded
@@ -57,13 +57,13 @@ UIWidget
 
     Label
       id: itemTypeLabel
-      anchors.top: itemNameLabel.bottom
-      anchors.left: itemSprite.right
+      anchors.top: prev.bottom
+      anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 8
+      margin-left: 56
       margin-top: 1
       margin-right: 6
-      font: verdana-9px-italic
+      font: verdana-11px-rounded
       color: #aaaaaa
       focusable: false
 
@@ -73,14 +73,14 @@ UIWidget
       anchors.right: parent.right
       margin-bottom: 5
       margin-right: 6
-      font: verdana-9px-italic
+      font: verdana-11px-rounded
       color: #888888
       text-auto-resize: true
       focusable: false
 
   Panel
     id: tooltipBody
-    anchors.top: tooltipHeader.bottom
+    anchors.top: prev.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom

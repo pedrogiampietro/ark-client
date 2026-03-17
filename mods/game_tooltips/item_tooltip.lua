@@ -111,12 +111,24 @@ function init()
     _G.tooltipWindow = tooltipWindow
     tooltipWindow:hide()
 
-    tooltipHeader    = tooltipWindow:getChildById("tooltipHeader")
-    labels           = tooltipWindow:getChildById("labels")
-    itemWeightLabel  = tooltipWindow:getChildById("itemWeightLabel")
-    itemNameLabel    = tooltipWindow:getChildById("itemNameLabel")
-    itemTypeLabel    = tooltipWindow:getChildById("itemTypeLabel")
-    itemSprite       = tooltipWindow:getChildById("itemSprite")
+    tooltipHeader   = tooltipWindow:getChildById("tooltipHeader")
+    local tooltipBody = tooltipWindow:getChildById("tooltipBody")
+
+    -- getChildById may be non-recursive — access nested widgets through their direct parent
+    if tooltipHeader then
+        itemSprite      = tooltipHeader:getChildById("itemSprite")
+        itemNameLabel   = tooltipHeader:getChildById("itemNameLabel")
+        itemTypeLabel   = tooltipHeader:getChildById("itemTypeLabel")
+        itemWeightLabel = tooltipHeader:getChildById("itemWeightLabel")
+    end
+    if tooltipBody then
+        labels = tooltipBody:getChildById("labels")
+    end
+
+    if not labels or not itemSprite or not itemNameLabel or not itemWeightLabel then
+        g_logger.error("item_tooltip: failed to find required child widgets — check item_tooltip.otui IDs")
+        return
+    end
 
     _G.buildItemTooltip = buildItemTooltip
     _G.showItemTooltip  = showItemTooltip
