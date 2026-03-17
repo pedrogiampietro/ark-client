@@ -9,33 +9,33 @@ ForgeItemSlot < UIItem
     color: #646464
 
 ForgeRuneSlot < Panel
-  size: 62 94
+  size: 74 110
 
   Panel
     id: slotBg
-    size: 56 56
+    size: 64 64
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    background-color: #2a2a2a
+    background-color: #1e2230
     border-width: 1
-    border-color: #4a4a4a
+    border-color: #5a6a8a
 
     UIItem
       id: runeItem
-      size: 32 32
+      size: 42 42
       anchors.centerIn: parent
       virtual: true
 
   FlatPanel
     id: runeCountBox
-    height: 24
+    height: 20
     anchors.top: slotBg.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 4
-    background-color: #1e1e1e
+    margin-top: 3
+    background-color: #141820
     border-width: 1
-    border-color: #555555
+    border-color: #4a5a7a
 
     Label
       id: runeCount
@@ -43,6 +43,17 @@ ForgeRuneSlot < Panel
       text-align: center
       font: verdana-11px-antialised
       color: #c0c0c0
+
+  Label
+    id: runeLabel
+    anchors.top: runeCountBox.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 3
+    height: 14
+    text-align: center
+    font: verdana-11px-antialised
+    color: #8899bb
 
 ForgeEnchantRow < Panel
   height: 20
@@ -282,37 +293,54 @@ ForgeClassificationTab < Panel
 
     Panel
       id: classActionRow
-      height: 100
+      height: 116
       anchors.top: classMatTitle.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 10
+      margin-top: 6
 
-      ForgeRuneSlot
-        id: classTierRuneSlot
+      // --- Fragment slot (pink) ---
+      Panel
+        id: classTierSlotGroup
+        width: 74
+        height: 110
         anchors.top: parent.top
         anchors.left: parent.left
-        margin-top: 0
-        margin-left: 24
+        margin-left: 16
+        margin-top: 3
 
-      ForgeRuneSlot
-        id: classProtRuneSlot
+        ForgeRuneSlot
+          id: classTierRuneSlot
+          anchors.top: parent.top
+          anchors.horizontalCenter: parent.horizontalCenter
+
+      // --- Protection orb slot ---
+      Panel
+        id: classProtSlotGroup
+        width: 74
+        height: 110
         anchors.top: parent.top
-        anchors.left: classTierRuneSlot.right
-        margin-top: 0
-        margin-left: 14
+        anchors.left: classTierSlotGroup.right
+        margin-left: 8
+        margin-top: 3
 
+        ForgeRuneSlot
+          id: classProtRuneSlot
+          anchors.top: parent.top
+          anchors.horizontalCenter: parent.horizontalCenter
+
+      // --- +20% bonus button ---
       UIWidget
         id: classBonusButton
-        size: 66 66
+        size: 56 56
         image-source: /images/ui/20
         image-clip: 0 0 66 66
-        image-size: 66 66
+        image-size: 56 56
         image-color: #ffffff
         anchors.top: parent.top
-        anchors.left: classProtRuneSlot.right
-        margin-top: 0
-        margin-left: 18
+        anchors.left: classProtSlotGroup.right
+        margin-top: 10
+        margin-left: 14
 
         $on:
           image-clip: 66 0 66 66
@@ -323,15 +351,15 @@ ForgeClassificationTab < Panel
       Panel
         id: classBonusCostRow
         anchors.top: classBonusButton.bottom
-        anchors.left: classBonusButton.left
+        anchors.horizontalCenter: classBonusButton.horizontalCenter
         margin-top: 4
-        width: 58
-        height: 26
+        width: 60
+        height: 22
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 24 24
-          size: 24 24
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -340,31 +368,30 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 28
-          width: 28
+          margin-left: 24
+          width: 34
           height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
+      // --- Arrow + Chance ---
       UIWidget
         id: classForgeArrow
         image-source: /images/ui/arrow_horizontal
         image-clip: 12 0 12 21
         size: 12 21
-        anchors.top: parent.top
+        anchors.verticalCenter: classBonusButton.verticalCenter
         anchors.left: classBonusButton.right
-        margin-top: 22
-        margin-left: 14
+        margin-left: 10
         phantom: false
 
       Panel
         id: classChancePanel
-        width: 80
-        height: 36
-        anchors.top: parent.top
+        width: 76
+        height: 34
+        anchors.verticalCenter: classBonusButton.verticalCenter
         anchors.left: classForgeArrow.right
-        margin-top: 14
-        margin-left: 12
+        margin-left: 8
 
         Label
           id: classChanceLabel
@@ -374,15 +401,15 @@ ForgeClassificationTab < Panel
           color: #c0c0c0
           text-wrap: true
 
+      // --- Forge button ---
       UIButton
         id: classForgeButton
-        size: 128 66
+        size: 120 60
         image-source: /images/game/imbuing/imbue_green
         image-clip: 0 0 128 66
-        anchors.top: parent.top
+        anchors.verticalCenter: classBonusButton.verticalCenter
         anchors.right: parent.right
-        margin-top: 0
-        margin-right: 24
+        margin-right: 16
         enabled: false
         image-color: #b0ffb0
 
@@ -395,15 +422,15 @@ ForgeClassificationTab < Panel
       Panel
         id: classCostRow
         anchors.top: classForgeButton.bottom
-        anchors.left: classForgeButton.left
+        anchors.horizontalCenter: classForgeButton.horizontalCenter
         margin-top: 4
-        width: 58
-        height: 26
+        width: 60
+        height: 22
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 24 24
-          size: 24 24
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -412,8 +439,8 @@ ForgeClassificationTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 28
-          width: 28
+          margin-left: 24
+          width: 34
           height: 16
           font: verdana-11px-antialised
           color: #ffcc00
@@ -645,20 +672,20 @@ ForgeAttributesTab < Panel
 
     Label
       id: attrRuneTitle
-      !text: tr('Required Rune:')
+      !text: tr('Required Fragment (x100):')
       anchors.top: attrReplacePanel.bottom
       anchors.left: parent.left
       margin-top: 10
       margin-left: 12
       font: verdana-11px-antialised
-      color: #c0c0c0
+      color: #8899bb
 
     ForgeRuneSlot
       id: attrRuneSlot
       anchors.top: attrRuneTitle.bottom
       anchors.left: parent.left
       margin-top: 4
-      margin-left: 25
+      margin-left: 16
 
     Label
       id: attrCostTitle
@@ -895,37 +922,54 @@ ForgeToolsTab < Panel
 
     Panel
       id: toolsActionRow
-      height: 100
+      height: 116
       anchors.top: toolsMatTitle.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-top: 10
+      margin-top: 6
 
-      ForgeRuneSlot
-        id: toolsUpgradeRuneSlot
+      // --- Fragment slot (yellow) ---
+      Panel
+        id: toolsUpgradeSlotGroup
+        width: 74
+        height: 110
         anchors.top: parent.top
         anchors.left: parent.left
-        margin-top: 0
-        margin-left: 24
+        margin-left: 16
+        margin-top: 3
 
-      ForgeRuneSlot
-        id: toolsProtRuneSlot
+        ForgeRuneSlot
+          id: toolsUpgradeRuneSlot
+          anchors.top: parent.top
+          anchors.horizontalCenter: parent.horizontalCenter
+
+      // --- Protection orb slot ---
+      Panel
+        id: toolsProtSlotGroup
+        width: 74
+        height: 110
         anchors.top: parent.top
-        anchors.left: toolsUpgradeRuneSlot.right
-        margin-top: 0
-        margin-left: 14
+        anchors.left: toolsUpgradeSlotGroup.right
+        margin-left: 8
+        margin-top: 3
 
+        ForgeRuneSlot
+          id: toolsProtRuneSlot
+          anchors.top: parent.top
+          anchors.horizontalCenter: parent.horizontalCenter
+
+      // --- +20% bonus button ---
       UIWidget
         id: toolsBonusButton
-        size: 66 66
+        size: 56 56
         image-source: /images/ui/20
         image-clip: 0 0 66 66
-        image-size: 66 66
+        image-size: 56 56
         image-color: #ffffff
         anchors.top: parent.top
-        anchors.left: toolsProtRuneSlot.right
-        margin-top: 0
-        margin-left: 18
+        anchors.left: toolsProtSlotGroup.right
+        margin-top: 10
+        margin-left: 14
 
         $on:
           image-clip: 66 0 66 66
@@ -936,15 +980,15 @@ ForgeToolsTab < Panel
       Panel
         id: toolsBonusCostRow
         anchors.top: toolsBonusButton.bottom
-        anchors.left: toolsBonusButton.left
+        anchors.horizontalCenter: toolsBonusButton.horizontalCenter
         margin-top: 4
-        width: 58
-        height: 26
+        width: 60
+        height: 22
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 24 24
-          size: 24 24
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -953,31 +997,30 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 28
-          width: 28
+          margin-left: 24
+          width: 34
           height: 16
           font: verdana-11px-antialised
           color: #ffcc00
 
+      // --- Arrow + Chance ---
       UIWidget
         id: toolsForgeArrow
         image-source: /images/ui/arrow_horizontal
         image-clip: 12 0 12 21
         size: 12 21
-        anchors.top: parent.top
+        anchors.verticalCenter: toolsBonusButton.verticalCenter
         anchors.left: toolsBonusButton.right
-        margin-top: 22
-        margin-left: 14
+        margin-left: 10
         phantom: false
 
       Panel
         id: toolsChancePanel
-        width: 80
-        height: 36
-        anchors.top: parent.top
+        width: 76
+        height: 34
+        anchors.verticalCenter: toolsBonusButton.verticalCenter
         anchors.left: toolsForgeArrow.right
-        margin-top: 14
-        margin-left: 12
+        margin-left: 8
 
         Label
           id: toolsChanceLabel
@@ -987,15 +1030,15 @@ ForgeToolsTab < Panel
           color: #c0c0c0
           text-wrap: true
 
+      // --- Forge button ---
       UIButton
         id: toolsForgeButton
-        size: 128 66
+        size: 120 60
         image-source: /images/game/imbuing/imbue_green
         image-clip: 0 0 128 66
-        anchors.top: parent.top
+        anchors.verticalCenter: toolsBonusButton.verticalCenter
         anchors.right: parent.right
-        margin-top: 0
-        margin-right: 24
+        margin-right: 16
         enabled: false
         image-color: #b0ffb0
 
@@ -1008,15 +1051,15 @@ ForgeToolsTab < Panel
       Panel
         id: toolsCostRow
         anchors.top: toolsForgeButton.bottom
-        anchors.left: toolsForgeButton.left
+        anchors.horizontalCenter: toolsForgeButton.horizontalCenter
         margin-top: 4
-        width: 58
-        height: 26
+        width: 60
+        height: 22
 
         Panel
           image-source: /images/ui/crystal_coin
-          image-size: 24 24
-          size: 24 24
+          image-size: 20 20
+          size: 20 20
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
 
@@ -1025,8 +1068,8 @@ ForgeToolsTab < Panel
           text-align: left
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          margin-left: 28
-          width: 28
+          margin-left: 24
+          width: 34
           height: 16
           font: verdana-11px-antialised
           color: #ffcc00

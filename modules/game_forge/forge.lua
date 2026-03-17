@@ -30,20 +30,24 @@ local TIER_RARITY_IMAGES = {
   [5] = '/images/ui/rarity_gold'
 }
 
+-- Fragment IDs matching server FORGE_RUNES (100 fragments required per action)
 local FORGE_RUNES = {
-  TIER_UP = { id = 2312, name = 'Rune of Tiering' },
-  UPGRADE = { id = 2284, name = 'Rune of Upgrading' },
-  ENCHANT_ADD = { id = 2276, name = 'Rune of Enchanting' },
-  ENCHANT_REROLL_LAST = { id = 2272, name = 'Rune of Rolling' },
-  ENCHANT_REROLL_ALL = { id = 2296, name = 'Rune of Total Rolling' },
-  ENCHANT_REMOVE_LAST = { id = 2270, name = 'Rune of Cleansing' },
-  ENCHANT_REMOVE_ALL = { id = 2298, name = 'Rune of Total Cleansing' },
-  ENCHANT_REPLACE = { id = 2272, name = 'Rune of Rolling' },
+  TIER_UP             = { id = 5110, name = 'Pink Fragment' },    -- Classification
+  UPGRADE             = { id = 5116, name = 'Yellow Fragment' },  -- Tools/Upgrade
+  ENCHANT_ADD         = { id = 5111, name = 'Green Fragment' },   -- Add Enchantment
+  ENCHANT_REROLL_LAST = { id = 5113, name = 'Blue Fragment' },    -- Reroll Last
+  ENCHANT_REROLL_ALL  = { id = 5113, name = 'Blue Fragment' },    -- Reroll All
+  ENCHANT_REMOVE_LAST = { id = 5118, name = 'Red Fragment' },     -- Remove Last
+  ENCHANT_REMOVE_ALL  = { id = 5118, name = 'Red Fragment' },     -- Remove All
+  ENCHANT_REPLACE     = { id = 5113, name = 'Blue Fragment' },    -- Replace Attribute
 }
 
+local FORGE_FRAGMENT_COST = 100 -- fragments required per action
+
+-- Orbs are protection items (1 orb protects against downgrade)
 local PROTECTION_RUNES = {
-  TIER = { id = 2309, name = 'Tier Protection' },
-  UPGRADE = { id = 2283, name = 'Upgrade Protection' },
+  TIER    = { id = 5109, name = 'Pink Orb' },    -- protects tier
+  UPGRADE = { id = 5115, name = 'Yellow Orb' },  -- protects upgrade level
 }
 
 local ATTR_ACTIONS = {
@@ -215,7 +219,7 @@ local function updatePlaceholder(tab, placeholderId, hasItem)
   end
 end
 
-local function setupRuneSlot(tab, slotId, runeId, count, total)
+local function setupRuneSlot(tab, slotId, runeId, count, total, labelText)
   local slot = tab:recursiveGetChildById(slotId)
   if not slot then return end
 
@@ -233,6 +237,16 @@ local function setupRuneSlot(tab, slotId, runeId, count, total)
       countLabel:setColor('#00ff00')
     else
       countLabel:setColor('#ff3333')
+    end
+  end
+
+  local nameLabel = slot:recursiveGetChildById('runeLabel')
+  if nameLabel then
+    if labelText then
+      nameLabel:setText(labelText)
+      nameLabel:setVisible(true)
+    else
+      nameLabel:setVisible(false)
     end
   end
 end
@@ -481,8 +495,8 @@ function updateClassInfo(data)
     end
   end
 
-  setupRuneSlot(tab, 'classTierRuneSlot', FORGE_RUNES.TIER_UP.id, data.runeCount or (hasRune and 1 or 0), 1)
-  setupRuneSlot(tab, 'classProtRuneSlot', PROTECTION_RUNES.TIER.id, data.protectionCount or 0, 1)
+  setupRuneSlot(tab, 'classTierRuneSlot', FORGE_RUNES.TIER_UP.id, data.runeCount or 0, FORGE_FRAGMENT_COST, FORGE_RUNES.TIER_UP.name)
+  setupRuneSlot(tab, 'classProtRuneSlot', PROTECTION_RUNES.TIER.id, data.protectionCount or 0, 1, PROTECTION_RUNES.TIER.name)
 
   local matLabel = tab:recursiveGetChildById('classMaterialLabel')
   if matLabel then
@@ -761,7 +775,7 @@ function updateAttrActionDisplay(tab)
     if attrCostData and attrCostData.runeCounts and attrCostData.runeCounts[action.countKey] then
       runeCount = attrCostData.runeCounts[action.countKey]
     end
-    setupRuneSlot(tab, 'attrRuneSlot', rune.id, runeCount, 1)
+    setupRuneSlot(tab, 'attrRuneSlot', rune.id, runeCount, FORGE_FRAGMENT_COST, rune.name)
   end
 
   local costLabel = tab:recursiveGetChildById('attrCostLabel')
@@ -1044,8 +1058,8 @@ function updateToolsInfo(data)
     resultContainer:setImageSource('/images/ui/slot')
   end
 
-  setupRuneSlot(tab, 'toolsUpgradeRuneSlot', FORGE_RUNES.UPGRADE.id, data.runeCount or (hasRune and 1 or 0), 1)
-  setupRuneSlot(tab, 'toolsProtRuneSlot', PROTECTION_RUNES.UPGRADE.id, data.protectionCount or 0, 1)
+  setupRuneSlot(tab, 'toolsUpgradeRuneSlot', FORGE_RUNES.UPGRADE.id, data.runeCount or 0, FORGE_FRAGMENT_COST, FORGE_RUNES.UPGRADE.name)
+  setupRuneSlot(tab, 'toolsProtRuneSlot', PROTECTION_RUNES.UPGRADE.id, data.protectionCount or 0, 1, PROTECTION_RUNES.UPGRADE.name)
 
   local matLabel = tab:recursiveGetChildById('toolsMaterialLabel')
   if matLabel then
