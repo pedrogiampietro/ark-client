@@ -21,6 +21,7 @@ local tooltipWidth = 0
 local tooltipWidthBase = BASE_WIDTH
 local tooltipHeight = BASE_HEIGHT
 local longestString = 0
+local firstLabel = true
 
 local cachedItems = {}
 
@@ -325,6 +326,7 @@ function buildItemTooltip(item)
     longestString    = 0
     tooltipWidthBase = BASE_WIDTH
     tooltipHeight    = BASE_HEIGHT
+    firstLabel       = true
     tooltipWindow:setWidth(tooltipWidth)
     tooltipWindow:setHeight(tooltipHeight)
 
@@ -552,10 +554,11 @@ function addString(text, color, resize, font)
     else
         label:setText(text)
         local textSize = label:getTextSize()
-        if longestString == 0 then
+        if firstLabel then
             longestString = textSize.width + itemWeightLabel:getWidth()
             tooltipWidth = tooltipWidthBase + longestString
             label:addAnchor(AnchorTop, "parent", AnchorTop)
+            firstLabel = false
         elseif textSize.width > longestString then
             longestString = textSize.width
             tooltipWidth = tooltipWidthBase + longestString
@@ -589,12 +592,20 @@ end
 
 function addSeparator()
     local sep = g_ui.createWidget("TooltipSeparator", labels)
+    if firstLabel then
+        sep:addAnchor(AnchorTop, "parent", AnchorTop)
+        firstLabel = false
+    end
     tooltipHeight = tooltipHeight + sep:getHeight() + sep:getMarginTop() +
                         sep:getMarginBottom()
 end
 
 function addEmpty(height)
     local empty = g_ui.createWidget("TooltipEmpty", labels)
+    if firstLabel then
+        empty:addAnchor(AnchorTop, "parent", AnchorTop)
+        firstLabel = false
+    end
     empty:setHeight(height)
     tooltipHeight = tooltipHeight + height
 end
