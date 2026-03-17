@@ -560,75 +560,80 @@ ForgeClassificationTab < Panel
           margin-left: 6
           margin-right: 6
 
-        // Bottom row: cost pill + forge button
+        // Bottom row: cost pill + forge button (centered together)
         Panel
           id: classForgeRow
           anchors.top: classBonusRow.bottom
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.bottom: parent.bottom
-          margin-top: 8
+          margin-top: 6
 
-          // Cost pill (styled like Exaltation Forge)
+          // Centered wrapper holds both cost pill and forge button
           Panel
-            id: classCostPill
-            width: 120
-            height: 36
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            margin-left: 10
-            background-color: #070b12
-            border-width: 1
-            border-color: #1e2d45
+            id: classForgeCenter
+            width: 266
+            height: 66
+            anchors.centerIn: parent
 
-            Label
-              !text: tr('Cost')
+            // Cost pill — same height as forge button
+            Panel
+              id: classCostPill
+              width: 120
+              height: 66
               anchors.left: parent.left
-              anchors.top: parent.top
-              margin-left: 8
-              margin-top: 3
-              font: verdana-11px-antialised
-              color: #3a5070
+              anchors.verticalCenter: parent.verticalCenter
+              background-color: #070b12
+              border-width: 1
+              border-color: #253550
 
-            UIWidget
-              id: classCostCoin
-              size: 16 16
-              image-source: /images/ui/crystal_coin
-              image-size: 16 16
-              anchors.left: parent.left
-              anchors.bottom: parent.bottom
-              margin-left: 8
-              margin-bottom: 5
+              Label
+                !text: tr('Forge Cost')
+                anchors.left: parent.left
+                anchors.top: parent.top
+                margin-left: 10
+                margin-top: 8
+                font: verdana-11px-antialised
+                color: #3a5070
 
-            Label
-              id: classCostLabel
-              anchors.left: classCostCoin.right
-              anchors.bottom: classCostCoin.bottom
+              UIWidget
+                id: classCostCoin
+                size: 20 20
+                image-source: /images/ui/crystal_coin
+                image-size: 20 20
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                margin-left: 10
+                margin-bottom: 10
+
+              Label
+                id: classCostLabel
+                anchors.left: classCostCoin.right
+                anchors.bottom: classCostCoin.bottom
+                anchors.right: parent.right
+                margin-left: 5
+                margin-right: 6
+                height: 20
+                font: verdana-11px-antialised
+                color: #ffd700
+                text-align: left
+
+            // Forge button — right side of center wrapper
+            UIButton
+              id: classForgeButton
+              size: 128 66
+              image-source: /images/game/imbuing/imbue_green
+              image-clip: 0 0 128 66
               anchors.right: parent.right
-              margin-left: 4
-              margin-right: 4
-              height: 18
-              font: verdana-11px-antialised
-              color: #ffd700
-              text-align: left
+              anchors.verticalCenter: parent.verticalCenter
+              enabled: false
+              image-color: #90e890
 
-          // Forge button (right side of row)
-          UIButton
-            id: classForgeButton
-            size: 128 66
-            image-source: /images/game/imbuing/imbue_green
-            image-clip: 0 0 128 66
-            anchors.verticalCenter: classCostPill.verticalCenter
-            anchors.right: parent.right
-            margin-right: 8
-            enabled: false
-            image-color: #90e890
+              $pressed:
+                image-clip: 0 66 128 66
 
-            $pressed:
-              image-clip: 0 66 128 66
-
-            $disabled:
-              image-color: #3a5544
+              $disabled:
+                image-color: #3a5544
 
     // Status label
     Label
@@ -1337,67 +1342,70 @@ ForgeToolsTab < Panel
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.bottom: parent.bottom
-          margin-top: 8
+          margin-top: 6
 
-          // Cost pill
           Panel
-            id: toolsCostPill
-            width: 120
-            height: 36
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            margin-left: 10
-            background-color: #070b12
-            border-width: 1
-            border-color: #1e2d45
+            id: toolsForgeCenter
+            width: 266
+            height: 66
+            anchors.centerIn: parent
 
-            Label
-              !text: tr('Cost')
+            Panel
+              id: toolsCostPill
+              width: 120
+              height: 66
               anchors.left: parent.left
-              anchors.top: parent.top
-              margin-left: 8
-              margin-top: 3
-              font: verdana-11px-antialised
-              color: #3a5070
+              anchors.verticalCenter: parent.verticalCenter
+              background-color: #070b12
+              border-width: 1
+              border-color: #253550
 
-            UIWidget
-              id: toolsCostCoin
-              size: 16 16
-              image-source: /images/ui/crystal_coin
-              image-size: 16 16
-              anchors.left: parent.left
-              anchors.bottom: parent.bottom
-              margin-left: 8
-              margin-bottom: 5
+              Label
+                !text: tr('Forge Cost')
+                anchors.left: parent.left
+                anchors.top: parent.top
+                margin-left: 10
+                margin-top: 8
+                font: verdana-11px-antialised
+                color: #3a5070
 
-            Label
-              id: toolsCostLabel
-              anchors.left: toolsCostCoin.right
-              anchors.bottom: toolsCostCoin.bottom
+              UIWidget
+                id: toolsCostCoin
+                size: 20 20
+                image-source: /images/ui/crystal_coin
+                image-size: 20 20
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                margin-left: 10
+                margin-bottom: 10
+
+              Label
+                id: toolsCostLabel
+                anchors.left: toolsCostCoin.right
+                anchors.bottom: toolsCostCoin.bottom
+                anchors.right: parent.right
+                margin-left: 5
+                margin-right: 6
+                height: 20
+                font: verdana-11px-antialised
+                color: #ffd700
+                text-align: left
+
+            UIButton
+              id: toolsForgeButton
+              size: 128 66
+              image-source: /images/game/imbuing/imbue_green
+              image-clip: 0 0 128 66
               anchors.right: parent.right
-              margin-left: 4
-              margin-right: 4
-              height: 18
-              font: verdana-11px-antialised
-              color: #ffd700
-              text-align: left
+              anchors.verticalCenter: parent.verticalCenter
+              enabled: false
+              image-color: #90e890
 
-          UIButton
-            id: toolsForgeButton
-            size: 128 66
-            image-source: /images/game/imbuing/imbue_green
-            image-clip: 0 0 128 66
-            anchors.verticalCenter: toolsCostPill.verticalCenter
-            anchors.right: parent.right
-            margin-right: 8
-            enabled: false
-            image-color: #90e890
+              $pressed:
+                image-clip: 0 66 128 66
 
-            $pressed:
-              image-clip: 0 66 128 66
-
-            $disabled:
-              image-color: #3a5544
+              $disabled:
+                image-color: #3a5544
 
     Label
       id: toolsMaterialLabel
