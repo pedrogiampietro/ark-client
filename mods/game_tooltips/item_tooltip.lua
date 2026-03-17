@@ -403,7 +403,7 @@ function buildItemTooltip(item)
     end
 
     -- ── Body ──────────────────────────────────────────────────────────────────
-    addEmpty(10)
+    addEmpty(18)
 
     -- Item level / required level
     if iLvl > 0 then
@@ -450,7 +450,7 @@ function buildItemTooltip(item)
     local hasStats = firstText or secondText or thirdText
     if hasStats then
         addSeparator()
-        addEmpty(3)
+        addEmpty(6)
         if firstText  then addString(firstText,  Colors.Stat) end
         if secondText then addString(secondText, Colors.Stat) end
         if thirdText  then addString(thirdText,  Colors.Stat) end
