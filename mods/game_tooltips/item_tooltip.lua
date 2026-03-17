@@ -352,7 +352,7 @@ function buildItemTooltip(item)
         tooltipHeader:setBackgroundColor(rarityHeaderBg[rarity] or rarityHeaderBg[0])
     end
     tooltipWindow:setBorderColor(rarityBorderColor[rarity] or rarityBorderColor[0])
-    tooltipWindow:setBorderWidth(1)
+    tooltipWindow:setBorderWidth(2)
 
     itemWeightLabel:setText(formatWeight(weight))
     itemSprite:setItemId(id)
@@ -509,11 +509,11 @@ function buildItemTooltip(item)
 
     -- Rarity frame around sprite
     local src = nil
-    if rarity == 1 then src = "/images/ui/rarity_white"
-    elseif rarity == 2 then src = "/images/ui/rarity_blue"
-    elseif rarity == 3 then src = "/images/ui/rarity_purple"
-    elseif rarity == 4 then src = "/images/ui/rarity_gold"
-    elseif rarity == 5 then src = "/images/ui/rarity_red"
+    if rarity == 1 then src = "/images/ui/rarity_white"      -- Common: white
+    elseif rarity == 2 then src = "/images/ui/rarity_green"  -- Uncommon: green
+    elseif rarity == 3 then src = "/images/ui/rarity_blue"   -- Rare: blue
+    elseif rarity == 4 then src = "/images/ui/rarity_purple" -- Epic: purple
+    elseif rarity == 5 then src = "/images/ui/rarity_gold"   -- Legendary: gold
     end
     tooltipWindow.currentRaritySrc = src
 
