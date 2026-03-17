@@ -137,7 +137,7 @@ ForgeEnchantRow < Panel
 ForgeWindow < MainWindow
   id: forgeWindow
   !text: tr('Forge Item')
-  size: 720 590
+  size: 720 490
   @onEscape: modules.game_forge.toggle()
 
   TabBar
@@ -466,6 +466,7 @@ ForgeClassificationTab < Panel
         margin-right: 14
         margin-top: 4
         margin-bottom: 4
+        background-color: #06090f
 
         // Top row: +20% toggle and chance
         Panel
@@ -548,17 +549,6 @@ ForgeClassificationTab < Panel
               font: verdana-11px-antialised
               color: #a0b8cc
               text-wrap: true
-
-        // Separator
-        UIWidget
-          height: 1
-          background-color: #1e2d45
-          anchors.top: classBonusRow.bottom
-          anchors.left: parent.left
-          anchors.right: parent.right
-          margin-top: 4
-          margin-left: 6
-          margin-right: 6
 
         // Bottom row: cost pill + forge button (centered together)
         Panel
@@ -1247,6 +1237,7 @@ ForgeToolsTab < Panel
         margin-right: 14
         margin-top: 4
         margin-bottom: 4
+        background-color: #06090f
 
         // Top row: +20% toggle and chance
         Panel
@@ -1325,16 +1316,6 @@ ForgeToolsTab < Panel
               font: verdana-11px-antialised
               color: #a0b8cc
               text-wrap: true
-
-        UIWidget
-          height: 1
-          background-color: #1e2d45
-          anchors.top: toolsBonusRow.bottom
-          anchors.left: parent.left
-          anchors.right: parent.right
-          margin-top: 4
-          margin-left: 6
-          margin-right: 6
 
         Panel
           id: toolsForgeRow
