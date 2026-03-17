@@ -244,12 +244,19 @@ function newTooltip(data)
         return
     end
 
+    g_logger.info("[TIP] newTooltip _itemId=" .. tostring(_itemId) ..
+        " hoveredItem=" .. tostring(hoveredItem) ..
+        " hoveredItem:getId()=" .. tostring(hoveredItem and hoveredItem:getId()))
+
     if hoveredItem and _itemId == hoveredItem:getId() then
         hoveredItem.uid    = _itemUId
         hoveredItem.name   = _itemName ..
             (_upgradeLevel > 0 and " +" .. _upgradeLevel or "")
         hoveredItem.rarity = _itemRarity
+        g_logger.info("[TIP] calling showTooltip uid=" .. tostring(_itemUId))
         showTooltip(_itemUId)
+    else
+        g_logger.info("[TIP] ID mismatch or hoveredItem nil — not showing")
     end
 end
 
