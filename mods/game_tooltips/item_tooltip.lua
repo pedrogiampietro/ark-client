@@ -35,30 +35,30 @@ local Colors = {
 }
 
 local rarityColor = {
-    [0] = {name = "",          color = "#ffffff",  star = ""},
-    [1] = {name = "Common",    color = "#9d9d9d",  star = ""},
-    [2] = {name = "Rare",      color = "#25fc19",  star = "* "},
-    [3] = {name = "Epic",      color = "#bd3ffa",  star = "* "},
-    [4] = {name = "Legendary", color = "#ff7605",  star = "* "},
-    [5] = {name = "Mythic",    color = "#ff4444",  star = "* "},
+    [0] = {name = "",           color = "#ffffff",  star = ""},
+    [1] = {name = "Common",     color = "#9d9d9d",  star = ""},
+    [2] = {name = "Uncommon",   color = "#25fc19",  star = "* "},
+    [3] = {name = "Rare",       color = "#4488ff",  star = "* "},
+    [4] = {name = "Epic",       color = "#bd3ffa",  star = "* "},
+    [5] = {name = "Legendary",  color = "#ff7605",  star = "* "},
 }
 
 local rarityHeaderBg = {
     [0] = "#141414",
     [1] = "#141414",
-    [2] = "#061a06",
-    [3] = "#0d0619",
-    [4] = "#1f0d00",
-    [5] = "#190303",
+    [2] = "#061a06",  -- Uncommon: dark green
+    [3] = "#060e1f",  -- Rare: dark blue
+    [4] = "#0d0619",  -- Epic: dark purple
+    [5] = "#1f0d00",  -- Legendary: dark orange
 }
 
 local rarityBorderColor = {
     [0] = "#444444",
     [1] = "#555555",
-    [2] = "#1a6b1a",
-    [3] = "#5a1f9c",
-    [4] = "#9c4c00",
-    [5] = "#9c1010",
+    [2] = "#1a6b1a",  -- Uncommon: green
+    [3] = "#1a3f9c",  -- Rare: blue
+    [4] = "#5a1f9c",  -- Epic: purple
+    [5] = "#9c4c00",  -- Legendary: orange
 }
 
 local implicits = {
@@ -477,24 +477,14 @@ function buildItemTooltip(item)
         end
     end
 
-    -- Rarity + Attributes
-    if rarity ~= 0 and attributes then
-        -- Rarity badge
+    -- Attributes
+    if rarity ~= 0 and attributes and maxAttributes > 0 then
         addSeparator()
         addEmpty(2)
-        local rc = rarityColor[rarity]
-        if rc and rc.name ~= "" then
-            addSection("Rarity")
-            addString(rc.star .. rc.name, rc.color)
-        end
-
-        -- Attributes
-        if maxAttributes > 0 then
-            addSection("Attributes")
-            for i = 1, maxAttributes do
-                if attributes[i] then
-                    addString(attributes[i], Colors.Attribute)
-                end
+        addSection("Attributes")
+        for i = 1, maxAttributes do
+            if attributes[i] then
+                addString(attributes[i], Colors.Attribute)
             end
         end
     end
