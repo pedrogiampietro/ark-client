@@ -3,9 +3,7 @@ TooltipLabel < Label
   anchors.left: parent.left
   anchors.right: parent.right
   font: verdana-11px-rounded
-  text-align: left
-  margin-left: 2
-  margin-right: 2
+  text-align: center
 
 TooltipSeparator < HorizontalSeparator
   anchors.top: prev.bottom
@@ -18,80 +16,60 @@ TooltipEmpty < UIWidget
   anchors.left: parent.left
   anchors.right: parent.right
 
-UIWidget
-  background-color: #181818f2
-  border-width: 1
-  border-color: #9c4c00
-  focusable: false
-
-  Panel
+FlatPanel
+  UIWidget
     id: tooltipHeader
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     height: 56
     background-color: #1f0d00
-    focusable: false
 
-    UIItem
-      id: itemSprite
-      anchors.left: parent.left
-      anchors.top: parent.top
-      margin-left: 8
-      margin-top: 8
-      size: 40 40
-      virtual: true
-      focusable: false
+  UIItem
+    id: itemSprite
+    font: verdana-11px-rounded
+    virtual: true
+    anchors.top: parent.top
+    anchors.left: parent.left
+    size: 40 40
+    margin-top: 8
+    margin-left: 8
 
-    Label
-      id: itemNameLabel
-      anchors.top: parent.top
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-left: 56
-      margin-top: 9
-      margin-right: 6
-      font: verdana-11px-rounded
-      color: #ffffff
-      focusable: false
+  Label
+    id: itemNameLabel
+    font: verdana-11px-rounded
+    anchors.top: parent.top
+    anchors.left: parent.left
+    text-auto-resize: true
+    margin-top: 9
+    margin-left: 56
+    margin-right: 6
+    color: #ffffff
 
-    Label
-      id: itemTypeLabel
-      anchors.top: prev.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-left: 56
-      margin-top: 1
-      margin-right: 6
-      font: verdana-11px-rounded
-      color: #aaaaaa
-      focusable: false
-
-    Label
-      id: itemWeightLabel
-      anchors.bottom: parent.bottom
-      anchors.right: parent.right
-      margin-bottom: 5
-      margin-right: 6
-      font: verdana-11px-rounded
-      color: #888888
-      text-auto-resize: true
-      focusable: false
-
-  Panel
-    id: tooltipBody
+  Label
+    id: itemTypeLabel
+    font: verdana-11px-rounded
     anchors.top: prev.bottom
     anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    background-color: #0e0e0ef2
-    focusable: false
+    text-auto-resize: true
+    margin-top: 2
+    margin-left: 56
+    margin-right: 6
+    color: #aaaaaa
 
-    Panel
-      id: labels
-      anchors.fill: parent
-      margin-top: 4
-      margin-bottom: 4
-      margin-left: 4
-      margin-right: 4
-      focusable: false
+  Label
+    id: itemWeightLabel
+    font: verdana-11px-rounded
+    anchors.top: parent.top
+    anchors.right: parent.right
+    text-auto-resize: true
+    margin-top: 5
+    margin-right: 5
+
+  Panel
+    id: labels
+    anchors.fill: parent
+    margin-top: 61
+    margin-bottom: 5
+    margin-left: 4
+    margin-right: 4
