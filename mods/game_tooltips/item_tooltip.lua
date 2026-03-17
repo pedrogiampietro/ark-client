@@ -180,6 +180,7 @@ function onExtendedOpcode(protocol, code, buffer)
         return
     end
 
+    g_logger.info("[TIP] opcode received action=" .. tostring(action))
     if action == "new" then newTooltip(data) end
 end
 
@@ -263,9 +264,12 @@ function resetData()
 end
 
 function onHoverChange(widget, hovered)
+    g_logger.info("[TIP] onHoverChange hovered=" .. tostring(hovered) .. " id=" .. tostring(widget:getId()))
+
     if not protocolGame then protocolGame = g_game.getProtocolGame() end
 
     if widget.getLinkedTooltip then
+        g_logger.info("[TIP] has getLinkedTooltip, returning")
         hoveredLinked = widget
         if not widget.cached then
             if protocolGame then
@@ -286,7 +290,10 @@ function onHoverChange(widget, hovered)
     end
 
     local item = widget:getItem()
+    g_logger.info("[TIP] item=" .. tostring(item) .. " getItemTooltip=" .. tostring(widget.getItemTooltip) .. " isVirtual=" .. tostring(widget:isVirtual()))
+
     if item and widget.getItemTooltip then
+        g_logger.info("[TIP] has getItemTooltip, building")
         if hovered then
             buildItemTooltip(widget:getItemTooltip())
             showItemTooltip()
@@ -296,6 +303,7 @@ function onHoverChange(widget, hovered)
         return
     end
     if not item or widget:getId() == "containerItemWidget" or widget:isVirtual() then
+        g_logger.info("[TIP] early return: no item or containerItemWidget or virtual")
         return
     end
 
@@ -305,6 +313,7 @@ function onHoverChange(widget, hovered)
         hoveredItem = item
         if protocolGame then
             local pos = item:getPosition()
+            g_logger.info("[TIP] sending opcode pos=" .. pos.x .. "," .. pos.y .. "," .. pos.z)
             protocolGame:sendExtendedOpcode(CODE_TOOLTIPS, json.encode({
                 pos.x, pos.y, pos.z, item:getStackPos()
             }))
