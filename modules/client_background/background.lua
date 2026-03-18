@@ -3,7 +3,6 @@ local background
 local clientVersionLabel
 local playersOnlineLabel
 local infoWindow
-local playersOnlineEvent
 
 -- public functions
 function init()
@@ -20,8 +19,8 @@ function init()
 
   if not g_game.isOnline() then
     addEvent(function() g_effects.fadeIn(clientVersionLabel, 1500) end)
-    fetchPlayersOnline()
-    playersOnlineEvent = cycleEvent(fetchPlayersOnline, 60000)
+    -- Aguarda 2s antes da primeira requisição para garantir que os módulos carregaram
+    scheduleEvent(fetchPlayersOnline, 2000)
   end
 
   connect(g_game, { onGameStart = hide })
@@ -31,11 +30,6 @@ end
 function terminate()
   disconnect(g_game, { onGameStart = hide })
   disconnect(g_game, { onGameEnd = show })
-
-  if playersOnlineEvent then
-    playersOnlineEvent:cancel()
-    playersOnlineEvent = nil
-  end
 
   g_effects.cancelFade(background:getChildById('clientVersionLabel'))
   background:destroy()
@@ -73,18 +67,29 @@ function getBackground()
 end
 
 function fetchPlayersOnline()
-  if not playersOnlineLabel then return end
-  HTTP.get(Services.status, function(data, err)
-    if err or not data then
-      playersOnlineLabel:setText('Servidor offline')
-      playersOnlineLabel:setColor('#ff6666')
-      return
-    end
-    local ok, result = pcall(function() return json.decode(data) end)
-    if ok and result and result.playersOnline ~= nil then
-      local count = tonumber(result.playersOnline) or 0
-      playersOnlineLabel:setText(count .. ' jogadores online')
-      playersOnlineLabel:setColor('#aaffaa')
-    end
+  if not playersOnlineLabel or not Services or not Services.status or Services.status == "" then
+    return
+  end
+
+  local ok, err = pcall(function()
+    HTTP.getJSON(Services.status, function(data, httpErr)
+      if not playersOnlineLabel then return end
+      if httpErr or not data then
+        playersOnlineLabel:setText('Servidor offline')
+        playersOnlineLabel:setColor('#ff6666')
+      elseif data.playersOnline ~= nil then
+        local count = tonumber(data.playersOnline) or 0
+        playersOnlineLabel:setText(count .. ' jogadores online')
+        playersOnlineLabel:setColor('#aaffaa')
+      end
+      -- Reagenda a próxima atualização após resposta
+      scheduleEvent(fetchPlayersOnline, 60000)
+    end)
   end)
+
+  if not ok then
+    g_logger.warning('[background] fetchPlayersOnline: ' .. tostring(err))
+    -- Tenta novamente em 30s se falhou
+    scheduleEvent(fetchPlayersOnline, 30000)
+  end
 end
