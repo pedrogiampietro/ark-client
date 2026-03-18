@@ -21,20 +21,25 @@ LoginButton < Button
     image-clip: 0 20 43 20
     text-offset: 1 1
 
-LinkLabel < Label
+BlueButton < Button
+  height: 22
+  image-source: /images/ui/buttons-blue
+  image-clip: 0 0 43 20
+  image-border: 4
+  color: #ffffff
   font: verdana-11px-antialised
-  color: #888888
-  text-auto-resize: true
-  change-cursor-image: true
-  cursor: pointer
 
-  $hover:
-    color: #c8a050
+  $hover !disabled:
+    image-clip: 0 20 43 20
+
+  $pressed:
+    image-clip: 0 20 43 20
+    text-offset: 1 1
 
 MainWindow
   id: enterGame
   !text: tr('Enter Game')
-  size: 290 262
+  size: 290 232
   @onEnter: EnterGame.doLogin()
 
   EnterGameLabel
@@ -80,19 +85,19 @@ MainWindow
     anchors.top: prev.top
     margin: 5
 
+  // Server combo oculto — necessário para o login funcionar
   EnterGameLabel
     !text: tr('Server:')
     anchors.left: parent.left
-    anchors.top: prev.bottom
-    margin-top: 13
+    anchors.top: rememberPasswordBox.bottom
+    visible: false
 
   ComboBox
     id: serverComboBox
-    anchors.left: prev.right
-    anchors.top: prev.top
+    anchors.left: parent.left
+    anchors.top: rememberPasswordBox.bottom
     anchors.right: parent.right
-    margin-left: 10
-    margin-top: -3
+    visible: false
     @onOptionChange: EnterGame.onServerChange()
     @onSetup: |
       for _, server in ipairs(SERVER_LIST) do
@@ -102,8 +107,8 @@ MainWindow
   HorizontalSeparator
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 13
+    anchors.top: rememberPasswordBox.bottom
+    margin-top: 18
 
   LoginButton
     !text: tr('Login')
@@ -114,18 +119,20 @@ MainWindow
     margin-right: 5
     @onClick: EnterGame.doLogin()
 
-  LinkLabel
-    !text: tr('Criar conta')
+  BlueButton
+    !text: tr('Criar Conta')
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    margin-bottom: 3
+    width: 128
+    margin-bottom: 2
     @onClick: g_platform.openUrl("https://eldera.pro/criar-conta")
 
-  LinkLabel
+  BlueButton
     !text: tr('Cancelar')
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    margin-bottom: 3
+    width: 128
+    margin-bottom: 2
     margin-right: 5
     @onClick: EnterGame.hide()
 
