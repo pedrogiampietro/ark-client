@@ -182,6 +182,7 @@ end
 
 -- Cancel keyboard/arrow walking so only map click (autoWalk) is followed. Prevents flick when holding arrow and clicking map.
 function cancelKeyboardWalk()
+  print("[WALK] cancelKeyboardWalk called | smartWalkDirs=" .. #smartWalkDirs .. " nextWalkDir=" .. tostring(nextWalkDir))
   stopSmartWalk()
   nextWalkDir = nil
   removeEvent(walkEvent)
@@ -192,6 +193,7 @@ end
 
 -- After a map click, ignore keyboard walk for a short time so key repeat doesn't override mouse.
 function setMousePriority()
+  print("[WALK] setMousePriority set for 450ms")
   mousePriorityUntil = g_clock.millis() + 450
 end
 
@@ -253,6 +255,7 @@ function onPositionChange(player, newPos, oldPos)
 end
 
 function onWalk(player, newPos, oldPos)
+  print("[WALK] onWalk | isAutoWalking=" .. tostring(player:isAutoWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " autoFinish=" .. tostring(autoFinishNextServerWalk + 200 > g_clock.millis()))
   if autoFinishNextServerWalk + 200 > g_clock.millis() then
     player:finishServerWalking()
   end
@@ -274,6 +277,7 @@ end
 
 function onWalkFinish(player)
   lastFinishedStep = g_clock.millis()
+  print("[WALK] onWalkFinish | nextWalkDir=" .. tostring(nextWalkDir) .. " isAutoWalking=" .. tostring(player:isAutoWalking()))
   if nextWalkDir ~= nil then
     removeEvent(autoWalkEvent)
     autoWalkEvent = addEvent(function() if nextWalkDir ~= nil then walk(nextWalkDir, 0) end end, false)
@@ -281,22 +285,27 @@ function onWalkFinish(player)
 end
 
 function onCancelWalk(player)
+  print("[WALK] onCancelWalk | locking walk 50ms")
   player:lockWalk(50)
 end
 
-function walk(dir, ticks) 
+function walk(dir, ticks)
   -- Mouse has priority: ignore keyboard walk for a short time after any map click
   if g_clock.millis() < mousePriorityUntil then
     return
   end
 
-  lastManualWalk = g_clock.millis()
   local player = g_game.getLocalPlayer()
   if not player or g_game.isDead() or player:isDead() then
     return
   end
 
+  print("[WALK] walk(" .. tostring(dir) .. ") | isWalkLocked=" .. tostring(player:isWalkLocked()) .. " canWalk=" .. tostring(player:canWalk(dir)) .. " isAutoWalking=" .. tostring(player:isAutoWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " isWalking=" .. tostring(player:isWalking()) .. " firstStep=" .. tostring(firstStep) .. " nextWalkDir=" .. tostring(nextWalkDir))
+
+  lastManualWalk = g_clock.millis()
+
   if player:isWalkLocked() then
+    print("[WALK] -> BLOCKED: isWalkLocked")
     nextWalkDir = nil
     return
   end
@@ -307,6 +316,7 @@ function walk(dir, ticks)
 
   if player:isAutoWalking() then
     if lastStop + 100 < g_clock.millis() then
+      print("[WALK] -> stopping autoWalk to resume keyboard walk")
       lastStop = g_clock.millis()
       player:stopAutoWalk()
       g_game.stop()
@@ -321,7 +331,7 @@ function walk(dir, ticks)
 
   local ticksToNextWalk = player:getStepTicksLeft()
   if not player:canWalk(dir) then -- canWalk return false when previous walk is not finished or not confirmed by server
-    if dash then 
+    if dash then
       ignoredCanWalk = true
     else
       if ticksToNextWalk < 500 and (lastWalkDir ~= dir or ticks == 0) then
@@ -330,6 +340,7 @@ function walk(dir, ticks)
       if ticksToNextWalk < 30 and lastFinishedStep + 400 > g_clock.millis() and nextWalkDir == nil then -- clicked walk 20 ms too early, try to execute again as soon possible to keep smooth walking
         nextWalkDir = dir
       end
+      print("[WALK] -> BLOCKED: canWalk=false ticksLeft=" .. tostring(ticksToNextWalk) .. " nextWalkDir=" .. tostring(nextWalkDir))
       return
     end
   end
@@ -367,11 +378,13 @@ function walk(dir, ticks)
   local toTile = g_map.getTile(toPos)
 
   if walkLock >= g_clock.millis() and lastWalkDir == dir then
+    print("[WALK] -> BLOCKED: walkLock same dir")
     nextWalkDir = nil
     return
   end
 
   if firstStep and lastWalkDir == dir and lastWalk + g_settings.getNumber('walkFirstStepDelay') > g_clock.millis() then
+    print("[WALK] -> BLOCKED: firstStep delay | lastWalkDir=" .. tostring(lastWalkDir) .. " delay=" .. g_settings.getNumber('walkFirstStepDelay'))
     firstStep = false
     walkLock = lastWalk + g_settings.getNumber('walkFirstStepDelay')
     return
@@ -392,6 +405,7 @@ function walk(dir, ticks)
   local preWalked = false
   if toTile and toTile:isWalkable() then
     if not player:isServerWalking() and not ignoredCanWalk then
+      print("[WALK] -> preWalk(" .. tostring(dir) .. ")")
       player:preWalk(dir)
       preWalked = true
     end
@@ -413,16 +427,18 @@ function walk(dir, ticks)
   end
 
   if player:isServerWalking() and not dash then
+    print("[WALK] -> isServerWalking: stop + finishServerWalking")
     g_game.stop()
     player:finishServerWalking()
     autoFinishNextServerWalk = g_clock.millis() + 200
   end
-  g_game.walk(dir, preWalked)  
-  
+  print("[WALK] -> g_game.walk(" .. tostring(dir) .. ", preWalked=" .. tostring(preWalked) .. ")")
+  g_game.walk(dir, preWalked)
+
   if not firstStep and lastWalkDir ~= dir then
-    walkLock = g_clock.millis() + g_settings.getNumber('walkTurnDelay')    
+    walkLock = g_clock.millis() + g_settings.getNumber('walkTurnDelay')
   end
-  
+
   lastWalkDir = dir
   lastWalk = g_clock.millis()
   return true

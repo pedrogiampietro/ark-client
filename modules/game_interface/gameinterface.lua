@@ -770,6 +770,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
       modules.game_walking.cancelKeyboardWalk()
       modules.game_walking.setMousePriority()
     end
+    print("[WALK] mapClick: g_game.stop() then autoWalk to " .. tostring(autoWalkPos.x) .. "," .. tostring(autoWalkPos.y) .. " | isWalking=" .. tostring(player:isWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " isAutoWalking=" .. tostring(player:isAutoWalking()))
     g_game.stop()
     player:autoWalk(autoWalkPos)
     return true
