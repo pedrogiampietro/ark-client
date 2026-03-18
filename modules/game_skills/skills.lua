@@ -244,9 +244,9 @@ function refresh()
   local contentsPanel = skillsWindow:getChildById('contentsPanel')
   skillsWindow:setContentMinimumHeight(38)
   if hasAdditionalSkills then
-    skillsWindow:setContentMaximumHeight(480)
+    skillsWindow:setContentMaximumHeight(600)
   else
-    skillsWindow:setContentMaximumHeight(340)
+    skillsWindow:setContentMaximumHeight(440)
   end
 end
 
