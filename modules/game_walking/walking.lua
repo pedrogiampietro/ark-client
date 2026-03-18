@@ -306,6 +306,14 @@ function walk(dir, ticks)
     return
   end
 
+  -- Waiting for server to confirm autoWalk stop; block all keyboard walks to prevent
+  -- premature preWalk that the server would reject (causing the snap-back visual glitch).
+  -- onCancelWalk will clear this flag and schedule the retry.
+  if waitingForCancelAck then
+    nextWalkDir = dir  -- keep direction queued
+    return
+  end
+
   local player = g_game.getLocalPlayer()
   if not player or g_game.isDead() or player:isDead() then
     return
@@ -328,11 +336,20 @@ function walk(dir, ticks)
     if lastStop + 100 < g_clock.millis() then
       print("[WALK] -> stopping autoWalk, queueing keyboard walk dir=" .. tostring(dir))
       lastStop = g_clock.millis()
-      waitingForCancelAck = true  -- block onWalkFinish retry until server confirms stop via onCancelWalk
+      waitingForCancelAck = true  -- block all keyboard walks until server confirms stop via onCancelWalk
       player:stopAutoWalk()
       player:finishServerWalking()
       g_game.stop()
       nextWalkDir = dir
+      -- Safety fallback: if server never sends onCancelWalk (autoWalk was already done),
+      -- clear the flag after 400ms so we don't get permanently stuck.
+      scheduleEvent(function()
+        if waitingForCancelAck then
+          print("[WALK] waitingForCancelAck timeout — clearing flag, retrying nextWalkDir=" .. tostring(nextWalkDir))
+          waitingForCancelAck = false
+          if nextWalkDir ~= nil then walk(nextWalkDir, 0) end
+        end
+      end, 400)
     end
     return
   end
