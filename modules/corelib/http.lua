@@ -11,8 +11,8 @@ function HTTP.get(url, callback)
   if not g_http or not g_http.get then
     return error("HTTP.get is not supported")
   end
-  local operation = g_http.get(url, HTTP.timeout)
-  HTTP.operations[operation] = {type="get", url=url, callback=callback}  
+  local operation = g_http.get(url, HTTP.timeout, {})
+  HTTP.operations[operation] = {type="get", url=url, callback=callback}
   return operation
 end
 
@@ -20,8 +20,8 @@ function HTTP.getJSON(url, callback)
   if not g_http or not g_http.get then
     return error("HTTP.getJSON is not supported")
   end
-  local operation = g_http.get(url, HTTP.timeout)
-  HTTP.operations[operation] = {type="get", json=true, url=url, callback=callback}  
+  local operation = g_http.get(url, HTTP.timeout, {})
+  HTTP.operations[operation] = {type="get", json=true, url=url, callback=callback}
   return operation
 end
 

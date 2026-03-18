@@ -3,6 +3,9 @@ EnterGameLabel < Label
   font: verdana-11px-antialised
   color: #cccccc
 
+EnterGameButton < Button
+  size: 43 20
+
 LoginButton < Button
   height: 28
   image-source: /images/ui/buttons-gold
