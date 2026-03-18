@@ -20,7 +20,7 @@ Services = {
   stats = "",
   crash = "http://otclient.ovh/api/crash.php",
   feedback = "http://otclient.ovh/api/feedback.php",
-  status = "https://eldera.pro/api/status"
+  status = "http://eldera.pro/api/status"
 }
 
 -- Servers accept http login url, websocket login url or ip:port:version
