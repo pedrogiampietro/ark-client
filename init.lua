@@ -15,12 +15,12 @@ SERVER_LIST = {
 
 -- If you don't use updater or other service, set it to updater = ""
 Services = {
-  website = "http://otclient.ovh", -- currently not used
+  website = "https://eldera.pro",
   updater = "http://otclient.ovh/api/updater.php",
   stats = "",
   crash = "http://otclient.ovh/api/crash.php",
   feedback = "http://otclient.ovh/api/feedback.php",
-  status = "http://otclient.ovh/api/status.php"
+  status = "https://eldera.pro/api/status"
 }
 
 -- Servers accept http login url, websocket login url or ip:port:version

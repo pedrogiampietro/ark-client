@@ -1,7 +1,9 @@
 -- private variables
 local background
 local clientVersionLabel
+local playersOnlineLabel
 local infoWindow
+local playersOnlineEvent
 
 -- public functions
 function init()
@@ -13,9 +15,13 @@ function init()
 
   clientVersionLabel = background:getChildById('clientVersionLabel')
   clientVersionLabel:setText('OTClientV8 ' .. g_app.getVersion() .. '\nrev ' .. g_app.getBuildRevision() .. '\nMade by:\n' .. g_app.getAuthor() .. "")
- 
+
+  playersOnlineLabel = background:recursiveGetChildById('playersOnlineLabel')
+
   if not g_game.isOnline() then
     addEvent(function() g_effects.fadeIn(clientVersionLabel, 1500) end)
+    fetchPlayersOnline()
+    playersOnlineEvent = cycleEvent(fetchPlayersOnline, 60000)
   end
 
   connect(g_game, { onGameStart = hide })
@@ -25,6 +31,11 @@ end
 function terminate()
   disconnect(g_game, { onGameStart = hide })
   disconnect(g_game, { onGameEnd = show })
+
+  if playersOnlineEvent then
+    playersOnlineEvent:cancel()
+    playersOnlineEvent = nil
+  end
 
   g_effects.cancelFade(background:getChildById('clientVersionLabel'))
   background:destroy()
@@ -59,4 +70,21 @@ end
 
 function getBackground()
   return background
+end
+
+function fetchPlayersOnline()
+  if not playersOnlineLabel then return end
+  HTTP.get(Services.status, function(data, err)
+    if err or not data then
+      playersOnlineLabel:setText('Servidor offline')
+      playersOnlineLabel:setColor('#ff6666')
+      return
+    end
+    local ok, result = pcall(function() return json.decode(data) end)
+    if ok and result and result.playersOnline ~= nil then
+      local count = tonumber(result.playersOnline) or 0
+      playersOnlineLabel:setText(count .. ' jogadores online')
+      playersOnlineLabel:setColor('#aaffaa')
+    end
+  end)
 end

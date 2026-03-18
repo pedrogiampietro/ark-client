@@ -26,29 +26,29 @@ InfoWindow < MainWindow
       margin-top: 10
       margin-left: 10
       margin-right: 10
-    
+
     Label
       anchors.top: prev.bottom
       anchors.left: prev.left
       text-auto-resize: true
       margin-top: 15
-      text: Official Website
+      text: Website
       opacity: 0.7
-    
+
     Button
       anchors.verticalCenter: prev.verticalCenter
       anchors.left: prev.right
       anchors.right: separator.right
       margin-left: 10
-      text: www.tibia.com
-      @onClick: g_platform.openUrl("https://github.com/tysonstrange/otcv8-classicui")
+      text: eldera.pro
+      @onClick: g_platform.openUrl("https://eldera.pro")
 
   HorizontalSeparator
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: next.top
     margin-bottom: 8
-  
+
   Button
     !text: tr('Ok')
     width: 44
@@ -58,23 +58,25 @@ InfoWindow < MainWindow
 
 MenuButton < Button
   anchors.top: parent.top
-  anchors.horizontalCenter: parent.horizontalCenter
   anchors.left: parent.left
   anchors.right: parent.right
-  margin-right: 15
-  margin-left: 15
-  height: 20
+  margin-right: 14
+  margin-left: 14
+  height: 22
   image-source: /images/ui/longbutton
   image-clip: 0 0 86 20
   image-border: 3
-  font: cipsoftFont
+  font: verdana-11px-antialised
+  color: #d4b870
 
   $hover !disabled:
-    image-clip: 0 0 86 20
+    image-clip: 0 20 86 20
+    color: #ffffff
 
   $pressed:
     image-clip: 0 20 86 20
     text-offset: 1 1
+    color: #ffffff
 
 UIWidget
   id: background
@@ -82,44 +84,68 @@ UIWidget
   focusable: false
   image-source: /images/background
   image-smooth: true
-  margin-top: 1
 
+  // Barra superior
+  UIWidget
+    id: topBar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 38
+    background-color: #000000cc
+
+    UILabel
+      id: serverNameLabel
+      text: ELDERA
+      font: terminus-14px-bold
+      color: #c8a050
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 20
+      text-auto-resize: true
+
+    UILabel
+      id: playersOnlineLabel
+      text: Carregando...
+      font: verdana-11px-antialised
+      color: #aaaaaa
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 20
+      text-auto-resize: true
+
+  // Painel do menu (esquerda inferior)
   UIWidget
     id: menu
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    size: 117 171
-    margin-left: 60
-    margin-bottom: 70
-    image-source: /images/game/gamemenu
+    width: 155
+    height: 165
+    margin-left: 40
+    margin-bottom: 55
+    background-color: #00000099
 
     MenuButton
       text: Enter Game
-      margin-top: 15
+      margin-top: 12
       @onClick: EnterGame.show()
 
     MenuButton
-      text: Access Account
+      text: Website
       anchors.top: prev.bottom
-      margin-top: 10
-      @onClick: g_platform.openUrl("https://github.com/tysonstrange/otcv8-classicui")
+      margin-top: 8
+      @onClick: g_platform.openUrl("https://eldera.pro")
 
     MenuButton
       text: Options
       anchors.top: prev.bottom
-      margin-top: 10
+      margin-top: 8
       @onClick: modules.client_options.toggle()
-
-    MenuButton
-      text: Info
-      anchors.top: prev.bottom
-      margin-top: 10
-      @onClick: modules.client_background.showInfoWindow()
 
     MenuButton
       text: Exit Game
       anchors.top: prev.bottom
-      margin-top: 10
+      margin-top: 8
       @onClick: exit()
 
   UILabel
@@ -130,8 +156,8 @@ UIWidget
     text-align: center
     text-auto-resize: false
     width: 220
-    height: 90
-    padding: 2
-    color: #ffffff
-    font: terminus-14px-bold
+    height: 55
+    padding: 4
+    color: #666666
+    font: verdana-11px-antialised
     visible: false
