@@ -74,7 +74,12 @@ function fetchPlayersOnline()
   local ok, err = pcall(function()
     HTTP.getJSON(Services.status, function(data, httpErr)
       if not playersOnlineLabel then return end
-      if httpErr or not data then
+      if httpErr then
+        g_logger.warning('[status] httpErr: ' .. tostring(httpErr))
+        playersOnlineLabel:setText('Servidor offline')
+        playersOnlineLabel:setColor('#ff6666')
+      elseif not data then
+        g_logger.warning('[status] data is nil')
         playersOnlineLabel:setText('Servidor offline')
         playersOnlineLabel:setColor('#ff6666')
       else
