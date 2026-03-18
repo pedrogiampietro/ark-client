@@ -394,8 +394,7 @@ function walk(dir, ticks)
     return
   end  
   
-  -- firstStep only true if character has been truly stopped for >500ms (not just between walk steps)
-  firstStep = (not player:isWalking() and lastFinishedStep + 500 < g_clock.millis() and walkLock + 100 < g_clock.millis())
+  firstStep = false
   if player:isServerWalking() and not dash then
     walkLock = walkLock + math.max(g_settings.getNumber('walkFirstStepDelay'), 100)
   end
