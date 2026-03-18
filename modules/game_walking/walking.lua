@@ -285,8 +285,16 @@ function onWalkFinish(player)
 end
 
 function onCancelWalk(player)
-  print("[WALK] onCancelWalk | locking walk 50ms")
+  print("[WALK] onCancelWalk | locking walk 50ms | nextWalkDir=" .. tostring(nextWalkDir))
   player:lockWalk(50)
+  -- if keyboard direction was queued, retry after lock expires
+  if nextWalkDir ~= nil then
+    local dir = nextWalkDir
+    removeEvent(autoWalkEvent)
+    autoWalkEvent = scheduleEvent(function()
+      if nextWalkDir ~= nil then walk(nextWalkDir, 0) end
+    end, 60)
+  end
 end
 
 function walk(dir, ticks)
@@ -305,9 +313,8 @@ function walk(dir, ticks)
   lastManualWalk = g_clock.millis()
 
   if player:isWalkLocked() then
-    print("[WALK] -> BLOCKED: isWalkLocked")
-    nextWalkDir = nil
-    return
+    print("[WALK] -> BLOCKED: isWalkLocked nextWalkDir=" .. tostring(nextWalkDir))
+    return  -- keep nextWalkDir so it retries after lock expires
   end
 
   if g_game.isFollowing() then
