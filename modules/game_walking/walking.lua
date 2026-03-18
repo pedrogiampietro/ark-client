@@ -255,8 +255,8 @@ function onPositionChange(player, newPos, oldPos)
 end
 
 function onWalk(player, newPos, oldPos)
-  print("[WALK] onWalk | isAutoWalking=" .. tostring(player:isAutoWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " autoFinish=" .. tostring(autoFinishNextServerWalk + 200 > g_clock.millis()))
-  if autoFinishNextServerWalk + 200 > g_clock.millis() then
+  print("[WALK] onWalk | isAutoWalking=" .. tostring(player:isAutoWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " autoFinish=" .. tostring(autoFinishNextServerWalk > g_clock.millis()))
+  if autoFinishNextServerWalk > g_clock.millis() then
     player:finishServerWalking()
   end
 end
@@ -326,9 +326,9 @@ function walk(dir, ticks)
       print("[WALK] -> stopping autoWalk, queueing keyboard walk dir=" .. tostring(dir))
       lastStop = g_clock.millis()
       player:stopAutoWalk()
+      player:finishServerWalking()  -- clear isServerWalking immediately so retry walk doesn't double-stop
       g_game.stop()
       nextWalkDir = dir  -- queue keyboard direction, walk after server confirms stop
-      autoFinishNextServerWalk = g_clock.millis() + 200  -- signal onWalk to finishServerWalking
     end
     return  -- wait for server to process the stop before walking
   end
