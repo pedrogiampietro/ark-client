@@ -118,8 +118,9 @@ function HTTP.onGet(operationId, url, err, data)
   if operation == nil then
     return
   end
-  if err and err:len() == 0 then
-    err = nil
+  if err then
+    err = tostring(err)
+    if err:len() == 0 then err = nil end
   end
   if not err and operation.json then
     if data:len() == 0 then

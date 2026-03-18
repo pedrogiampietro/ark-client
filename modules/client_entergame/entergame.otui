@@ -123,7 +123,7 @@ MainWindow
     !text: tr('Criar Conta')
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    width: 128
+    width: 120
     margin-bottom: 2
     @onClick: g_platform.openUrl("https://eldera.pro/criar-conta")
 
@@ -131,7 +131,7 @@ MainWindow
     !text: tr('Cancelar')
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    width: 128
+    width: 120
     margin-bottom: 2
     margin-right: 5
     @onClick: EnterGame.hide()
