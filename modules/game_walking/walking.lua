@@ -14,6 +14,7 @@ lastTurnDirection = 0
 lastStop = 0
 lastManualWalk = 0
 autoFinishNextServerWalk = 0
+waitingForCancelAck = false  -- true after g_game.stop() for autoWalk cancel; blocks premature retry until onCancelWalk fires
 turnKeys = {}
 mousePriorityUntil = 0  -- while > g_clock.millis(), ignore keyboard walk (mouse has priority)
 
@@ -277,7 +278,10 @@ end
 
 function onWalkFinish(player)
   lastFinishedStep = g_clock.millis()
-  print("[WALK] onWalkFinish | nextWalkDir=" .. tostring(nextWalkDir) .. " isAutoWalking=" .. tostring(player:isAutoWalking()))
+  print("[WALK] onWalkFinish | nextWalkDir=" .. tostring(nextWalkDir) .. " isAutoWalking=" .. tostring(player:isAutoWalking()) .. " waitingForCancelAck=" .. tostring(waitingForCancelAck))
+  if waitingForCancelAck then
+    return  -- don't retry yet; onCancelWalk will handle it once server confirms stop
+  end
   if nextWalkDir ~= nil then
     removeEvent(autoWalkEvent)
     autoWalkEvent = addEvent(function() if nextWalkDir ~= nil then walk(nextWalkDir, 0) end end, false)
@@ -285,11 +289,10 @@ function onWalkFinish(player)
 end
 
 function onCancelWalk(player)
-  print("[WALK] onCancelWalk | locking walk 50ms | nextWalkDir=" .. tostring(nextWalkDir))
+  print("[WALK] onCancelWalk | locking walk 50ms | nextWalkDir=" .. tostring(nextWalkDir) .. " waitingForCancelAck=" .. tostring(waitingForCancelAck))
+  waitingForCancelAck = false  -- server confirmed stop, safe to retry now
   player:lockWalk(50)
-  -- if keyboard direction was queued, retry after lock expires
   if nextWalkDir ~= nil then
-    local dir = nextWalkDir
     removeEvent(autoWalkEvent)
     autoWalkEvent = scheduleEvent(function()
       if nextWalkDir ~= nil then walk(nextWalkDir, 0) end
@@ -325,12 +328,13 @@ function walk(dir, ticks)
     if lastStop + 100 < g_clock.millis() then
       print("[WALK] -> stopping autoWalk, queueing keyboard walk dir=" .. tostring(dir))
       lastStop = g_clock.millis()
+      waitingForCancelAck = true  -- block onWalkFinish retry until server confirms stop via onCancelWalk
       player:stopAutoWalk()
-      player:finishServerWalking()  -- clear isServerWalking immediately so retry walk doesn't double-stop
+      player:finishServerWalking()
       g_game.stop()
-      nextWalkDir = dir  -- queue keyboard direction, walk after server confirms stop
+      nextWalkDir = dir
     end
-    return  -- wait for server to process the stop before walking
+    return
   end
      
   local dash = false
