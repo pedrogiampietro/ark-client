@@ -122,15 +122,13 @@ function HTTP.onGet(operationId, url, err, data)
     err = tostring(err)
     if err:len() == 0 then err = nil end
   end
-  if type(data) == "table" then
-    local keys = {}
-    for k,v in pairs(data) do keys[#keys+1] = tostring(k)..'='..tostring(v):sub(1,60) end
-    g_logger.warning('[http.onGet] data is table: ' .. table.concat(keys, ' | '))
-  else
-    g_logger.warning('[http.onGet] url=' .. tostring(url) .. ' err=' .. tostring(err) .. ' data_type=' .. type(data) .. ' data=' .. tostring(data):sub(1,80))
-  end
   if not err and operation.json then
-    local rawData = type(data) == "string" and data or ""
+    local rawData
+    if type(data) == "table" then
+      rawData = type(data.body) == "string" and data.body or ""
+    else
+      rawData = type(data) == "string" and data or ""
+    end
     if rawData:len() == 0 then
       rawData = "null"
     end
