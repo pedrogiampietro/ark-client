@@ -770,6 +770,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
       modules.game_walking.cancelKeyboardWalk()
       modules.game_walking.setMousePriority()
     end
+    g_game.stop()
     player:autoWalk(autoWalkPos)
     return true
   end
