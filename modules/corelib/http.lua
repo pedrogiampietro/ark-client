@@ -123,16 +123,17 @@ function HTTP.onGet(operationId, url, err, data)
     if err:len() == 0 then err = nil end
   end
   if not err and operation.json then
-    if data:len() == 0 then
-      data = "null"
+    local rawData = type(data) == "string" and data or ""
+    if rawData:len() == 0 then
+      rawData = "null"
     end
-    local status, result = pcall(function() return json.decode(data) end)
+    local status, result = pcall(function() return json.decode(rawData) end)
     if not status then
-      err = "JSON ERROR: " .. result
-      if data and data:len() > 0 then
-        err = err .. " (" .. data:sub(1, 100) .. ")"
+      err = "JSON ERROR: " .. tostring(result)
+      if rawData:len() > 0 then
+        err = err .. " (" .. rawData:sub(1, 100) .. ")"
       end
-    end  
+    end
     data = result
   end
   if operation.callback then

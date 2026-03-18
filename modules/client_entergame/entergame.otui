@@ -125,7 +125,7 @@ MainWindow
     anchors.bottom: parent.bottom
     width: 120
     margin-bottom: 2
-    @onClick: g_platform.openUrl("https://eldera.pro/criar-conta")
+    @onClick: g_platform.openUrl("https://eldera.pro/account-manager/register")
 
   BlueButton
     !text: tr('Cancelar')
