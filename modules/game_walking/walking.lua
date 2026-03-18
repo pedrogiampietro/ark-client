@@ -316,11 +316,13 @@ function walk(dir, ticks)
 
   if player:isAutoWalking() then
     if lastStop + 100 < g_clock.millis() then
-      print("[WALK] -> stopping autoWalk to resume keyboard walk")
+      print("[WALK] -> stopping autoWalk, queueing keyboard walk dir=" .. tostring(dir))
       lastStop = g_clock.millis()
       player:stopAutoWalk()
       g_game.stop()
+      nextWalkDir = dir  -- queue keyboard direction, walk after server confirms stop
     end
+    return  -- wait for server to process the stop before walking
   end
      
   local dash = false
