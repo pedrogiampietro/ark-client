@@ -77,12 +77,15 @@ function fetchPlayersOnline()
       if httpErr or not data then
         playersOnlineLabel:setText('Servidor offline')
         playersOnlineLabel:setColor('#ff6666')
-      elseif data.playersOnline ~= nil then
+      else
         local count = tonumber(data.playersOnline) or 0
-        playersOnlineLabel:setText(count .. ' jogadores online')
+        if count == 1 then
+          playersOnlineLabel:setText('1 jogador online')
+        else
+          playersOnlineLabel:setText(count .. ' jogadores online')
+        end
         playersOnlineLabel:setColor('#aaffaa')
       end
-      -- Reagenda a próxima atualização após resposta
       scheduleEvent(fetchPlayersOnline, 60000)
     end)
   end)
