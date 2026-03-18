@@ -328,6 +328,7 @@ function walk(dir, ticks)
       player:stopAutoWalk()
       g_game.stop()
       nextWalkDir = dir  -- queue keyboard direction, walk after server confirms stop
+      autoFinishNextServerWalk = g_clock.millis() + 200  -- signal onWalk to finishServerWalking
     end
     return  -- wait for server to process the stop before walking
   end
