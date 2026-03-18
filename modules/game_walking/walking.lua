@@ -186,6 +186,7 @@ function cancelKeyboardWalk()
   print("[WALK] cancelKeyboardWalk called | smartWalkDirs=" .. #smartWalkDirs .. " nextWalkDir=" .. tostring(nextWalkDir))
   stopSmartWalk()
   nextWalkDir = nil
+  waitingForCancelAck = false  -- clear any pending stop-ack state so new autoWalk isn't blocked
   removeEvent(walkEvent)
   walkEvent = nil
   removeEvent(autoWalkEvent)
