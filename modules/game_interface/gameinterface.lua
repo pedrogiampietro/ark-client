@@ -615,6 +615,7 @@ end
 
 function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, marking)
   local keyboardModifiers = g_keyboard.getModifiers()
+  print("[WALK] processMouseAction | btn=" .. tostring(mouseButton) .. " mod=" .. tostring(keyboardModifiers) .. " autoWalkPos=" .. tostring(autoWalkPos ~= nil) .. " useThing=" .. tostring(useThing ~= nil) .. " creature=" .. tostring(creatureThing ~= nil) .. " mobile=" .. tostring(g_app.isMobile()) .. " classic=" .. tostring(modules.client_options.getOption('classicControl')))
 
   if g_app.isMobile() then
     if mouseButton == MouseRightButton then
@@ -759,7 +760,6 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
   local player = g_game.getLocalPlayer()
   player:stopAutoWalk()
 
-  print("[WALK] processMouseAction | btn=" .. tostring(mouseButton) .. " modifiers=" .. tostring(keyboardModifiers) .. " autoWalkPos=" .. tostring(autoWalkPos ~= nil) .. " KeyboardNoModifier=" .. tostring(KeyboardNoModifier))
 
   -- Only cancel keyboard walk when we're actually walking with the mouse (left-click move)
   if autoWalkPos and keyboardModifiers == KeyboardNoModifier and (mouseButton == MouseLeftButton or mouseButton == MouseTouch2 or mouseButton == MouseTouch3) then
