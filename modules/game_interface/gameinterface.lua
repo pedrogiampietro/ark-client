@@ -758,14 +758,12 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
   end
 
   local player = g_game.getLocalPlayer()
-  player:stopAutoWalk()
-
 
   -- Only cancel keyboard walk when we're actually walking with the mouse (left-click move)
   if autoWalkPos and keyboardModifiers == KeyboardNoModifier and (mouseButton == MouseLeftButton or mouseButton == MouseTouch2 or mouseButton == MouseTouch3) then
     local autoWalkTile = g_map.getTile(autoWalkPos)
-    print("[WALK] autoWalk check | tileExists=" .. tostring(autoWalkTile ~= nil) .. " isWalkable=" .. tostring(autoWalkTile and autoWalkTile:isWalkable(true)))
     if autoWalkTile and not autoWalkTile:isWalkable(true) then
+      player:stopAutoWalk()
       modules.game_textmessage.displayFailureMessage(tr('Sorry, not possible.'))
       return false
     end
@@ -773,11 +771,12 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
       modules.game_walking.cancelKeyboardWalk()
       modules.game_walking.setMousePriority()
     end
-    print("[WALK] mapClick: autoWalk to " .. tostring(autoWalkPos.x) .. "," .. tostring(autoWalkPos.y) .. " | isWalking=" .. tostring(player:isWalking()) .. " isServerWalking=" .. tostring(player:isServerWalking()) .. " isAutoWalking=" .. tostring(player:isAutoWalking()))
     player:autoWalk(autoWalkPos)
     return true
   end
 
+  -- Not starting a new autoWalk — stop any existing one
+  player:stopAutoWalk()
   return false
 end
 

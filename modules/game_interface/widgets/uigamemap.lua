@@ -109,9 +109,7 @@ function UIGameMap:blockNextMouseRelease(postAction)
 end
 
 function UIGameMap:onMouseRelease(mousePosition, mouseButton)
-  print("[WALK] onMouseRelease | btn=" .. tostring(mouseButton) .. " allowNextRelease=" .. tostring(self.allowNextRelease) .. " blockNextRelease=" .. tostring(self.blockNextRelease) .. " now=" .. tostring(g_clock.millis()))
   if not self.allowNextRelease and not self.markingMouseRelease then
-    print("[WALK] onMouseRelease BLOCKED")
     return true
   end
   local autoWalkPos = self:getPosition(mousePosition)
