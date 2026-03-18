@@ -291,7 +291,13 @@ end
 
 function onCancelWalk(player)
   print("[WALK] onCancelWalk | locking walk 50ms | nextWalkDir=" .. tostring(nextWalkDir) .. " waitingForCancelAck=" .. tostring(waitingForCancelAck))
-  waitingForCancelAck = false  -- server confirmed stop, safe to retry now
+  if waitingForCancelAck then
+    -- The server re-set isServerWalking=true via walk packet while we were waiting.
+    -- Clear it now so the retry walk doesn't hit the isServerWalking→g_game.stop() path,
+    -- which would call g_game.stop() again and set nextWalkDir=nil (losing the direction).
+    player:finishServerWalking()
+  end
+  waitingForCancelAck = false
   player:lockWalk(50)
   if nextWalkDir ~= nil then
     removeEvent(autoWalkEvent)
