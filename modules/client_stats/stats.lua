@@ -164,9 +164,9 @@ function sendStats()
   data.widgets = g_stats.getWidgetsInfo(10, false)
   data = json.encode(data, 1)
   if Services.stats ~= nil and Services.stats:len() > 3 then
-    g_http.post(Services.stats, data)
+    g_http.post(Services.stats, data, {})
   end
-  g_http.post("http://otclient.ovh/api/stats.php", data)
+  g_http.post("http://otclient.ovh/api/stats.php", data, {})
   fps = {}
   ping = {}
 end

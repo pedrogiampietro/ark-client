@@ -1267,6 +1267,10 @@ function onForgeData(protocol, opcode, buffer)
       end
     end
 
+  -- FORGE_OPEN: open the forge window (sent by NPC)
+  elseif buffer == 'FORGE_OPEN' then
+    show()
+
   -- FORGE_ERROR:message
   elseif buffer:sub(1, 12) == 'FORGE_ERROR:' then
     stopForgeAnimation()
