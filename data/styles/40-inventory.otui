@@ -94,6 +94,20 @@ CombatBox < UICheckBox
     image-clip: 0 20 20 20
 
 
+RelicBoxButton < UIButton
+  id: relicBoxButton
+  size: 32 18
+  !tooltip: tr('Relic Box')
+  image-source: /images/ui/relics
+  margin-top: 2
+  image-color: #CCCCCC
+
+  $hover:
+    image-color: #FFFFFF
+
+  $on:
+    image-color: #FFD700
+
 InventoryButton < Button
   font: verdana-11px-antialised
   height: 18

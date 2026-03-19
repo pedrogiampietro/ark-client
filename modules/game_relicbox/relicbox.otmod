@@ -1,0 +1,10 @@
+Module
+  name: game_relicbox
+  description: Relic Box - equip relics for passive bonuses
+  author: custom
+  sandboxed: true
+  dependencies:
+    - game_inventory
+  scripts: [ relicbox ]
+  @onLoad: init()
+  @onUnload: terminate()

@@ -1,0 +1,183 @@
+-- Relic IDs allowed in the relic box
+local RELIC_IDS = {
+  [5130] = true, -- artifact of combat
+  [5131] = true, -- artifact of mana leech
+  [5132] = true, -- artifact of gold
+  [5133] = true, -- artifact of protection
+  [5134] = true, -- artifact of bounty
+  [5135] = true, -- artifact of swiftness
+  [5136] = true, -- artifact of sorcery
+  [5137] = true, -- artifact of precision
+  [5138] = true, -- artifact of arcane power
+}
+
+local NUM_SLOTS = 4
+
+local relicBoxWindow = nil
+local relicBoxButton = nil
+local relicSlots = {}      -- UIItem widgets (the 4 slots)
+local equippedRelics = {}  -- item stored in each slot index (1..4)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Helpers
+-- ─────────────────────────────────────────────────────────────────────────────
+
+local function isRelic(item)
+  return item and RELIC_IDS[item:getId()] == true
+end
+
+local function updateSlotVisual(slotIndex)
+  local slot = relicSlots[slotIndex]
+  local item = equippedRelics[slotIndex]
+  if not slot then return end
+  if item then
+    slot:setStyle('InventoryItem')
+    slot:setItem(item)
+  else
+    slot:setStyle('RelicSlot')
+    slot:setItem(nil)
+  end
+end
+
+local function notifyServerRelics()
+  -- TODO (parte 2): send relic state to server via extended opcode
+  local ids = {}
+  for i = 1, NUM_SLOTS do
+    local item = equippedRelics[i]
+    ids[i] = item and item:getId() or 0
+  end
+  -- g_game.sendExtendedOpcode(OPCODE_RELICS, table.tostring(ids))
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Slot interaction
+-- ─────────────────────────────────────────────────────────────────────────────
+
+local function onSlotMousePress(widget, mousePos, mouseButton)
+  local slotIndex = widget:getData('relicIndex')
+  if not slotIndex then return false end
+
+  if mouseButton == MouseRightButton then
+    local item = equippedRelics[slotIndex]
+    if item then
+      -- Return item to player backpack
+      local player = g_game.getLocalPlayer()
+      if player then
+        local backpack = player:getInventoryItem(InventorySlotBack)
+        if backpack then
+          g_game.move(item, {x=65535, y=InventorySlotBack, z=0}, 1)
+        end
+      end
+      equippedRelics[slotIndex] = nil
+      updateSlotVisual(slotIndex)
+      notifyServerRelics()
+    end
+    return true
+  end
+
+  return false
+end
+
+local function onSlotDrop(widget, mousePos, item)
+  local slotIndex = widget:getData('relicIndex')
+  if not slotIndex then return false end
+
+  if not isRelic(item) then
+    modules.game_textmessage.displayMessage('Only relics can be placed in the relic box.', MessageInfo)
+    return false
+  end
+
+  -- Swap if slot already occupied
+  local oldItem = equippedRelics[slotIndex]
+  if oldItem then
+    local player = g_game.getLocalPlayer()
+    if player then
+      local backpack = player:getInventoryItem(InventorySlotBack)
+      if backpack then
+        g_game.move(oldItem, {x=65535, y=InventorySlotBack, z=0}, 1)
+      end
+    end
+  end
+
+  equippedRelics[slotIndex] = item
+  updateSlotVisual(slotIndex)
+  notifyServerRelics()
+  return true
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Window management
+-- ─────────────────────────────────────────────────────────────────────────────
+
+function toggle()
+  if not relicBoxWindow then return end
+  if relicBoxWindow:isVisible() then
+    relicBoxWindow:hide()
+    if relicBoxButton then relicBoxButton:setOn(false) end
+  else
+    relicBoxWindow:show()
+    relicBoxWindow:raise()
+    relicBoxWindow:focus()
+    if relicBoxButton then relicBoxButton:setOn(true) end
+  end
+end
+
+function onWindowClose()
+  if relicBoxButton then relicBoxButton:setOn(false) end
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Module lifecycle
+-- ─────────────────────────────────────────────────────────────────────────────
+
+function init()
+  -- Load the relic box window into the right panel
+  relicBoxWindow = g_ui.loadUI('relicbox', modules.game_interface.getRightPanel())
+  relicBoxWindow:hide()
+
+  -- Wire up the 4 slot widgets
+  for i = 1, NUM_SLOTS do
+    local slot = relicBoxWindow:recursiveGetChildById('relicSlot' .. i)
+    if slot then
+      slot:setData('relicIndex', i)
+      slot.onMousePress = onSlotMousePress
+      slot.onDrop       = onSlotDrop
+      relicSlots[i] = slot
+    end
+    equippedRelics[i] = nil
+  end
+
+  -- Connect the button already placed in inventory.otui
+  addEvent(function()
+    local invWindow = modules.game_inventory and
+                      modules.game_inventory.inventoryWindow
+    if invWindow then
+      relicBoxButton = invWindow:recursiveGetChildById('relicBoxButton')
+      if relicBoxButton then
+        relicBoxButton.onClick = toggle
+      end
+    end
+  end)
+
+  connect(g_game, { onGameEnd = onGameEnd })
+end
+
+function terminate()
+  disconnect(g_game, { onGameEnd = onGameEnd })
+
+  if relicBoxWindow then
+    relicBoxWindow:destroy()
+    relicBoxWindow = nil
+  end
+
+  relicBoxButton = nil
+  relicSlots = {}
+  equippedRelics = {}
+end
+
+function onGameEnd()
+  for i = 1, NUM_SLOTS do
+    equippedRelics[i] = nil
+    updateSlotVisual(i)
+  end
+end
