@@ -131,8 +131,8 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 function init()
-  -- Load the relic box window into the right panel
-  relicBoxWindow = g_ui.loadUI('relicbox', modules.game_interface.getRightPanel())
+  -- Create the relic box window (style defined in data/styles/40-relicbox.otui)
+  relicBoxWindow = g_ui.createWidget('RelicBoxWindow', modules.game_interface.getRightPanel())
   relicBoxWindow:hide()
 
   -- Wire up the 4 slot widgets
