@@ -98,17 +98,8 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
     return false
   end
 
-  -- Swap if slot already occupied
-  local oldItem = equippedRelics[slotIndex]
-  if oldItem then
-    local player = g_game.getLocalPlayer()
-    if player then
-      local backpack = player:getInventoryItem(InventorySlotBack)
-      if backpack then
-        g_game.move(oldItem, {x=65535, y=InventorySlotBack, z=0}, 1)
-      end
-    end
-  end
+  -- Move item to necklace slot so it physically leaves the source
+  g_game.move(item, {x=65535, y=InventorySlotNeck, z=0}, 1)
 
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
