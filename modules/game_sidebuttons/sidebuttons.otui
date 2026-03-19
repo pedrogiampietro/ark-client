@@ -1,5 +1,5 @@
 NonClosableMiniWindow
-  height: 74
+  height: 50
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -25,10 +25,10 @@ NonClosableMiniWindow
       @onClick: modules.game_store.toggle()
 
     RelicBoxButton
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      width: 108
-      margin-top: 2
+      anchors.left: storeButton.right
+      anchors.top: storeButton.top
+      anchors.right: parent.right
+      margin-left: 4
 
     InventoryButton
       id: skillsButton
