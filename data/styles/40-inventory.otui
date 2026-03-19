@@ -94,14 +94,6 @@ CombatBox < UICheckBox
     image-clip: 0 20 20 20
 
 
-RelicBoxButton < InventoryButton
-  id: relicBoxButton
-  !text: tr('Relics')
-  icon: /images/ui/relics
-  icon-size: 14 14
-  icon-align: left
-  text-offset: 2 0
-
 InventoryButton < Button
   font: verdana-11px-antialised
   height: 18
@@ -308,8 +300,6 @@ InventoryWindow < MiniWindow
         InventoryButton
           !text: tr('Tracker')
           @onClick: modules.game_hunteranalyzer.toggle()
-
-        RelicBoxButton
 
         InventoryButton
           !text: tr('Logout')

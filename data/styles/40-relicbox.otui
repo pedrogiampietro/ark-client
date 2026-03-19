@@ -1,3 +1,11 @@
+RelicBoxButton < InventoryButton
+  id: relicBoxButton
+  !text: tr('Relics')
+  icon: /images/ui/relics
+  icon-size: 14 14
+  icon-align: left
+  text-offset: 4 0
+
 RelicSlot < Item
   size: 34 34
   image-source: /images/game/slots/finger
