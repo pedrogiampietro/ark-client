@@ -19,7 +19,7 @@ RelicBoxButton < UIButton
 
 RelicSlot < Item
   size: 34 34
-  image-source: /images/game/slots/finger
+  image-source: /images/ui/icon_add
   border-width: 1
   border-color: #8B691488
   background-color: #1A120899

@@ -84,8 +84,13 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
   return false
 end
 
-local function onSlotDrop(widget, mousePos, item)
-  local slotIndex = slotIndexFromWidget(widget)
+local function onSlotDrop(self, dragWidget, mousePos, forced)
+  if not self:canAcceptDrop(dragWidget, mousePos) and not forced then return false end
+
+  local item = dragWidget.currentDragThing
+  if not item or not item:isItem() then return false end
+
+  local slotIndex = slotIndexFromWidget(self)
   if not slotIndex then return false end
 
   if not isRelic(item) then
