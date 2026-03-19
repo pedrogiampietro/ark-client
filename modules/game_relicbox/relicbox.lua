@@ -53,8 +53,12 @@ end
 -- Slot interaction
 -- ─────────────────────────────────────────────────────────────────────────────
 
+local function slotIndexFromWidget(widget)
+  return tonumber(widget:getId():match('relicSlot(%d+)'))
+end
+
 local function onSlotMousePress(widget, mousePos, mouseButton)
-  local slotIndex = widget:getData('relicIndex')
+  local slotIndex = slotIndexFromWidget(widget)
   if not slotIndex then return false end
 
   if mouseButton == MouseRightButton then
@@ -79,7 +83,7 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
 end
 
 local function onSlotDrop(widget, mousePos, item)
-  local slotIndex = widget:getData('relicIndex')
+  local slotIndex = slotIndexFromWidget(widget)
   if not slotIndex then return false end
 
   if not isRelic(item) then
@@ -139,7 +143,6 @@ function init()
   for i = 1, NUM_SLOTS do
     local slot = relicBoxWindow:recursiveGetChildById('relicSlot' .. i)
     if slot then
-      slot:setData('relicIndex', i)
       slot.onMousePress = onSlotMousePress
       slot.onDrop       = onSlotDrop
       relicSlots[i] = slot
