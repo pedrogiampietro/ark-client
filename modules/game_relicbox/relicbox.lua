@@ -154,10 +154,10 @@ function init()
 
   -- Connect to the RelicBoxButton defined in inventory.otui
   addEvent(function()
-    local invWindow = modules.game_inventory and
-                      modules.game_inventory.inventoryWindow
-    if not invWindow then return end
-    relicBoxButton = invWindow:recursiveGetChildById('relicBoxButton')
+    local sbWindow = modules.game_sidebuttons and
+                     modules.game_sidebuttons.buttonsWindow
+    if not sbWindow then return end
+    relicBoxButton = sbWindow:recursiveGetChildById('relicBoxButton')
     if relicBoxButton then
       relicBoxButton.onClick = toggle
     end
