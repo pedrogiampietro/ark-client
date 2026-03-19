@@ -166,9 +166,9 @@ function init()
 
     relicBoxButton = g_ui.createWidget('RelicBoxButton', parent)
     relicBoxButton.onClick = toggle
-
-    local trackerIndex = tracker:getIndex()
-    parent:moveChildToIndex(relicBoxButton, trackerIndex + 1)
+    relicBoxButton:addAnchor(AnchorTop, tracker:getId(), AnchorBottom)
+    relicBoxButton:addAnchor(AnchorLeft, tracker:getId(), AnchorLeft)
+    relicBoxButton:addAnchor(AnchorRight, tracker:getId(), AnchorRight)
   end)
 
   connect(g_game, { onGameEnd = onGameEnd })

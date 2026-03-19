@@ -1,10 +1,20 @@
 RelicBoxButton < UIButton
   id: relicBoxButton
-  height: 20
+  height: 34
   margin-top: 2
-  image-source: /images/ui/relics
-  image-align: center
+  background-color: #0D0D0DCC
+  border-width: 1
+  border-color: #555555BB
+  icon: /images/ui/relics
   !tooltip: tr('Relic Box')
+
+  $hover:
+    border-color: #FFD700BB
+    background-color: #1A1200CC
+
+  $on:
+    border-color: #FFD700
+    background-color: #2A1A00CC
 
 RelicSlot < Item
   size: 34 34
