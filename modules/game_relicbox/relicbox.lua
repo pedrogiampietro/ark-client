@@ -66,13 +66,18 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
   if mouseButton == MouseRightButton then
     local item = equippedRelics[slotIndex]
     if item then
-      -- Return item to player backpack
-      local player = g_game.getLocalPlayer()
-      if player then
-        local backpack = player:getInventoryItem(InventorySlotBack)
-        if backpack then
-          g_game.move(item, {x=65535, y=InventorySlotBack, z=0}, 1)
+      -- Find first open container with space and move item there
+      local moved = false
+      for _, container in pairs(g_game.getContainers()) do
+        if container:getItemsCount() < container:getCapacity() then
+          g_game.move(item, container:getSlotPosition(container:getItemsCount()), 1)
+          moved = true
+          break
         end
+      end
+      if not moved then
+        modules.game_textmessage.displayMessage('No open container with space to return the relic.', MessageInfo)
+        return true
       end
       equippedRelics[slotIndex] = nil
       updateSlotVisual(slotIndex)
