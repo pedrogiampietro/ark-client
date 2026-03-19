@@ -152,23 +152,15 @@ function init()
     equippedRelics[i] = nil
   end
 
-  -- Dynamically insert Relics button below Tracker in the inventory window
+  -- Connect to the RelicBoxButton defined in inventory.otui
   addEvent(function()
     local invWindow = modules.game_inventory and
                       modules.game_inventory.inventoryWindow
     if not invWindow then return end
-
-    local tracker = invWindow:recursiveGetChildById('tracker')
-    if not tracker then return end
-
-    local parent = tracker:getParent()
-    if not parent then return end
-
-    relicBoxButton = g_ui.createWidget('RelicBoxButton', parent)
-    relicBoxButton.onClick = toggle
-    relicBoxButton:addAnchor(AnchorTop, tracker:getId(), AnchorBottom)
-    relicBoxButton:addAnchor(AnchorLeft, tracker:getId(), AnchorLeft)
-    relicBoxButton:addAnchor(AnchorRight, tracker:getId(), AnchorRight)
+    relicBoxButton = invWindow:recursiveGetChildById('relicBoxButton')
+    if relicBoxButton then
+      relicBoxButton.onClick = toggle
+    end
   end)
 
   connect(g_game, { onGameEnd = onGameEnd })
