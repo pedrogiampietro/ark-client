@@ -29,6 +29,7 @@ NonClosableMiniWindow
       anchors.top: storeButton.top
       anchors.right: parent.right
       margin-left: 4
+      margin-right: 6
 
     InventoryButton
       id: skillsButton
