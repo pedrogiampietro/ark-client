@@ -1,10 +1,10 @@
-RelicBoxButton < InventoryButton
+RelicBoxButton < UIButton
   id: relicBoxButton
-  !text: tr('Relics')
-  icon: /images/ui/relics
-  icon-size: 14 14
-  icon-align: left
-  text-offset: 4 0
+  height: 20
+  margin-top: 2
+  image-source: /images/ui/relics
+  image-align: center
+  !tooltip: tr('Relic Box')
 
 RelicSlot < Item
   size: 34 34
