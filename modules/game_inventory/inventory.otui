@@ -122,7 +122,7 @@ MountButton < CombatBox
   image-source: /images/game/combatmodes/mount    
 
 NonClosableMiniWindow
-  height: 188
+  height: 170
   id: inventoryWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -211,11 +211,6 @@ NonClosableMiniWindow
       anchors.right: slot5.right
       margin-top: 3
 
-    RelicBoxButton
-      anchors.top: conditionPanel.bottom
-      anchors.horizontalCenter: conditionPanel.horizontalCenter
-      margin-top: 3
-
     FightOffensiveBox
       id: fightOffensiveBox
       anchors.left: slot3.right
@@ -294,3 +289,8 @@ NonClosableMiniWindow
       anchors.right: prev.right
       margin-top: 2
       @onClick: modules.game_hunteranalyzer.toggle()
+
+    RelicBoxButton
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      anchors.right: prev.right

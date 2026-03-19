@@ -23,7 +23,9 @@ local equippedRelics = {}  -- item stored in each slot index (1..4)
 -- ─────────────────────────────────────────────────────────────────────────────
 
 local function isRelic(item)
-  return item and RELIC_IDS[item:getId()] == true
+  if not item then return false end
+  local ok, id = pcall(function() return item:getId() end)
+  return ok and RELIC_IDS[id] == true
 end
 
 local function updateSlotVisual(slotIndex)
