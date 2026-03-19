@@ -6,6 +6,7 @@ RelicBoxButton < UIButton
   border-width: 1
   border-color: #555555BB
   icon: /images/ui/relics
+  icon-clip: 0 0 32 32
   !tooltip: tr('Relic Box')
 
   $hover:

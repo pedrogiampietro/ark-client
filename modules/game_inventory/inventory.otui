@@ -122,7 +122,7 @@ MountButton < CombatBox
   image-source: /images/game/combatmodes/mount    
 
 NonClosableMiniWindow
-  height: 170
+  height: 210
   id: inventoryWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
