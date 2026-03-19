@@ -19,10 +19,9 @@ RelicBoxButton < UIButton
 
 RelicSlot < Item
   size: 34 34
-  image-source: /images/game/slots/neck
   border-width: 1
-  border-color: #8B691488
-  background-color: #1A120899
+  border-color: #55442266
+  background-color: #0D0A0599
 
   $on:
     image-source: /images/ui/item-blessed
