@@ -1159,17 +1159,17 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    -- cipsoftFont: monospace 8x8, space-width 2px
-    -- calcular largura sem resizeToText para evitar problemas de wrapText
-    local w = 0
-    for i = 1, #msg do
-        w = w + (msg:sub(i, i) == ' ' and 2 or 8)
-    end
-    local cardW = w + 8   -- 4px padding each side
-    local cardH = 14      -- 8px font + 6px padding
+    -- Setar largura ANTES do setText para wrapText não quebrar cada char numa linha
+    -- (label tem anchors.centerIn, não tem tamanho implícito da anchor)
+    label:setWidth(500)
+    label:setHeight(14)
+    label:setText(msg)
+    label:resizeToText()  -- retorna dimensões reais do texto (cipsoftFont 8px)
+
+    local cardW = label:getWidth() + 8   -- 4px padding each side
+    local cardH = label:getHeight() + 6  -- 3px padding top/bottom
     card:setWidth(cardW)
     card:setHeight(cardH)
-    label:setText(msg)
 
     creature:addTopWidget(card)
 
