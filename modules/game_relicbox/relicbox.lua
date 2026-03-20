@@ -44,13 +44,14 @@ end
 local OPCODE_RELICS = 52
 
 local function notifyServerRelics()
-  if not g_game.isOnline() then return end
+  local protocol = g_game.getProtocolGame()
+  if not protocol then return end
   local parts = {}
   for i = 1, NUM_SLOTS do
     local item = equippedRelics[i]
     parts[i] = tostring(item and item:getId() or 0)
   end
-  g_game.sendExtendedOpcode(OPCODE_RELICS, table.concat(parts, ','))
+  protocol:sendExtendedOpcode(OPCODE_RELICS, table.concat(parts, ','))
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
