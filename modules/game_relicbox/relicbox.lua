@@ -64,21 +64,7 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
   if not slotIndex then return false end
 
   if mouseButton == MouseRightButton then
-    local item = equippedRelics[slotIndex]
-    if item then
-      -- Find first open container with space and move item there
-      local moved = false
-      for _, container in pairs(g_game.getContainers()) do
-        if container:getItemsCount() < container:getCapacity() then
-          g_game.move(item, container:getSlotPosition(container:getItemsCount()), 1)
-          moved = true
-          break
-        end
-      end
-      if not moved then
-        modules.game_textmessage.displayMessage('No open container with space to return the relic.', MessageInfo)
-        return true
-      end
+    if equippedRelics[slotIndex] then
       equippedRelics[slotIndex] = nil
       updateSlotVisual(slotIndex)
       notifyServerRelics()
@@ -102,9 +88,6 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
     modules.game_textmessage.displayMessage('Only relics can be placed in the relic box.', MessageInfo)
     return false
   end
-
-  -- Move item to necklace slot so it physically leaves the source
-  g_game.move(item, {x=65535, y=InventorySlotNeck, z=0}, 1)
 
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
