@@ -1,7 +1,6 @@
 RelicBoxButton < UIButton
   id: relicBoxButton
   height: 20
-  margin-top: 2
   background-color: #0D0D0DCC
   border-width: 1
   border-color: #555555BB
