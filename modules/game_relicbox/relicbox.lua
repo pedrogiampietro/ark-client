@@ -92,8 +92,29 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
     return false
   end
 
-  -- Equip: tell server to remove from source and store in relic box
+  -- Only allow items from inventory/containers (x == 65535), not ground tiles
   local pos = item:getPosition()
+  if pos.x ~= 65535 then
+    modules.game_textmessage.displayMessage('Pick up the relic before equipping it.', MessageInfo)
+    return false
+  end
+
+  -- Prevent duplicate relics across slots
+  local ok, itemId = pcall(function() return item:getId() end)
+  if ok then
+    for i = 1, NUM_SLOTS do
+      local equipped = equippedRelics[i]
+      if equipped and i ~= slotIndex then
+        local ok2, equippedId = pcall(function() return equipped:getId() end)
+        if ok2 and equippedId == itemId then
+          modules.game_textmessage.displayMessage('You cannot equip the same relic twice.', MessageInfo)
+          return false
+        end
+      end
+    end
+  end
+
+  -- Equip: tell server to remove from source and store in relic box
   sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. item:getId() .. ':' .. pos.y .. ':' .. pos.z)
 
   equippedRelics[slotIndex] = item
