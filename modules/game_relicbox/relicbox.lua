@@ -41,14 +41,16 @@ local function updateSlotVisual(slotIndex)
   end
 end
 
+local OPCODE_RELICS = 52
+
 local function notifyServerRelics()
-  -- TODO (parte 2): send relic state to server via extended opcode
-  local ids = {}
+  if not g_game.isOnline() then return end
+  local parts = {}
   for i = 1, NUM_SLOTS do
     local item = equippedRelics[i]
-    ids[i] = item and item:getId() or 0
+    parts[i] = tostring(item and item:getId() or 0)
   end
-  -- g_game.sendExtendedOpcode(OPCODE_RELICS, table.tostring(ids))
+  g_game.sendExtendedOpcode(OPCODE_RELICS, table.concat(parts, ','))
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -76,45 +78,22 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
 end
 
 local function onSlotDrop(self, dragWidget, mousePos, forced)
-  print('[RelicBox] onSlotDrop called. forced=' .. tostring(forced))
-
-  if not self:canAcceptDrop(dragWidget, mousePos) and not forced then
-    print('[RelicBox] canAcceptDrop=false, aborting')
-    return false
-  end
+  if not self:canAcceptDrop(dragWidget, mousePos) and not forced then return false end
 
   local item = dragWidget.currentDragThing
-  print('[RelicBox] currentDragThing=' .. tostring(item))
-
-  if not item or not item:isItem() then
-    print('[RelicBox] item is nil or not an item, aborting')
-    return false
-  end
-
-  local ok, itemId = pcall(function() return item:getId() end)
-  local pos = item:getPosition()
-  print('[RelicBox] item:getId()=' .. tostring(ok and itemId or 'ERROR') ..
-        ' pos={x=' .. tostring(pos and pos.x) ..
-        ', y=' .. tostring(pos and pos.y) ..
-        ', z=' .. tostring(pos and pos.z) .. '}')
-  print('[RelicBox] dragWidget.position=' .. tostring(dragWidget.position))
-  print('[RelicBox] self.position=' .. tostring(self.position))
+  if not item or not item:isItem() then return false end
 
   local slotIndex = slotIndexFromWidget(self)
-  print('[RelicBox] slotIndex=' .. tostring(slotIndex))
   if not slotIndex then return false end
 
   if not isRelic(item) then
-    print('[RelicBox] not a relic id, rejecting')
     modules.game_textmessage.displayMessage('Only relics can be placed in the relic box.', MessageInfo)
     return false
   end
 
-  print('[RelicBox] equipping relic id=' .. tostring(itemId) .. ' in slot ' .. slotIndex)
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
   notifyServerRelics()
-  print('[RelicBox] done, returning true')
   return true
 end
 
