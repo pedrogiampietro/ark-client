@@ -695,5 +695,5 @@ ShopCardWidget < UIWidget
     anchors.centerIn: parent
     text-align: center
     color: #FFD700
-    font: small-9px
+    font: cipsoftFont
 
