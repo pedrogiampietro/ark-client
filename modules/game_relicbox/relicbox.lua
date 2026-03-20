@@ -92,9 +92,13 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
   end
 
   local ok, itemId = pcall(function() return item:getId() end)
-  local ok2, itemPos = pcall(function() return item:getPosition() end)
+  local pos = item:getPosition()
   print('[RelicBox] item:getId()=' .. tostring(ok and itemId or 'ERROR') ..
-        ' pos=' .. tostring(ok2 and itemPos or 'ERROR'))
+        ' pos={x=' .. tostring(pos and pos.x) ..
+        ', y=' .. tostring(pos and pos.y) ..
+        ', z=' .. tostring(pos and pos.z) .. '}')
+  print('[RelicBox] dragWidget.position=' .. tostring(dragWidget.position))
+  print('[RelicBox] self.position=' .. tostring(self.position))
 
   local slotIndex = slotIndexFromWidget(self)
   print('[RelicBox] slotIndex=' .. tostring(slotIndex))
