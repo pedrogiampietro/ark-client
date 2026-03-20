@@ -1154,25 +1154,23 @@ local function parseShopCard(data)
     local msg = data.msg or ""
     if #msg > 25 then msg = msg:sub(1, 22) .. "..." end
 
-    local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
+    -- nil como parent: widget criado sem pai, nunca entra na árvore do root
+    -- e nunca renderiza fora do drawInformation (sem necessidade de setParent/hide)
+    local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    -- Definir largura antes de setText para evitar que wrapText quebre cada char numa linha
-    card:setWidth(500)
+    -- Definir largura grande antes de setText para evitar que wrapText quebre cada char
     label:setWidth(500)
     label:setText(msg)
     label:resizeToText()
 
-    -- verdana-11px-rounded: resizeToText() agora retorna dimensões corretas
-    local cardW = label:getWidth() + 12   -- 6px padding each side
-    local cardH = label:getHeight() + 8   -- 4px padding top/bottom
+    -- small-9px: resizeToText() retorna dimensões corretas do texto
+    local cardW = label:getWidth() + 8    -- 4px padding each side
+    local cardH = label:getHeight() + 6   -- 3px padding top/bottom
     card:setWidth(cardW)
     card:setHeight(cardH)
 
     creature:addTopWidget(card)
-    -- Esconder do root para não renderizar duplicado na UI normal
-    -- (drawInformation chama draw() diretamente, sem checar visibilidade)
-    card:hide()
 
     shopCards[data.id] = card
 end
