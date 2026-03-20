@@ -1152,17 +1152,27 @@ local function parseShopCard(data)
     end
 
     local msg = data.msg or ""
-    if #msg > 14 then msg = msg:sub(1, 12) .. ".." end
 
     -- nil parent: sem renderização pelo root, apenas via drawInformation
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    -- Definir tamanho ANTES do setText: anchors.fill dá ao label a largura do card
-    -- wrapText usará 80-8=72px de área útil (padding 2 4), sem quebrar o texto
-    card:setWidth(80)
-    card:setHeight(12)
+    -- Sem anchors no label: resizeToText() funciona livremente
+    -- Setar largura grande para wrapText não quebrar linha
+    label:setWidth(600)
+    label:setHeight(12)
     label:setText(msg)
+    label:resizeToText()
+
+    local textW = label:getWidth()
+    local textH = label:getHeight()
+    local cardW = textW + 8   -- 4px margem cada lado
+    local cardH = textH + 4   -- 2px margem cima/baixo
+
+    card:setWidth(cardW)
+    card:setHeight(cardH)
+    -- Centralizar label no card manualmente
+    label:move(4, 2)
 
     creature:addTopWidget(card)
 
