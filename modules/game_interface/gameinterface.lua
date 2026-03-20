@@ -498,6 +498,14 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
         menu:addOption(tr('Open Prey Dialog'), function() modules.game_prey.show() end)
       end
       
+      if creatureThing:isPartyLeader() then
+        if localPlayer:isPartySharedExperienceActive() then
+          menu:addOption(tr('Disable Shared Experience'), function() g_game.partyShareExperience(false) end)
+        else
+          menu:addOption(tr('Enable Shared Experience'), function() g_game.partyShareExperience(true) end)
+        end
+      end
+
       if creatureThing:isPartyMember() then
         menu:addOption(tr('Leave Party'), function() g_game.partyLeave() end)
       end
