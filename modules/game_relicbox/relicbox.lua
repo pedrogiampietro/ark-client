@@ -161,7 +161,7 @@ function init()
       origMaximize(self, ...)
       local b = self:getChildById('bottomResizeBorder')
       if b then b:hide() end
-      self:setHeight(100)
+      self:setHeight(82)
     end
   end
 

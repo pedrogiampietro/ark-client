@@ -29,7 +29,7 @@ RelicSlot < Item
 
 RelicBoxWindow < MiniWindow
   !text: tr('Relics Box')
-  height: 100
+  height: 82
   width: 170
   id: relicBoxWindow
   &save: true
