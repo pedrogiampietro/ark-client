@@ -1158,11 +1158,10 @@ local function parseShopCard(data)
     local label = card:getChildById('cardText')
 
     label:setText(msg)
-    label:resizeToText()
 
-    -- Auto-size card to hug the text (cipsoftFont: ~5px/char, 8px height, padding 2 4)
-    local cardW = label:getWidth() + 8    -- 4px padding each side
-    local cardH = label:getHeight() + 4   -- 2px padding top/bottom
+    -- cipsoftFont: ~6px per char, 8px height; avoid resizeToText() since label anchors.fill parent
+    local cardW = math.max(20, #msg * 6 + 8)
+    local cardH = 14
     card:setWidth(cardW)
     card:setHeight(cardH)
 
