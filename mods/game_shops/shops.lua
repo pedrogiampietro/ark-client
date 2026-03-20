@@ -1170,8 +1170,9 @@ local function parseShopCard(data)
     card:setHeight(cardH)
 
     creature:addTopWidget(card)
-    -- Desanexar do root para não renderizar duplicado na UI normal
-    card:setParent(nil)
+    -- Esconder do root para não renderizar duplicado na UI normal
+    -- (drawInformation chama draw() diretamente, sem checar visibilidade)
+    card:hide()
 
     shopCards[data.id] = card
 end
