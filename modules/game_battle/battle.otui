@@ -146,7 +146,7 @@ MiniWindow
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.top: parent.top
-      margin-top: 5
+      margin-top: 10
       padding-right: 5
       layout:
         type: verticalBox
