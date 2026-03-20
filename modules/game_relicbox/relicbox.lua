@@ -76,22 +76,41 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
 end
 
 local function onSlotDrop(self, dragWidget, mousePos, forced)
-  if not self:canAcceptDrop(dragWidget, mousePos) and not forced then return false end
+  print('[RelicBox] onSlotDrop called. forced=' .. tostring(forced))
+
+  if not self:canAcceptDrop(dragWidget, mousePos) and not forced then
+    print('[RelicBox] canAcceptDrop=false, aborting')
+    return false
+  end
 
   local item = dragWidget.currentDragThing
-  if not item or not item:isItem() then return false end
+  print('[RelicBox] currentDragThing=' .. tostring(item))
+
+  if not item or not item:isItem() then
+    print('[RelicBox] item is nil or not an item, aborting')
+    return false
+  end
+
+  local ok, itemId = pcall(function() return item:getId() end)
+  local ok2, itemPos = pcall(function() return item:getPosition() end)
+  print('[RelicBox] item:getId()=' .. tostring(ok and itemId or 'ERROR') ..
+        ' pos=' .. tostring(ok2 and itemPos or 'ERROR'))
 
   local slotIndex = slotIndexFromWidget(self)
+  print('[RelicBox] slotIndex=' .. tostring(slotIndex))
   if not slotIndex then return false end
 
   if not isRelic(item) then
+    print('[RelicBox] not a relic id, rejecting')
     modules.game_textmessage.displayMessage('Only relics can be placed in the relic box.', MessageInfo)
     return false
   end
 
+  print('[RelicBox] equipping relic id=' .. tostring(itemId) .. ' in slot ' .. slotIndex)
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
   notifyServerRelics()
+  print('[RelicBox] done, returning true')
   return true
 end
 
