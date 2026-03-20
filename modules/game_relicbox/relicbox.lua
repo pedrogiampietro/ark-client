@@ -43,15 +43,11 @@ end
 
 local OPCODE_RELICS = 52
 
-local function notifyServerRelics()
+local function sendRelicOpcode(msg)
   local protocol = g_game.getProtocolGame()
-  if not protocol then return end
-  local parts = {}
-  for i = 1, NUM_SLOTS do
-    local item = equippedRelics[i]
-    parts[i] = tostring(item and item:getId() or 0)
+  if protocol then
+    protocol:sendExtendedOpcode(OPCODE_RELICS, msg)
   end
-  protocol:sendExtendedOpcode(OPCODE_RELICS, table.concat(parts, ','))
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -67,10 +63,14 @@ local function onSlotMousePress(widget, mousePos, mouseButton)
   if not slotIndex then return false end
 
   if mouseButton == MouseRightButton then
-    if equippedRelics[slotIndex] then
+    local item = equippedRelics[slotIndex]
+    if item then
+      local ok, id = pcall(function() return item:getId() end)
+      if ok then
+        sendRelicOpcode('REMOVE:' .. slotIndex .. ':' .. id)
+      end
       equippedRelics[slotIndex] = nil
       updateSlotVisual(slotIndex)
-      notifyServerRelics()
     end
     return true
   end
@@ -92,9 +92,12 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
     return false
   end
 
+  -- Equip: tell server to remove from source and store in relic box
+  local pos = item:getPosition()
+  sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. item:getId() .. ':' .. pos.y .. ':' .. pos.z)
+
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
-  notifyServerRelics()
   return true
 end
 
