@@ -29,33 +29,25 @@ RelicSlot < Item
     image-source: /images/ui/item-blessed
 
 RelicBoxWindow < MiniWindow
-  !title: tr('Relic Box')
-  height: 116
+  !title: tr('Relics Box')
+  height: 100
   width: 170
+  min-height: 100
+  max-height: 100
+  min-width: 170
+  max-width: 170
   id: relicBoxWindow
   &save: true
   &autoOpen: 99
   @onClose: modules.game_relicbox.onWindowClose()
 
   MiniWindowContents
-    Label
-      id: relicBoxTitle
-      !text: tr('Relics Box')
-      font: cipsoftFont
-      color: #C8A84B
-      text-auto-resize: true
-      anchors.top: parent.top
-      anchors.left: parent.left
-      margin-top: 2
-      margin-left: 4
-
     Panel
       id: slotsGrid
-      anchors.top: relicBoxTitle.bottom
+      anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
       margin: 4
-      margin-top: 2
       height: 38
       layout:
         type: horizontalBox
