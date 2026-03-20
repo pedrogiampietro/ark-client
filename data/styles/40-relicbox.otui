@@ -22,13 +22,15 @@ RelicSlot < Item
   border-width: 1
   border-color: #55442266
   background-color: #0D0A0599
+  image-source: /images/ui/relics_add
+  image-color: #FFFFFF88
 
   $on:
     image-source: /images/ui/item-blessed
 
 RelicBoxWindow < MiniWindow
   !title: tr('Relic Box')
-  height: 100
+  height: 116
   width: 170
   id: relicBoxWindow
   &save: true
@@ -36,12 +38,24 @@ RelicBoxWindow < MiniWindow
   @onClose: modules.game_relicbox.onWindowClose()
 
   MiniWindowContents
+    Label
+      id: relicBoxTitle
+      !text: tr('Relics Box')
+      font: cipsoftFont
+      color: #C8A84B
+      text-auto-resize: true
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 2
+      margin-left: 4
+
     Panel
       id: slotsGrid
-      anchors.top: parent.top
+      anchors.top: relicBoxTitle.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin: 4
+      margin-top: 2
       height: 38
       layout:
         type: horizontalBox
@@ -66,7 +80,7 @@ RelicBoxWindow < MiniWindow
     Label
       !text: tr('Right-click a slot to remove a relic.')
       font: cipsoftFont
-      color: #AA8844
+      color: #E8C86A
       text-auto-resize: true
       anchors.top: slotsGrid.bottom
       anchors.left: parent.left
