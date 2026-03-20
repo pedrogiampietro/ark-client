@@ -29,6 +29,7 @@ RelicSlot < Item
 
 RelicBoxWindow < MiniWindow
   !text: tr('Relics Box')
+  icon: /images/ui/relics_ico
   height: 82
   width: 170
   id: relicBoxWindow
