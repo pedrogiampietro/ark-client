@@ -692,7 +692,8 @@ ShopCardWidget < UIWidget
 
   Label
     id: cardText
+    anchors.centerIn: parent
     font: cipsoftFont
     color: #FFD700FF
-    text-align: left
+    text-align: center
 
