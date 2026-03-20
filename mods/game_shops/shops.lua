@@ -1152,7 +1152,7 @@ local function parseShopCard(data)
     end
 
     local msg = data.msg or ""
-    if #msg > 30 then msg = msg:sub(1, 27) .. "..." end
+    if #msg > 20 then msg = msg:sub(1, 17) .. "..." end
 
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
@@ -1160,9 +1160,9 @@ local function parseShopCard(data)
     label:setText(msg)
     label:resizeToText()
 
-    -- Auto-size card to hug the text
-    local cardW = label:getWidth() + 12   -- 6px padding each side
-    local cardH = label:getHeight() + 6   -- 3px padding top/bottom
+    -- Auto-size card to hug the text (cipsoftFont: ~5px/char, 8px height, padding 2 4)
+    local cardW = label:getWidth() + 8    -- 4px padding each side
+    local cardH = label:getHeight() + 4   -- 2px padding top/bottom
     card:setWidth(cardW)
     card:setHeight(cardH)
 
