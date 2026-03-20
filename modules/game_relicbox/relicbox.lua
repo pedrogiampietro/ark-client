@@ -151,6 +151,7 @@ function init()
   -- Create the relic box window (style defined in data/styles/40-relicbox.otui)
   relicBoxWindow = g_ui.createWidget('RelicBoxWindow', modules.game_interface.getRightPanel())
   relicBoxWindow:setup()
+  relicBoxWindow:setHeight(72)
 
   -- Lock window size: hide the resize border and prevent it from showing on maximize
   local resizeBorder = relicBoxWindow:getChildById('bottomResizeBorder')
@@ -161,7 +162,7 @@ function init()
       origMaximize(self, ...)
       local b = self:getChildById('bottomResizeBorder')
       if b then b:hide() end
-      self:setHeight(82)
+      self:setHeight(72)
     end
   end
 
