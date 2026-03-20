@@ -151,6 +151,20 @@ function init()
   -- Create the relic box window (style defined in data/styles/40-relicbox.otui)
   relicBoxWindow = g_ui.createWidget('RelicBoxWindow', modules.game_interface.getRightPanel())
   relicBoxWindow:setup()
+
+  -- Lock window size: hide the resize border and prevent it from showing on maximize
+  local resizeBorder = relicBoxWindow:getChildById('bottomResizeBorder')
+  if resizeBorder then
+    resizeBorder:hide()
+    local origMaximize = relicBoxWindow.maximize
+    relicBoxWindow.maximize = function(self, ...)
+      origMaximize(self, ...)
+      local b = self:getChildById('bottomResizeBorder')
+      if b then b:hide() end
+      self:setHeight(100)
+    end
+  end
+
   relicBoxWindow:hide()
 
   -- Wire up the 4 slot widgets
