@@ -32,6 +32,7 @@ RelicBoxWindow < MiniWindow
   width: 170
   id: relicBoxWindow
   &save: true
+  &autoOpen: 99
   @onClose: modules.game_relicbox.onWindowClose()
 
   MiniWindowContents
