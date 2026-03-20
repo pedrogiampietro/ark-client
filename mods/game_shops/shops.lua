@@ -1152,16 +1152,17 @@ local function parseShopCard(data)
     end
 
     local msg = data.msg or ""
-    if #msg > 20 then msg = msg:sub(1, 17) .. "..." end
+    if #msg > 25 then msg = msg:sub(1, 22) .. "..." end
 
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
 
     label:setText(msg)
+    label:resizeToText()
 
-    -- cipsoftFont: ~6px per char, 8px height; avoid resizeToText() since label anchors.fill parent
-    local cardW = math.max(20, #msg * 6 + 8)
-    local cardH = 14
+    -- verdana-11px-rounded: resizeToText() works correctly with anchors.centerIn
+    local cardW = label:getWidth() + 12   -- 6px padding each side
+    local cardH = label:getHeight() + 8   -- 4px padding top/bottom
     card:setWidth(cardW)
     card:setHeight(cardH)
 
