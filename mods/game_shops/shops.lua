@@ -1157,10 +1157,13 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', g_ui.getRootWidget())
     local label = card:getChildById('cardText')
 
+    -- Definir largura antes de setText para evitar que wrapText quebre cada char numa linha
+    card:setWidth(500)
+    label:setWidth(500)
     label:setText(msg)
     label:resizeToText()
 
-    -- verdana-11px-rounded: resizeToText() works correctly with anchors.centerIn
+    -- verdana-11px-rounded: resizeToText() agora retorna dimensões corretas
     local cardW = label:getWidth() + 12   -- 6px padding each side
     local cardH = label:getHeight() + 8   -- 4px padding top/bottom
     card:setWidth(cardW)
