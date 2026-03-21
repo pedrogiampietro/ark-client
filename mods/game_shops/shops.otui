@@ -701,7 +701,7 @@ ShopCardWidget < UIWidget
 
   Label
     id: cardText
-    font: cipsoftFont
+    font: verdana-11px-rounded
     color: #FFD700FF
     text-align: center
 
