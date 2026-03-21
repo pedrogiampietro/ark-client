@@ -685,36 +685,19 @@ PixSuccessWindow < MainWindow
 
 ShopCardWidget < UIWidget
   height: 10
-  background-color: #0D0B00EE
-  border-width: 1
-  border-color: #C89620FF
+  background-color: #C89620FF
 
   UIWidget
-    id: topHighlight
+    id: innerBg
     anchors.top: parent.top
+    anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 1
-    background-color: #FFD70028
-
-  UIWidget
-    id: headerBg
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: 5
-    background-color: #1A1200CC
-
-  UIWidget
-    id: dividerLine
-    background-color: #C8962066
-    height: 1
-
-  Label
-    id: cardHeader
-    font: cipsoftFont
-    color: #C89620FF
-    text-align: center
+    margin-top: 1
+    margin-bottom: 1
+    margin-left: 1
+    margin-right: 1
+    background-color: #100D00EE
 
   Label
     id: cardText
