@@ -684,23 +684,14 @@ PixSuccessWindow < MainWindow
     !text: tr('Nos próximos 30 segundos o item será enviado.')
 
 ShopCardWidget < UIWidget
-  height: 10
-  background-color: #C89620FF
-
-  UIWidget
-    id: innerBg
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 1
-    margin-bottom: 1
-    margin-left: 1
-    margin-right: 1
-    background-color: #100D00EE
+  height: 12
+  background-color: #0F0C00EE
+  border-width: 1
+  border-color: #C89620FF
 
   Label
     id: cardText
+    anchors.centerIn: parent
     font: verdana-9px
     color: #FFD700FF
     text-align: center
