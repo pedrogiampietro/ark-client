@@ -689,7 +689,6 @@ ShopCardWidget < UIWidget
   border-width: 1
   border-color: #C89620FF
 
-  # Faixa de brilho no topo (simula gradiente superior)
   UIWidget
     id: topHighlight
     anchors.top: parent.top
@@ -698,7 +697,6 @@ ShopCardWidget < UIWidget
     height: 1
     background-color: #FFD70028
 
-  # Fundo da seção de header (nome do vendedor)
   UIWidget
     id: headerBg
     anchors.top: parent.top
@@ -707,20 +705,17 @@ ShopCardWidget < UIWidget
     height: 5
     background-color: #1A1200CC
 
-  # Linha divisória entre header e mensagem
   UIWidget
     id: dividerLine
     background-color: #C8962066
     height: 1
 
-  # Nome do vendedor (header)
   Label
     id: cardHeader
     font: cipsoftFont
     color: #C89620FF
     text-align: center
 
-  # Mensagem da loja (linha principal)
   Label
     id: cardText
     font: cipsoftFont
