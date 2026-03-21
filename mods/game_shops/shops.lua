@@ -1161,8 +1161,8 @@ local function parseShopCard(data)
     local VPAD = 4  -- padding vertical (inclui a borda de 1px)
 
     -- resizeToText() não funciona com anchors: label sem anchors, posicionada manualmente
+    -- Não pré-definir height: deixar resizeToText() calcular livremente
     label:setWidth(400)
-    label:setHeight(12)
     label:setText(msg)
     label:resizeToText()
 
