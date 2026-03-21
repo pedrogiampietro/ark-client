@@ -1157,18 +1157,21 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
+    -- getTextSize() mede o texto sem interferir no layout (diferente de resizeToText)
     label:setWidth(600)
-    label:setHeight(12)
+    label:setTextWrap(false)
     label:setText(msg)
-    label:resizeToText()
 
-    local tW = label:getWidth()
-    local tH = label:getHeight()
+    local textSize = label:getTextSize()
+    local tW = textSize.width
+    local tH = textSize.height
     local cardW = tW + 8
     local cardH = tH + 4
 
     card:setWidth(cardW)
     card:setHeight(cardH)
+    label:setWidth(tW)
+    label:setHeight(tH)
     label:move(4, 2)
 
     creature:addTopWidget(card)
