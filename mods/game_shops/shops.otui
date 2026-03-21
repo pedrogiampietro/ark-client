@@ -692,7 +692,7 @@ ShopCardWidget < UIWidget
   Label
     id: cardText
     anchors.centerIn: parent
-    font: verdana-9px
+    font: small-9px
     color: #FFD700FF
     text-align: center
 
