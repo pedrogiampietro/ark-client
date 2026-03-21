@@ -1157,7 +1157,6 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    -- anchors.centerIn exige que o label tenha tamanho fixo antes do resizeToText()
     label:setWidth(600)
     label:setHeight(12)
     label:setText(msg)
@@ -1165,12 +1164,12 @@ local function parseShopCard(data)
 
     local tW = label:getWidth()
     local tH = label:getHeight()
-    local cardW = tW + 10
-    local cardH = tH + 6
+    local cardW = tW + 8
+    local cardH = tH + 4
 
     card:setWidth(cardW)
     card:setHeight(cardH)
-    label:move(5, 3)
+    label:move(4, 2)
 
     creature:addTopWidget(card)
 
