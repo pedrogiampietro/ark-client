@@ -1151,28 +1151,63 @@ local function parseShopCard(data)
         shopCards[data.id] = nil
     end
 
+    -- Extrai o nome do dono a partir do nome da criatura (formato "Nome#guid")
+    local creatureName = creature:getName() or ""
+    local ownerName = creatureName:match("^(.-)#") or creatureName
+    local headerText = (ownerName ~= "") and ownerName or "Private Shop"
+
     local msg = data.msg or ""
+    local displayMsg = (msg ~= "") and msg or "Confira meus itens!"
 
     -- nil parent: sem renderização pelo root, apenas via drawInformation
-    local card  = g_ui.createWidget('ShopCardWidget', nil)
-    local label = card:getChildById('cardText')
+    local card      = g_ui.createWidget('ShopCardWidget', nil)
+    local headerLbl = card:getChildById('cardHeader')
+    local textLbl   = card:getChildById('cardText')
+    local divLine   = card:getChildById('dividerLine')
+    local headerBg  = card:getChildById('headerBg')
 
-    -- Sem anchors no label: resizeToText() funciona livremente
-    -- Setar largura grande para wrapText não quebrar linha
-    label:setWidth(600)
-    label:setHeight(12)
-    label:setText(msg)
-    label:resizeToText()
+    local HPAD      = 10  -- padding horizontal total (cada lado)
+    local VPAD      = 4   -- padding vertical (topo e base)
+    local INNER_GAP = 2   -- espaço entre elementos internos
+    local DIVIDER_H = 1
 
-    local textW = label:getWidth()
-    local textH = label:getHeight()
-    local cardW = textW + 8   -- 4px margem cada lado
-    local cardH = textH + 4   -- 2px margem cima/baixo
+    -- Mede o header (nome do vendedor)
+    headerLbl:setWidth(500)
+    headerLbl:setHeight(12)
+    headerLbl:setText(headerText)
+    headerLbl:resizeToText()
+    local hW = headerLbl:getWidth()
+    local hH = headerLbl:getHeight()
+
+    -- Mede a mensagem principal
+    textLbl:setWidth(500)
+    textLbl:setHeight(12)
+    textLbl:setText(displayMsg)
+    textLbl:resizeToText()
+    local tW = textLbl:getWidth()
+    local tH = textLbl:getHeight()
+
+    -- Calcula dimensões do card
+    local cardW = math.max(hW, tW) + HPAD * 2
+    local headerSectionH = VPAD + hH + INNER_GAP
+    local cardH = headerSectionH + DIVIDER_H + INNER_GAP + tH + VPAD
 
     card:setWidth(cardW)
     card:setHeight(cardH)
-    -- Centralizar label no card manualmente
-    label:move(4, 2)
+
+    -- Ajusta altura do fundo do header
+    headerBg:setHeight(headerSectionH)
+
+    -- Posiciona o label do header (centralizado)
+    headerLbl:move(math.floor((cardW - hW) / 2), VPAD)
+
+    -- Posiciona a linha divisória
+    local divX = math.floor(HPAD / 2)
+    divLine:setWidth(cardW - HPAD)
+    divLine:move(divX, headerSectionH)
+
+    -- Posiciona a mensagem principal (centralizada)
+    textLbl:move(math.floor((cardW - tW) / 2), headerSectionH + DIVIDER_H + INNER_GAP)
 
     creature:addTopWidget(card)
 
