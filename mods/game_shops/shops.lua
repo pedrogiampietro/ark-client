@@ -1138,44 +1138,33 @@ local function parseShopHistory(entries)
     end
 end
 
--- Cria ou atualiza o card flutuante persistente acima do NPC clone
 local function parseShopCard(data)
     if not data or not data.id or not data.msg then return end
 
     local creature = g_map.getCreatureById(data.id)
     if not creature then return end
 
-    -- Remover card anterior deste clone se existir
     if shopCards[data.id] then
         creature:removeTopWidget(shopCards[data.id])
         shopCards[data.id] = nil
     end
 
-    local msg = data.msg or ""
+    local msg = data.msg
     if msg == "" then return end
 
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    -- getTextSize() mede o texto sem interferir no layout (diferente de resizeToText)
     label:setWidth(600)
-    label:setTextWrap(false)
+    label:setHeight(12)
     label:setText(msg)
+    label:resizeToText()
 
-    local textSize = label:getTextSize()
-    local tW = textSize.width
-    local tH = textSize.height
-    local cardW = tW + 8
-    local cardH = tH + 4
-
-    card:setWidth(cardW)
-    card:setHeight(cardH)
-    label:setWidth(tW)
-    label:setHeight(tH)
+    card:setWidth(label:getWidth() + 8)
+    card:setHeight(label:getHeight() + 4)
     label:move(4, 2)
 
     creature:addTopWidget(card)
-
     shopCards[data.id] = card
 end
 
