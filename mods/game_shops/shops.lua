@@ -1155,13 +1155,12 @@ local function parseShopCard(data)
     local card  = g_ui.createWidget('ShopCardWidget', nil)
     local label = card:getChildById('cardText')
 
-    label:setWidth(600)
+    -- DIAGNOSTIC: largura fixa para isolar se o problema é medição ou renderização
+    card:setWidth(300)
+    card:setHeight(16)
+    label:setWidth(292)
     label:setHeight(12)
     label:setText(msg)
-    label:resizeToText()
-
-    card:setWidth(label:getWidth() + 8)
-    card:setHeight(label:getHeight() + 4)
     label:move(4, 2)
 
     creature:addTopWidget(card)
