@@ -685,15 +685,20 @@ PixSuccessWindow < MainWindow
 
 ShopCardWidget < UIWidget
   width: 10
-  height: 12
+  height: 16
   background-color: #0F0C00EE
   border-width: 1
   border-color: #C89620FF
 
   Label
     id: cardText
-    anchors.centerIn: parent
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 5
+    margin-right: 5
     font: cipsoftFont
     color: #FFD700FF
     text-align: center
+    text-wrap: false
 
