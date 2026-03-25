@@ -208,6 +208,8 @@ function init()
     if slot then
       slot.onMousePress = onSlotMousePress
       slot.onDrop       = onSlotDrop
+      slot.onDragLeave  = function() addEvent(function() for j = 1, NUM_SLOTS do updateSlotVisual(j) end end) end
+      slot.onDragEnter  = function() addEvent(function() for j = 1, NUM_SLOTS do updateSlotVisual(j) end end) end
       relicSlots[i] = slot
     end
     equippedRelics[i] = nil
