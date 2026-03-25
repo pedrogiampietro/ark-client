@@ -25,7 +25,8 @@ RelicSlot < Item
   image-color: #FFFFFF88
 
   $on:
-    image-source: /images/ui/item-blessed
+    border-color: #22AA22
+    image-source: ''
 
 RelicBoxWindow < MiniWindow
   !text: tr('Relics Box')

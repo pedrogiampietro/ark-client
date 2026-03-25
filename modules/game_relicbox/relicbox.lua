@@ -34,13 +34,10 @@ local function updateSlotVisual(slotIndex)
   if not slot then return end
   if item then
     slot:setItem(item)
-    slot:setBorderColor('#22AA22')
-    slot:setImageSource('')
+    slot:setOn(true)
   else
     slot:setItem(nil)
-    slot:setBorderColor('#55442266')
-    slot:setImageSource('/images/ui/relics_add')
-    slot:setImageColor('#FFFFFF88')
+    slot:setOn(false)
   end
 end
 
