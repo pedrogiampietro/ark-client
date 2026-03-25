@@ -35,9 +35,15 @@ local function updateSlotVisual(slotIndex)
   if item then
     slot:setStyle('InventoryItem')
     slot:setItem(item)
+    if modules.game_rarity then
+      modules.game_rarity.applyRarityFrame(slot, 2)  -- tier 2 = green
+    end
   else
     slot:setStyle('RelicSlot')
     slot:setItem(nil)
+    if modules.game_rarity then
+      modules.game_rarity.applyRarityFrame(slot, 0)  -- remove frame
+    end
   end
 end
 
@@ -105,9 +111,6 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
   local item = dragWidget.currentDragThing
   if not item or not item:isItem() then return false end
 
-  local slotIndex = slotIndexFromWidget(self)
-  if not slotIndex then return false end
-
   if not isRelic(item) then
     modules.game_textmessage.displayMessage('Only relics can be placed in the relic box.', MessageInfo)
     return false
@@ -120,23 +123,36 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
     return false
   end
 
-  -- Prevent duplicate relics across slots
   local ok, itemId = pcall(function() return item:getId() end)
-  if ok then
-    for i = 1, NUM_SLOTS do
-      local equipped = equippedRelics[i]
-      if equipped and i ~= slotIndex then
-        local ok2, equippedId = pcall(function() return equipped:getId() end)
-        if ok2 and equippedId == itemId then
-          modules.game_textmessage.displayMessage('You cannot equip the same relic twice.', MessageInfo)
-          return false
-        end
+  if not ok then return false end
+
+  -- Prevent duplicate relics across slots
+  for i = 1, NUM_SLOTS do
+    local equipped = equippedRelics[i]
+    if equipped then
+      local ok2, equippedId = pcall(function() return equipped:getId() end)
+      if ok2 and equippedId == itemId then
+        modules.game_textmessage.displayMessage('You cannot equip the same relic twice.', MessageInfo)
+        return false
       end
     end
   end
 
-  -- Equip: tell server to remove from source and store in relic box
-  sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. item:getId() .. ':' .. pos.y .. ':' .. pos.z)
+  -- Always use the first available slot (ordered 1→4), ignoring the drop target
+  local slotIndex = nil
+  for i = 1, NUM_SLOTS do
+    if not equippedRelics[i] then
+      slotIndex = i
+      break
+    end
+  end
+
+  if not slotIndex then
+    modules.game_textmessage.displayMessage('All relic slots are full.', MessageInfo)
+    return false
+  end
+
+  sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. itemId .. ':' .. pos.y .. ':' .. pos.z)
 
   equippedRelics[slotIndex] = item
   updateSlotVisual(slotIndex)
