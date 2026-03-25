@@ -32,12 +32,16 @@ local function updateSlotVisual(slotIndex)
   local slot = relicSlots[slotIndex]
   local item = equippedRelics[slotIndex]
   if not slot then return end
+  local border = slot:getChildById('equippedBorder')
   if item then
     slot:setItem(item)
-    slot:setOn(true)
+    slot:setImageSource('')
+    if border then border:show() end
   else
     slot:setItem(nil)
-    slot:setOn(false)
+    slot:setImageSource('/images/ui/relics_add')
+    slot:setImageColor('#FFFFFF88')
+    if border then border:hide() end
   end
 end
 
@@ -149,10 +153,7 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
   sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. itemId .. ':' .. pos.y .. ':' .. pos.z)
 
   equippedRelics[slotIndex] = item
-  -- Refresh all slots: OTClient may reset $on state on drop targets during drag
-  addEvent(function()
-    for i = 1, NUM_SLOTS do updateSlotVisual(i) end
-  end)
+  updateSlotVisual(slotIndex)
   return true
 end
 
@@ -208,8 +209,6 @@ function init()
     if slot then
       slot.onMousePress = onSlotMousePress
       slot.onDrop       = onSlotDrop
-      slot.onDragLeave  = function() addEvent(function() for j = 1, NUM_SLOTS do updateSlotVisual(j) end end) end
-      slot.onDragEnter  = function() addEvent(function() for j = 1, NUM_SLOTS do updateSlotVisual(j) end end) end
       relicSlots[i] = slot
     end
     equippedRelics[i] = nil

@@ -24,9 +24,14 @@ RelicSlot < Item
   image-source: /images/ui/relics_add
   image-color: #FFFFFF88
 
-  $on:
+  UIWidget
+    id: equippedBorder
+    anchors.fill: parent
+    border-width: 1
     border-color: #22AA22
-    image-source: ''
+    background-color: alpha
+    phantom: true
+    visible: false
 
 RelicBoxWindow < MiniWindow
   !text: tr('Relics Box')
