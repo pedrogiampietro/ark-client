@@ -149,7 +149,10 @@ local function onSlotDrop(self, dragWidget, mousePos, forced)
   sendRelicOpcode('EQUIP:' .. slotIndex .. ':' .. itemId .. ':' .. pos.y .. ':' .. pos.z)
 
   equippedRelics[slotIndex] = item
-  updateSlotVisual(slotIndex)
+  -- Refresh all slots: OTClient may reset $on state on drop targets during drag
+  addEvent(function()
+    for i = 1, NUM_SLOTS do updateSlotVisual(i) end
+  end)
   return true
 end
 
