@@ -33,16 +33,16 @@ local function updateSlotVisual(slotIndex)
   local item = equippedRelics[slotIndex]
   if not slot then return end
   if item then
-    slot:setStyle('InventoryItem')
     slot:setItem(item)
+    slot:setBorderColor('#22AA22')
     if modules.game_rarity then
       modules.game_rarity.applyRarityFrame(slot, 2)  -- tier 2 = green
     end
   else
-    slot:setStyle('RelicSlot')
     slot:setItem(nil)
+    slot:setBorderColor('#55442266')
     if modules.game_rarity then
-      modules.game_rarity.applyRarityFrame(slot, 0)  -- remove frame
+      modules.game_rarity.applyRarityFrame(slot, 0)
     end
   end
 end
