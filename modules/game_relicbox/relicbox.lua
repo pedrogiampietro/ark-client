@@ -50,6 +50,27 @@ local function sendRelicOpcode(msg)
   end
 end
 
+local function onRelicOpcode(protocol, opcode, buffer)
+  if buffer:sub(1, 5) ~= "SYNC:" then return end
+  -- Format: SYNC:slot:id:slot:id...
+  local parts = {}
+  for p in buffer:sub(6):gmatch("[^:]+") do parts[#parts + 1] = tonumber(p) end
+  for i = 1, NUM_SLOTS do
+    equippedRelics[i] = nil
+    updateSlotVisual(i)
+  end
+  local i = 1
+  while i < #parts do
+    local slot = parts[i]
+    local id   = parts[i + 1]
+    if slot and id and slot >= 1 and slot <= NUM_SLOTS then
+      equippedRelics[slot] = Item.create(id)
+      updateSlotVisual(slot)
+    end
+    i = i + 2
+  end
+end
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Slot interaction
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -190,10 +211,12 @@ function init()
     end
   end)
 
+  ProtocolGame.registerExtendedOpcode(OPCODE_RELICS, onRelicOpcode)
   connect(g_game, { onGameEnd = onGameEnd })
 end
 
 function terminate()
+  ProtocolGame.unregisterExtendedOpcode(OPCODE_RELICS)
   disconnect(g_game, { onGameEnd = onGameEnd })
 
   if relicBoxWindow then
