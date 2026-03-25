@@ -41,9 +41,8 @@ local function updateSlotVisual(slotIndex)
   else
     slot:setItem(nil)
     slot:setBorderColor('#55442266')
-    if modules.game_rarity then
-      modules.game_rarity.applyRarityFrame(slot, 0)
-    end
+    slot:setImageSource('/images/ui/relics_add')
+    slot:setImageColor('#FFFFFF88')
   end
 end
 
