@@ -35,8 +35,7 @@ local function updateSlotVisual(slotIndex)
   if item then
     slot:setItem(item)
     slot:setBorderColor('#22AA22')
-    slot:setImageSource('/images/ui/relics_add')
-    slot:setImageColor('#FFFFFF88')
+    slot:setImageSource('')
   else
     slot:setItem(nil)
     slot:setBorderColor('#55442266')
