@@ -10,6 +10,7 @@ local defaultOptions = {
   smartWalk = false,
   dash = false,
   autoChaseOverride = true,
+  moveStack = false,
   showStatusMessagesInConsole = true,
   showEventMessagesInConsole = true,
   showInfoMessagesInConsole = true,
