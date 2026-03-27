@@ -119,11 +119,8 @@ function onContainerOpen(container, previousContainer)
     containerWindow = previousContainer.window
     previousContainer.window = nil
     previousContainer.itemsPanel = nil
-    g_logger.info('[CONTAINER] onContainerOpen: previousContainer, name=' .. container:getName() .. ' id=' .. container:getId())
   else
-    local targetPanel = modules.game_interface.getContainerPanel()
-    g_logger.info('[CONTAINER] onContainerOpen: name=' .. container:getName() .. ' id=' .. container:getId() .. ' targetPanel=' .. (targetPanel and targetPanel:getId() or 'nil') .. ' gameStart=' .. gameStart .. ' now=' .. g_clock.millis())
-    containerWindow = g_ui.createWidget('ContainerWindow', targetPanel)
+    containerWindow = g_ui.createWidget('ContainerWindow', modules.game_interface.getContainerPanel())
 
     -- white border flash effect
     containerWindow:setBorderWidth(2)
@@ -136,13 +133,6 @@ function onContainerOpen(container, previousContainer)
   end
 
   containerWindow:setId('container' .. container:getId())
-  local savedSettings = g_settings.getNode('MiniWindows')
-  local containerKey = 'container' .. container:getId()
-  if savedSettings and savedSettings[containerKey] then
-    g_logger.info('[CONTAINER] savedSettings for ' .. containerKey .. ': parentId=' .. tostring(savedSettings[containerKey].parentId) .. ' index=' .. tostring(savedSettings[containerKey].index))
-  else
-    g_logger.info('[CONTAINER] no savedSettings for ' .. containerKey)
-  end
   containerWindow:clearSettings()
   
   local containerPanel = containerWindow:getChildById('contentsPanel')

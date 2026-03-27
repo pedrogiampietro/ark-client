@@ -887,16 +887,7 @@ function getLeftPanel()
 end
 
 function getContainerPanel()
-  local containerPanel = g_settings.getNumber("containerPanel")
-  g_logger.info('[PANEL] getContainerPanel: containerPanel=' .. containerPanel .. ' leftPanels=' .. g_settings.getNumber("leftPanels") .. ' leftCount=' .. gameLeftPanels:getChildCount() .. ' rightCount=' .. gameRightPanels:getChildCount())
-  if containerPanel >= 5 then
-    containerPanel = containerPanel - 4
-  else
-    containerPanel = 1
-  end
-  local result = gameRightPanels:getChildByIndex(math.min(containerPanel, gameRightPanels:getChildCount()))
-  g_logger.info('[PANEL] getContainerPanel: result=' .. (result and result:getId() or 'nil'))
-  return result
+  return getRightPanel()
 end
 
 local function addRightPanel()
