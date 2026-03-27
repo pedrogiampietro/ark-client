@@ -182,12 +182,15 @@ function UIMiniWindow:setup()
 
       if selfSettings.parentId then
         local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
+        g_logger.info('[MINIWINDOW] setup: id=' .. self:getId() .. ' parentId=' .. tostring(selfSettings.parentId) .. ' parentFound=' .. tostring(parent ~= nil))
         if parent then
           if parent:getClassName() == 'UIMiniWindowContainer' and selfSettings.index and parent:isOn() then
+            g_logger.info('[MINIWINDOW] reparenting id=' .. self:getId() .. ' to ' .. selfSettings.parentId .. ' index=' .. tostring(selfSettings.index))
             self:setParent(parent, true)
             self.miniIndex = selfSettings.index
             parent:scheduleInsert(self, selfSettings.index)
           elseif selfSettings.position then
+            g_logger.info('[MINIWINDOW] reparenting id=' .. self:getId() .. ' to ' .. selfSettings.parentId .. ' position=' .. tostring(selfSettings.position))
             self:setParent(parent, true)
             self:setPosition(topoint(selfSettings.position))
           end
