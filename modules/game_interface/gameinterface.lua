@@ -890,12 +890,10 @@ function getContainerPanel()
   local containerPanel = g_settings.getNumber("containerPanel")
   if containerPanel >= 5 then
     containerPanel = containerPanel - 4
-    return gameRightPanels:getChildByIndex(math.min(containerPanel, gameRightPanels:getChildCount()))
+  else
+    containerPanel = 1
   end
-  if gameLeftPanels:getChildCount() == 0 or containerPanel < 1 then
-    return getRightPanel()
-  end
-  return gameLeftPanels:getChildByIndex(math.min(containerPanel, gameLeftPanels:getChildCount()))
+  return gameRightPanels:getChildByIndex(math.min(containerPanel, gameRightPanels:getChildCount()))
 end
 
 local function addRightPanel()
