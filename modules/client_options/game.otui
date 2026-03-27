@@ -11,6 +11,11 @@ OptionPanel
     !text: tr('Allow auto chase override')
 
   OptionCheckBox
+    id: moveStack
+    !text: tr('Move full stack without dialog')
+    !tooltip: tr('Moving a stackable item moves the entire stack automatically. Hold CTRL to open the count dialog.')
+
+  OptionCheckBox
     id: displayText
     !text: tr('Display text messages')
 

@@ -11,11 +11,6 @@ OptionPanel
     !text: tr('Allow auto chase override')
 
   OptionCheckBox
-    id: moveStack
-    !text: tr('Move full stack without dialog')
-    !tooltip: tr('When enabled, moving a stackable item moves the entire stack automatically.\nHold CTRL to open the count dialog instead.')
-
-  OptionCheckBox
     id: dash
     !text: tr('Enable fast walking (DASH)')
     !tooltip: tr('Allows to execute next move without server confirmation of previous one')
