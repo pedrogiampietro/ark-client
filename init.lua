@@ -39,7 +39,7 @@ Servers = {
 --USE_NEW_ENERGAME = true -- uses entergamev2 based on websockets instead of entergame
 ALLOW_CUSTOM_SERVERS = true -- if true it shows option ANOTHER on server list
 
-g_app.setName("OTCv8")
+g_app.setName("Eldera")
 -- CONFIG END
 
 -- print first terminal message
