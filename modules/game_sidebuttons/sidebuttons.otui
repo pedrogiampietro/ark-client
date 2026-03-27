@@ -3,7 +3,7 @@ NonClosableMiniWindow
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
-  &autoOpen: 3
+  &autoOpen: 4
 
   NonClosableMiniWindowContents
     margin-left: 8
