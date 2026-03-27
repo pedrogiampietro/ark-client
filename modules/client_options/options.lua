@@ -161,7 +161,8 @@ function setup()
     if type(v) == 'boolean' then
       setOption(k, g_settings.getBoolean(k), true)
     elseif type(v) == 'number' then
-      setOption(k, g_settings.getNumber(k), true)
+      local numVal = g_settings.getNumber(k)
+      setOption(k, numVal > 0 and numVal or v, true)
     elseif type(v) == 'string' then
       setOption(k, g_settings.getString(k), true)
     end

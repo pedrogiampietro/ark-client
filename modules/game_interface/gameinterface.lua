@@ -892,7 +892,7 @@ function getContainerPanel()
     containerPanel = containerPanel - 4
     return gameRightPanels:getChildByIndex(math.min(containerPanel, gameRightPanels:getChildCount()))
   end
-  if gameLeftPanels:getChildCount() == 0 then
+  if gameLeftPanels:getChildCount() == 0 or containerPanel < 1 then
     return getRightPanel()
   end
   return gameLeftPanels:getChildByIndex(math.min(containerPanel, gameLeftPanels:getChildCount()))
