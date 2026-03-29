@@ -25,4 +25,5 @@ vc17/otclient/
 x64/
 Debug/
 Release/
+build/
 
