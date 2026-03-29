@@ -1,0 +1,288 @@
+BestiaryRaceButton < Button
+  height: 20
+  font: verdana-11px-monochrome
+  text-align: left
+  padding-left: 4
+
+BestiaryCreatureButton < Button
+  height: 20
+  font: verdana-11px-monochrome
+  text-align: left
+  padding-left: 4
+
+BestiaryCharmButton < Button
+  height: 20
+  font: verdana-11px-monochrome
+  text-align: left
+  padding-left: 4
+
+MainWindow
+  id: bestiaryWindow
+  !text: tr('Bestiary')
+  size: 600 440
+  @onEscape: modules.game_bestiary.toggle()
+
+  -- Tab buttons
+  Button
+    id: tabBestiary
+    !text: tr('Bestiary')
+    anchors.top: parent.top
+    anchors.left: parent.left
+    width: 80
+    height: 22
+    margin-top: 0
+    $on:
+      color: #ffaf00
+
+  Button
+    id: tabCharms
+    !text: tr('Charms')
+    anchors.top: tabBestiary.top
+    anchors.left: tabBestiary.right
+    width: 80
+    height: 22
+    margin-left: 3
+    $on:
+      color: #ffaf00
+
+  -- ============================================================
+  -- BESTIARY PANEL
+  -- ============================================================
+  UIWidget
+    id: bestiaryPanel
+    anchors.top: tabBestiary.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: btnClose.top
+    margin-top: 4
+    margin-bottom: 4
+
+    -- Race list (left column)
+    TextList
+      id: raceList
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      width: 115
+      vertical-scrollbar: raceScrollBar
+      focusable: false
+      padding: 2
+
+    VerticalScrollBar
+      id: raceScrollBar
+      anchors.top: raceList.top
+      anchors.bottom: raceList.bottom
+      anchors.right: raceList.right
+      step: 14
+      pixels-scroll: true
+
+    -- Creature list (middle column)
+    TextList
+      id: creatureList
+      anchors.top: parent.top
+      anchors.left: raceList.right
+      anchors.bottom: parent.bottom
+      width: 145
+      margin-left: 4
+      vertical-scrollbar: creatureScrollBar
+      focusable: false
+      padding: 2
+
+    VerticalScrollBar
+      id: creatureScrollBar
+      anchors.top: creatureList.top
+      anchors.bottom: creatureList.bottom
+      anchors.right: creatureList.right
+      step: 14
+      pixels-scroll: true
+
+    -- Creature detail (right column)
+    UIWidget
+      id: creatureDetail
+      anchors.top: parent.top
+      anchors.left: creatureList.right
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin-left: 6
+      padding: 4
+
+      Label
+        id: detailName
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        color: #ffaf00
+        text-align: center
+        height: 16
+
+      Label
+        id: detailClass
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        color: #aaaaaa
+        text-align: center
+        height: 14
+        margin-top: 2
+
+      Label
+        id: detailProgress
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        color: #88ccff
+        height: 14
+        margin-top: 6
+
+      Label
+        id: detailKills
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 14
+
+      Label
+        id: detailHealth
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 14
+        margin-top: 6
+
+      Label
+        id: detailExp
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 14
+
+      Label
+        id: detailArmor
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 14
+
+      Label
+        id: detailSpeed
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 14
+
+      Label
+        id: detailCharmPts
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        color: #ffcc44
+        height: 14
+        margin-top: 6
+
+      Label
+        id: detailLoot
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 60
+        margin-top: 4
+
+      Label
+        id: detailElements
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        height: 40
+        margin-top: 4
+
+      Label
+        id: detailLocations
+        anchors.top: prev.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        font: verdana-11px-monochrome
+        color: #88bb88
+        height: 28
+        margin-top: 4
+
+      Button
+        id: trackerBtn
+        !text: tr('Track')
+        width: 64
+        height: 18
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        @onClick: modules.game_bestiary.onTrackerClick()
+
+  -- ============================================================
+  -- CHARMS PANEL
+  -- ============================================================
+  UIWidget
+    id: charmsPanel
+    anchors.top: tabBestiary.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: btnClose.top
+    margin-top: 4
+    margin-bottom: 4
+
+    Label
+      id: charmPointsLabel
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      font: verdana-11px-monochrome
+      color: #ffaf00
+      text-align: center
+      height: 18
+
+    Label
+      id: charmInfoLabel
+      anchors.top: prev.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      font: verdana-11px-monochrome
+      color: #aaaaaa
+      text-align: center
+      height: 16
+      margin-top: 2
+
+    TextList
+      id: charmList
+      anchors.top: prev.bottom
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      margin-top: 5
+      vertical-scrollbar: charmScrollBar
+      focusable: false
+      padding: 2
+
+    VerticalScrollBar
+      id: charmScrollBar
+      anchors.top: charmList.top
+      anchors.bottom: charmList.bottom
+      anchors.right: charmList.right
+      step: 14
+      pixels-scroll: true
+
+  -- Close button
+  Button
+    id: btnClose
+    !text: tr('Close')
+    width: 64
+    height: 22
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    @onClick: modules.game_bestiary.toggle()

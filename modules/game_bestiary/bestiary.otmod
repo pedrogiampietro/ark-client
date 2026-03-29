@@ -1,0 +1,10 @@
+Module
+  name: game_bestiary
+  description: Bestiary and Charms system
+  sandboxed: true
+  scripts: [ bestiary ]
+  @onLoad: init()
+  @onUnload: terminate()
+  dependencies:
+    - game_interface
+    - game_sidebuttons

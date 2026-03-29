@@ -114,6 +114,11 @@ public:
     void sendDebugReport(const std::string& a, const std::string& b, const std::string& c, const std::string& d);
     void sendRequestQuestLog();
     void sendRequestQuestLine(int questId);
+    void sendBestiaryRaces();
+    void sendBestiaryCreatures(const std::string& raceName);
+    void sendBestiaryMonsterData(int raceId);
+    void sendBestiaryBuyCharmRune(int runeId, int action, int raceId);
+    void sendBestiaryTrackerStatus(int raceId, bool track);
     void sendNewNewRuleViolation(int reason, int action, const std::string& characterName, const std::string& comment, const std::string& translation);
     void sendRequestItemInfo(int itemId, int subType, int index);
     void sendAnswerModalDialog(uint32 dialog, int button, int choice);

@@ -972,6 +972,49 @@ void ProtocolGame::sendRequestQuestLine(int questId)
     send(msg);
 }
 
+void ProtocolGame::sendBestiaryRaces()
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientBestiaryRaces);
+    send(msg);
+}
+
+void ProtocolGame::sendBestiaryCreatures(const std::string& raceName)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientBestiaryCreatures);
+    msg->addU8(0); // searchFlag = 0 (by race name)
+    msg->addString(raceName);
+    send(msg);
+}
+
+void ProtocolGame::sendBestiaryMonsterData(int raceId)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientBestiaryMonsterData);
+    msg->addU16(raceId);
+    send(msg);
+}
+
+void ProtocolGame::sendBestiaryBuyCharmRune(int runeId, int action, int raceId)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientBestiaryBuyCharmRune);
+    msg->addU8(runeId);
+    msg->addU8(action);
+    msg->addU16(raceId);
+    send(msg);
+}
+
+void ProtocolGame::sendBestiaryTrackerStatus(int raceId, bool track)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientBestiaryTrackerStatus);
+    msg->addU16(raceId);
+    msg->addU8(track ? 1 : 0);
+    send(msg);
+}
+
 void ProtocolGame::sendNewNewRuleViolation(int reason, int action, const std::string& characterName, const std::string& comment, const std::string& translation)
 {
     auto msg = std::make_shared<OutputMessage>();

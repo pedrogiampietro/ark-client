@@ -285,6 +285,13 @@ public:
     void requestQuestLog();
     void requestQuestLine(int questId);
 
+    // bestiary related
+    void requestBestiaryRaces();
+    void requestBestiaryCreatures(const std::string& raceName);
+    void requestBestiaryMonsterData(int raceId);
+    void requestBestiaryBuyCharmRune(int runeId, int action, int raceId);
+    void requestBestiaryTrackerStatus(int raceId, bool track);
+
     // 870 only
     void equipItem(const ItemPtr& item);
     void equipItemId(int itemId, int subType);

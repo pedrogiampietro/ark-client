@@ -3,6 +3,7 @@ buttonsWindow = nil
 battleButton = nil
 skillsbutton = nil
 vipButton = nil
+bestiaryButton = nil
 
 function init()
   buttonsWindow = g_ui.loadUI('sidebuttons', modules.game_interface.getRightPanel())
@@ -13,6 +14,7 @@ function init()
   battleButton = buttonsWindow:recursiveGetChildById("battleButton")
   skillsButton = buttonsWindow:recursiveGetChildById("skillsButton")
   vipButton = buttonsWindow:recursiveGetChildById("vipButton")
+  bestiaryButton = buttonsWindow:recursiveGetChildById("bestiaryButton")
 end
 
 function terminate()

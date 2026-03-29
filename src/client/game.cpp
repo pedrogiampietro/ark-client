@@ -1389,6 +1389,36 @@ void Game::requestQuestLine(int questId)
     m_protocolGame->sendRequestQuestLine(questId);
 }
 
+void Game::requestBestiaryRaces()
+{
+    if(!canPerformGameAction()) return;
+    m_protocolGame->sendBestiaryRaces();
+}
+
+void Game::requestBestiaryCreatures(const std::string& raceName)
+{
+    if(!canPerformGameAction()) return;
+    m_protocolGame->sendBestiaryCreatures(raceName);
+}
+
+void Game::requestBestiaryMonsterData(int raceId)
+{
+    if(!canPerformGameAction()) return;
+    m_protocolGame->sendBestiaryMonsterData(raceId);
+}
+
+void Game::requestBestiaryBuyCharmRune(int runeId, int action, int raceId)
+{
+    if(!canPerformGameAction()) return;
+    m_protocolGame->sendBestiaryBuyCharmRune(runeId, action, raceId);
+}
+
+void Game::requestBestiaryTrackerStatus(int raceId, bool track)
+{
+    if(!canPerformGameAction()) return;
+    m_protocolGame->sendBestiaryTrackerStatus(raceId, track);
+}
+
 void Game::equipItem(const ItemPtr& item)
 {
     if (!item || !canPerformGameAction())

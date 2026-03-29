@@ -634,19 +634,201 @@ function registerProtocol()
     end
   end)
   
+  -- 0xB9 — Bestiary tracker update
   registerOpcode(ServerPackets.BestiaryTrackerTab, function(protocol, msg)
+    local trackerType = msg:getU8() -- 0 = bestiary
     local count = msg:getU8()
+    local entries = {}
     for i = 1, count do
-      msg:getU16()
-      msg:getU32()
-      msg:getU16()
-      msg:getU16()
-      msg:getU16()
-      msg:getU8()
+      local raceId    = msg:getU16()
+      local kills     = msg:getU32()
+      local first     = msg:getU16()
+      local second    = msg:getU16()
+      local toUnlock  = msg:getU16()
+      local progress  = msg:getU8()
+      table.insert(entries, {
+        raceId = raceId, kills = kills,
+        firstUnlock = first, secondUnlock = second,
+        toUnlock = toUnlock, progress = progress
+      })
+    end
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryTracker(entries)
     end
   end)
-  
-  
+
+  -- 0xD5 — Bestiary race list
+  registerOpcode(ServerPackets.BestiaryData, function(protocol, msg)
+    local count = msg:getU16()
+    local raceData = {}
+    for i = 1, count do
+      local name     = msg:getString()
+      local total    = msg:getU16()
+      local unlocked = msg:getU16()
+      table.insert(raceData, { name = name, total = total, unlocked = unlocked })
+    end
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryData(raceData)
+    end
+  end)
+
+  -- 0xD6 — Bestiary creature overview for a race
+  registerOpcode(ServerPackets.BestiaryOverview, function(protocol, msg)
+    local raceName  = msg:getString()
+    local count     = msg:getU16()
+    local list = {}
+    for i = 1, count do
+      local raceId    = msg:getU16()
+      local progress  = msg:getU8()
+      local occurrence = 0
+      if progress > 0 then
+        occurrence = msg:getU8()
+      end
+      local animusBonus = msg:getU16()
+      table.insert(list, {
+        raceId = raceId, progress = progress,
+        occurrence = occurrence, animusBonus = animusBonus
+      })
+    end
+    local totalAnimus = msg:getU16()
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryOverview(raceName, list, totalAnimus)
+    end
+  end)
+
+  -- 0xD7 — Full bestiary monster data
+  registerOpcode(ServerPackets.BestiaryMonsterData, function(protocol, msg)
+    local raceId    = msg:getU16()
+    local className = msg:getString()
+    local level     = msg:getU8()
+    local animusMasteryBonus  = msg:getU16()
+    local animusMasteryPoints = msg:getU16()
+    local kills         = msg:getU32()
+    local firstUnlock   = msg:getU16()
+    local secondUnlock  = msg:getU16()
+    local toUnlock      = msg:getU16()
+    local stars         = msg:getU8()
+    local occurrence    = msg:getU8()
+
+    local lootCount = msg:getU8()
+    local lootItems = {}
+    for i = 1, lootCount do
+      local itemId    = msg:getU16()
+      local difficulty = msg:getU8()
+      local special   = msg:getU8()
+      local name = ""
+      local maxCount = 0
+      if itemId ~= 0 then
+        name = msg:getString()
+        maxCount = msg:getU8()
+      end
+      table.insert(lootItems, {
+        itemId = itemId, difficulty = difficulty,
+        specialEvent = special, name = name, maxCount = maxCount
+      })
+    end
+
+    local charmPoints = 0
+    local attackMode  = 0
+    local healthMax   = 0
+    local experience  = 0
+    local baseSpeed   = 0
+    local armor       = 0
+    if level > 1 then
+      charmPoints = msg:getU16()
+      attackMode  = msg:getU8()
+      local unk   = msg:getU8()
+      healthMax   = msg:getU32()
+      experience  = msg:getU32()
+      baseSpeed   = msg:getU16()
+      armor       = msg:getU16()
+      local mitBits = msg:getU64() -- mitigation double (unused)
+    end
+
+    local elements  = {}
+    local locations = ""
+    if level > 2 then
+      local elemCount = msg:getU8()
+      for i = 1, elemCount do
+        local eId  = msg:getU8()
+        local eVal = msg:getU16()
+        table.insert(elements, { id = eId, value = eVal })
+      end
+      local unk2  = msg:getU16()
+      locations   = msg:getString()
+    end
+
+    local data = {
+      raceId      = raceId,
+      name        = nil,   -- filled by creature list button label
+      className   = className,
+      level       = level,
+      kills       = kills,
+      firstUnlock = firstUnlock,
+      secondUnlock= secondUnlock,
+      toUnlock    = toUnlock,
+      stars       = stars,
+      occurrence  = occurrence,
+      lootItems   = lootItems,
+      charmPoints = charmPoints,
+      attackMode  = attackMode,
+      healthMax   = healthMax,
+      experience  = experience,
+      baseSpeed   = baseSpeed,
+      armor       = armor,
+      elements    = elements,
+      locations   = locations
+    }
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryMonsterData(data)
+    end
+  end)
+
+  -- 0xD8 — Bestiary charms data
+  registerOpcode(ServerPackets.BestiaryCharmsData, function(protocol, msg)
+    local resetCost  = msg:getU64()
+    local charmCount = msg:getU8()
+    local charmList  = {}
+    for i = 1, charmCount do
+      local id       = msg:getU8()
+      local tier     = msg:getU8()
+      local unlocked = msg:getU8() > 0
+      local raceId   = 0
+      local removeCost = 0
+      if unlocked then
+        raceId     = msg:getU16()
+        removeCost = msg:getU32()
+      end
+      table.insert(charmList, {
+        id = id, tier = tier, unlocked = unlocked,
+        raceId = raceId, removeCost = removeCost
+      })
+    end
+    local slots         = msg:getU8()
+    local finishedCount = msg:getU16()
+    local finished = {}
+    for i = 1, finishedCount do
+      table.insert(finished, msg:getU16())
+    end
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryCharms({
+        resetCost = resetCost,
+        charms    = charmList,
+        slots     = slots,
+        finished  = finished
+      })
+    end
+  end)
+
+  -- 0xD9 — Bestiary entry changed notification
+  registerOpcode(ServerPackets.BestiaryTracker, function(protocol, msg)
+    local raceId = msg:getU16()
+    if modules.game_bestiary then
+      modules.game_bestiary.onBestiaryEntryChanged(raceId)
+    end
+  end)
+
+
 end
 
 function readAddItem(msg)

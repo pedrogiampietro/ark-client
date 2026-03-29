@@ -332,7 +332,14 @@ namespace Proto {
         ClientRequestStoreOffers            = 251, // 1080
         ClientBuyStoreOffer                 = 252, // 1080
         ClientOpenTransactionHistory        = 253, // 1080
-        ClientRequestTransactionHistory     = 254  // 1080
+        ClientRequestTransactionHistory     = 254,  // 1080
+
+        // Bestiary / Charms
+        ClientBestiaryTrackerStatus         = 42,   // 0x2A
+        ClientBestiaryRaces                 = 225,  // 0xE1
+        ClientBestiaryCreatures             = 226,  // 0xE2
+        ClientBestiaryMonsterData           = 227,  // 0xE3
+        ClientBestiaryBuyCharmRune          = 228   // 0xE4
     };
 
     enum CreatureType {

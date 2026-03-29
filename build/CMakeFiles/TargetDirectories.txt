@@ -1,0 +1,3 @@
+/home/ark-client/build/CMakeFiles/otclient.dir
+/home/ark-client/build/CMakeFiles/edit_cache.dir
+/home/ark-client/build/CMakeFiles/rebuild_cache.dir

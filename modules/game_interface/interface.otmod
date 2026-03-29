@@ -39,5 +39,6 @@ Module
     - game_rarity
     - game_forge
     - game_relicbox
+    - game_bestiary
   @onLoad: init()
   @onUnload: terminate()

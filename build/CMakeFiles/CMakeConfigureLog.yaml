@@ -527,3 +527,40 @@ events:
       
       
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "/usr/share/cmake-3.28/Modules/FindBZip2.cmake:93 (CHECK_SYMBOL_EXISTS)"
+      - "src/framework/CMakeLists.txt:242 (find_package)"
+      - "CMakeLists.txt:20 (include)"
+    checks:
+      - "Looking for BZ2_bzCompressInit"
+    directories:
+      source: "/home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9"
+      binary: "/home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/ark-client/src/framework/cmake;"
+    buildResult:
+      variable: "BZIP2_NEED_PREFIX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_94490/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_94490.dir/build.make CMakeFiles/cmTC_94490.dir/build
+        gmake[1]: Entering directory '/home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9'
+        Building C object CMakeFiles/cmTC_94490.dir/CheckSymbolExists.c.o
+        /usr/bin/cc    -o CMakeFiles/cmTC_94490.dir/CheckSymbolExists.c.o -c /home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9/CheckSymbolExists.c
+        Linking C executable cmTC_94490
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_94490.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_94490.dir/CheckSymbolExists.c.o -o cmTC_94490  /usr/lib/x86_64-linux-gnu/libbz2.a 
+        gmake[1]: Leaving directory '/home/ark-client/build/CMakeFiles/CMakeScratch/TryCompile-lfqlH9'
+        
+      exitCode: 0
+...
