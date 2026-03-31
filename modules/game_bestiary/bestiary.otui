@@ -22,7 +22,6 @@ MainWindow
   size: 600 440
   @onEscape: modules.game_bestiary.toggle()
 
-  -- Tab buttons
   Button
     id: tabBestiary
     !text: tr('Bestiary')
@@ -30,7 +29,6 @@ MainWindow
     anchors.left: parent.left
     width: 80
     height: 22
-    margin-top: 0
     $on:
       color: #ffaf00
 
@@ -45,9 +43,6 @@ MainWindow
     $on:
       color: #ffaf00
 
-  -- ============================================================
-  -- BESTIARY PANEL
-  -- ============================================================
   UIWidget
     id: bestiaryPanel
     anchors.top: tabBestiary.bottom
@@ -57,7 +52,6 @@ MainWindow
     margin-top: 4
     margin-bottom: 4
 
-    -- Race list (left column)
     TextList
       id: raceList
       anchors.top: parent.top
@@ -76,7 +70,6 @@ MainWindow
       step: 14
       pixels-scroll: true
 
-    -- Creature list (middle column)
     TextList
       id: creatureList
       anchors.top: parent.top
@@ -96,7 +89,6 @@ MainWindow
       step: 14
       pixels-scroll: true
 
-    -- Creature detail (right column)
     UIWidget
       id: creatureDetail
       anchors.top: parent.top
@@ -225,9 +217,6 @@ MainWindow
         anchors.left: parent.left
         @onClick: modules.game_bestiary.onTrackerClick()
 
-  -- ============================================================
-  -- CHARMS PANEL
-  -- ============================================================
   UIWidget
     id: charmsPanel
     anchors.top: tabBestiary.bottom
@@ -277,7 +266,6 @@ MainWindow
       step: 14
       pixels-scroll: true
 
-  -- Close button
   Button
     id: btnClose
     !text: tr('Close')

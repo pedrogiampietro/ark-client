@@ -53,6 +53,10 @@ local CHARM_NAMES = {
 
 function init()
   bestiaryWindow = g_ui.loadUI('bestiary', rootWidget)
+  if not bestiaryWindow then
+    g_logger.error('[game_bestiary] failed to load bestiary.otui')
+    return
+  end
   bestiaryWindow:hide()
   bestiaryWindow:centerIn(rootWidget)
 
