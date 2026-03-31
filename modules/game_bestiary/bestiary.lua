@@ -2,22 +2,22 @@
 -- Bestiary & Charms client module
 
 local bestiaryWindow = nil
-local bestiaryButton = nil  -- sidebutton ref (set from sidebuttons module)
+local bestiaryButton = nil
 
 -- State
-local races = {}           -- { [raceName] = { total=N, unlocked=N } }
-local raceOrder = {}       -- ordered list of race names
-local creatures = {}       -- { [raceId] = { name=str, progress=N, occurrence=N } } (per current race)
-local currentRace = nil    -- selected race name
-local currentCreatureId = nil -- selected creature raceId
+local races = {}
+local raceOrder = {}
+local creatures = {}
+local currentRace = nil
+local currentCreatureId = nil
 
-local charms = {}          -- indexed by charmId (0-based): { id, tier, unlocked, raceId, removeCost }
+local charms = {}
 local charmPoints = 0
 local charmSlots = 0
 local charmResetCost = 0
-local finishedMonsters = {} -- list of raceIds with bestiary complete (eligible for charm assign)
-local trackedMonsters = {}  -- { [raceId] = { kills, first, second, toUnlock, progress } }
-local monsterData = {}     -- cached full data: { [raceId] = { ... } }
+local finishedMonsters = {}
+local trackedMonsters = {}
+local monsterData = {}
 
 local ELEMENT_NAMES = {
   [0] = "Physical",
@@ -28,11 +28,28 @@ local ELEMENT_NAMES = {
   [5] = "Mana Drain"
 }
 
+local ELEMENT_COLORS = {
+  [0] = "#cc4444",
+  [1] = "#ff7700",
+  [2] = "#44bb44",
+  [3] = "#aa44cc",
+  [4] = "#881122",
+  [5] = "#4444cc"
+}
+
 local OCCURRENCE_NAMES = {
   [0] = "Common",
   [1] = "Uncommon",
   [2] = "Rare",
   [3] = "Very Rare"
+}
+
+local LOOT_DIFFICULTY_NAMES = {
+  [0] = "Always",
+  [1] = "Common",
+  [2] = "Uncommon",
+  [3] = "Rare",
+  [4] = "Very Rare"
 }
 
 local CHARM_NAMES = {
@@ -67,20 +84,16 @@ function init()
 
   g_keyboard.bindKeyDown('Alt+L', toggle)
 
-  -- Start on bestiary tab
   showBestiaryTab()
 
-  -- wire tab buttons
   local win = bestiaryWindow
   win:recursiveGetChildById('tabBestiary').onClick = function() showBestiaryTab() end
   win:recursiveGetChildById('tabCharms').onClick   = function() showCharmsTab() end
 
-  -- Get sidebutton reference
   if modules.game_sidebuttons then
     bestiaryButton = modules.game_sidebuttons.bestiaryButton
   end
 
-  -- Register protocol opcodes directly (bypasses GameTibia12Protocol guard)
   ProtocolGame.registerOpcode(0xD5, parseRaces)
   ProtocolGame.registerOpcode(0xD6, parseOverview)
   ProtocolGame.registerOpcode(0xD7, parseMonsterData)
@@ -117,7 +130,7 @@ function terminate()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Protocol parsers (registered directly, no GameTibia12Protocol guard)
+-- Protocol parsers
 -- ─────────────────────────────────────────────────────────────────────────────
 
 function parseRaces(protocol, msg)
@@ -153,6 +166,7 @@ end
 
 function parseMonsterData(protocol, msg)
   local raceId    = msg:getU16()
+  local lookType  = msg:getU16()
   local name      = msg:getString()
   local className = msg:getString()
   local level     = msg:getU8()
@@ -171,14 +185,14 @@ function parseMonsterData(protocol, msg)
     local itemId     = msg:getU16()
     local difficulty = msg:getU8()
     local special    = msg:getU8()
-    local name = ""
-    local maxCount = 0
+    local itemName   = ""
+    local maxCount   = 0
     if itemId ~= 0 then
-      name     = msg:getString()
+      itemName = msg:getString()
       maxCount = msg:getU8()
     end
     table.insert(lootItems, { itemId = itemId, difficulty = difficulty,
-                               name = name, maxCount = maxCount })
+                               name = itemName, maxCount = maxCount })
   end
 
   local charmPts = 0
@@ -190,12 +204,12 @@ function parseMonsterData(protocol, msg)
   if level > 1 then
     charmPts   = msg:getU16()
     attackMode = msg:getU8()
-    msg:getU8() -- unknown
+    msg:getU8()
     healthMax  = msg:getU32()
     experience = msg:getU32()
     baseSpeed  = msg:getU16()
     armor      = msg:getU16()
-    msg:getU64() -- mitigation double
+    msg:getU64()
   end
 
   local elements = {}
@@ -207,17 +221,18 @@ function parseMonsterData(protocol, msg)
       local eVal = msg:getU16()
       table.insert(elements, { id = eId, value = eVal })
     end
-    msg:getU16() -- unknown
+    msg:getU16()
     locations = msg:getString()
   end
 
   onBestiaryMonsterData({
-    raceId = raceId, name = name, className = className, level = level,
-    kills = kills, firstUnlock = firstUnlock, secondUnlock = secondUnlock,
-    toUnlock = toUnlock, stars = stars, occurrence = occurrence,
-    lootItems = lootItems, charmPoints = charmPts, attackMode = attackMode,
-    healthMax = healthMax, experience = experience, baseSpeed = baseSpeed,
-    armor = armor, elements = elements, locations = locations
+    raceId = raceId, lookType = lookType, name = name, className = className,
+    level = level, kills = kills, firstUnlock = firstUnlock,
+    secondUnlock = secondUnlock, toUnlock = toUnlock, stars = stars,
+    occurrence = occurrence, lootItems = lootItems, charmPoints = charmPts,
+    attackMode = attackMode, healthMax = healthMax, experience = experience,
+    baseSpeed = baseSpeed, armor = armor, elements = elements,
+    locations = locations
   })
 end
 
@@ -290,7 +305,6 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 function onGameStart()
-  -- nothing to pre-load; data arrives when window is opened
 end
 
 function onGameEnd()
@@ -327,7 +341,6 @@ function toggle()
     bestiaryWindow:raise()
     bestiaryWindow:focus()
     if bestiaryButton then bestiaryButton:setOn(true) end
-    -- Request data from server
     g_game.requestBestiaryRaces()
   end
 end
@@ -358,12 +371,10 @@ function showCharmsTab()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Protocol handlers (called from game_protocol/protocol.lua)
+-- Protocol handlers
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- 0xD5 — Race list
 function onBestiaryData(raceData)
-  -- raceData: list of { name, total, unlocked }
   races = {}
   raceOrder = {}
   for _, r in ipairs(raceData) do
@@ -375,9 +386,7 @@ function onBestiaryData(raceData)
   refreshRaceList()
 end
 
--- 0xD6 — Creature overview for a race
 function onBestiaryOverview(raceName, creatureList, totalAnimus)
-  -- creatureList: list of { raceId, progress, occurrence, animusBonus }
   creatures = {}
   for _, c in ipairs(creatureList) do
     creatures[c.raceId] = c
@@ -386,11 +395,7 @@ function onBestiaryOverview(raceName, creatureList, totalAnimus)
   refreshCreatureList()
 end
 
--- 0xD7 — Full monster data
 function onBestiaryMonsterData(data)
-  -- data: { raceId, className, level, kills, firstUnlock, secondUnlock, toUnlock,
-  --         stars, occurrence, lootItems, charmPoints, attackMode, healthMax,
-  --         experience, baseSpeed, armor, elements, locations }
   monsterData[data.raceId] = data
   -- Update creature list button label if visible
   local list = bestiaryWindow:recursiveGetChildById('creatureList')
@@ -406,9 +411,7 @@ function onBestiaryMonsterData(data)
   end
 end
 
--- 0xD8 — Charms data
 function onBestiaryCharms(data)
-  -- data: { resetCost, charms=[{id,tier,unlocked,raceId,removeCost}], slots, finished=[raceIds] }
   charmResetCost = data.resetCost
   charms = {}
   for _, c in ipairs(data.charms) do
@@ -417,7 +420,6 @@ function onBestiaryCharms(data)
   charmSlots = data.slots
   finishedMonsters = data.finished
 
-  -- If charms tab is showing, refresh it
   if bestiaryWindow:isVisible() then
     local charmsPanel = bestiaryWindow:recursiveGetChildById('charmsPanel')
     if charmsPanel:isVisible() then
@@ -426,24 +428,18 @@ function onBestiaryCharms(data)
   end
 end
 
--- 0xD9 — Entry changed notification (a kill count updated)
 function onBestiaryEntryChanged(raceId)
-  -- Invalidate cached data and refresh if this creature is selected
   monsterData[raceId] = nil
   if currentCreatureId == raceId then
     g_game.requestBestiaryMonsterData(raceId)
   end
-  -- Refresh overview if this race is showing
   if currentRace then
     g_game.requestBestiaryCreatures(currentRace)
   end
-  -- Refresh race list
   g_game.requestBestiaryRaces()
 end
 
--- 0xB9 — Tracker update
 function onBestiaryTracker(entries)
-  -- entries: list of { raceId, kills, firstUnlock, secondUnlock, toUnlock, progress }
   trackedMonsters = {}
   for _, e in ipairs(entries) do
     trackedMonsters[e.raceId] = e
@@ -461,8 +457,7 @@ function refreshRaceList()
   for _, name in ipairs(raceOrder) do
     local r = races[name]
     local btn = g_ui.createWidget('BestiaryRaceButton', list)
-    local label = name .. ' (' .. r.unlocked .. '/' .. r.total .. ')'
-    btn:setText(label)
+    btn:setText(name .. ' (' .. r.unlocked .. '/' .. r.total .. ')')
     btn.raceName = name
     btn.onClick = function()
       currentRace = name
@@ -477,7 +472,6 @@ function refreshCreatureList()
   local list = bestiaryWindow:recursiveGetChildById('creatureList')
   list:destroyChildren()
 
-  -- Sort by raceId
   local sorted = {}
   for raceId, c in pairs(creatures) do
     table.insert(sorted, { raceId = raceId, data = c })
@@ -489,18 +483,12 @@ function refreshCreatureList()
     local c = entry.data
     local btn = g_ui.createWidget('BestiaryCreatureButton', list)
 
-    local progressStr = ""
-    if c.progress == 0 then
-      progressStr = " [?]"
-    elseif c.progress == 1 then
-      progressStr = " [I]"
-    elseif c.progress == 2 then
-      progressStr = " [II]"
-    elseif c.progress == 3 then
-      progressStr = " [III]"
+    local progressStr = " [?]"
+    if c.progress == 1 then progressStr = " [I]"
+    elseif c.progress == 2 then progressStr = " [II]"
+    elseif c.progress == 3 then progressStr = " [III]"
     end
 
-    -- Try to get name from cached data
     local name = "Monster " .. raceId
     if monsterData[raceId] then
       name = monsterData[raceId].name or name
@@ -521,18 +509,33 @@ end
 
 function clearCreatureDetail()
   local detail = bestiaryWindow:recursiveGetChildById('creatureDetail')
+
   detail:recursiveGetChildById('detailName'):setText('')
+  detail:recursiveGetChildById('detailStars'):setText('')
   detail:recursiveGetChildById('detailClass'):setText('')
-  detail:recursiveGetChildById('detailProgress'):setText('')
-  detail:recursiveGetChildById('detailKills'):setText('')
-  detail:recursiveGetChildById('detailHealth'):setText('')
-  detail:recursiveGetChildById('detailExp'):setText('')
-  detail:recursiveGetChildById('detailArmor'):setText('')
-  detail:recursiveGetChildById('detailSpeed'):setText('')
+  detail:recursiveGetChildById('detailOccurrence'):setText('')
+  detail:recursiveGetChildById('detailKillsLabel'):setText('')
+  detail:recursiveGetChildById('killProgressBar'):setPercent(0)
+  detail:recursiveGetChildById('detailStats'):setText('')
   detail:recursiveGetChildById('detailCharmPts'):setText('')
-  detail:recursiveGetChildById('detailLoot'):setText('')
-  detail:recursiveGetChildById('detailElements'):setText('')
+  detail:recursiveGetChildById('elementsTitle'):hide()
+
+  local ep = detail:recursiveGetChildById('elementsPanel')
+  ep:destroyChildren()
+  ep:setHeight(0)
+
+  detail:recursiveGetChildById('lootTitle'):hide()
+
+  local lp = detail:recursiveGetChildById('lootPanel')
+  lp:destroyChildren()
+  lp:setHeight(0)
+
   detail:recursiveGetChildById('detailLocations'):setText('')
+
+  local sprite = detail:recursiveGetChildById('creatureSprite')
+  if sprite then
+    sprite:setOutfit({type = 0})
+  end
 end
 
 function refreshCreatureDetail(raceId)
@@ -541,63 +544,145 @@ function refreshCreatureDetail(raceId)
 
   local detail = bestiaryWindow:recursiveGetChildById('creatureDetail')
 
+  -- Monster sprite
+  local sprite = detail:recursiveGetChildById('creatureSprite')
+  if sprite and data.lookType and data.lookType > 0 then
+    sprite:setOutfit({type = data.lookType})
+  end
+
+  -- Name
   detail:recursiveGetChildById('detailName'):setText(data.name or "Unknown")
+
+  -- Stars (0–5 filled, remainder empty)
+  local numStars = data.stars or 0
+  local starsStr = string.rep("*", numStars) .. string.rep(".", math.max(0, 5 - numStars))
+  detail:recursiveGetChildById('detailStars'):setText(starsStr)
+
+  -- Class + Occurrence
   detail:recursiveGetChildById('detailClass'):setText(data.className or "")
+  local occStr = OCCURRENCE_NAMES[data.occurrence] or ""
+  detail:recursiveGetChildById('detailOccurrence'):setText(occStr)
 
-  -- Progress label
-  local progressLabels = { [0]="No info", [1]="Stage I", [2]="Stage II", [3]="Complete" }
-  local progressStr = (progressLabels[data.level] or "Stage " .. data.level)
-  detail:recursiveGetChildById('detailProgress'):setText("Progress: " .. progressStr)
-
-  -- Kill counts
-  local kills = data.kills or 0
-  local toUnlock = data.toUnlock or 0
+  -- Kill progress
+  local kills       = data.kills or 0
   local firstUnlock = data.firstUnlock or 0
-  local secondUnlock = data.secondUnlock or 0
-  detail:recursiveGetChildById('detailKills'):setText(
-    "Kills: " .. kills .. " / " .. toUnlock ..
-    " (I:" .. firstUnlock .. " II:" .. secondUnlock .. ")")
+  local secondUnlock= data.secondUnlock or 0
+  local toUnlock    = data.toUnlock or 0
+  local nextTarget  = 0
 
-  -- Stats (available at level > 1)
+  if data.level == 0 then
+    nextTarget = firstUnlock
+  elseif data.level == 1 then
+    nextTarget = secondUnlock
+  elseif data.level == 2 then
+    nextTarget = toUnlock
+  end
+
+  local killLabel
+  if data.level and data.level >= 3 then
+    killLabel = "Kills: " .. kills .. "  (Bestiary Complete)"
+  else
+    killLabel = "Kills: " .. kills .. " / " .. nextTarget ..
+                "  (I:" .. firstUnlock .. "  II:" .. secondUnlock .. "  III:" .. toUnlock .. ")"
+  end
+  detail:recursiveGetChildById('detailKillsLabel'):setText(killLabel)
+
+  local killBar = detail:recursiveGetChildById('killProgressBar')
+  if nextTarget > 0 and data.level < 3 then
+    local prevTarget = 0
+    if data.level == 1 then prevTarget = firstUnlock
+    elseif data.level == 2 then prevTarget = secondUnlock
+    end
+    local span = nextTarget - prevTarget
+    local done = kills - prevTarget
+    local pct = span > 0 and math.min(100, math.floor(done / span * 100)) or 0
+    killBar:setPercent(pct)
+  elseif data.level >= 3 then
+    killBar:setPercent(100)
+  else
+    killBar:setPercent(0)
+  end
+
+  -- Stats
   if data.level and data.level > 1 then
-    detail:recursiveGetChildById('detailHealth'):setText("HP: " .. (data.healthMax or "?"))
-    detail:recursiveGetChildById('detailExp'):setText("Exp: " .. (data.experience or "?"))
-    detail:recursiveGetChildById('detailArmor'):setText("Armor: " .. (data.armor or "?"))
-    detail:recursiveGetChildById('detailSpeed'):setText("Speed: " .. (data.baseSpeed or "?"))
-    detail:recursiveGetChildById('detailCharmPts'):setText("Charm pts: " .. (data.charmPoints or 0))
+    detail:recursiveGetChildById('detailStats'):setText(
+      "HP: " .. (data.healthMax or "?") ..
+      "  Exp: " .. (data.experience or "?") ..
+      "\nArmor: " .. (data.armor or "?") ..
+      "  Speed: " .. (data.baseSpeed or "?"))
+    detail:recursiveGetChildById('detailCharmPts'):setText(
+      "Charm Points: " .. (data.charmPoints or 0))
   else
-    detail:recursiveGetChildById('detailHealth'):setText("HP: ???")
-    detail:recursiveGetChildById('detailExp'):setText("Exp: ???")
-    detail:recursiveGetChildById('detailArmor'):setText("Armor: ???")
-    detail:recursiveGetChildById('detailSpeed'):setText("Speed: ???")
-    detail:recursiveGetChildById('detailCharmPts'):setText("")
+    detail:recursiveGetChildById('detailStats'):setText(
+      "HP: ???  Exp: ???\nArmor: ???  Speed: ???")
+    detail:recursiveGetChildById('detailCharmPts'):setText('')
   end
 
-  -- Loot
-  local lootStr = "Loot:\n"
-  if data.lootItems and #data.lootItems > 0 then
-    local diffNames = { [0]="Always", [1]="Common", [2]="Uncommon", [3]="Rare", [4]="Very Rare" }
-    for _, loot in ipairs(data.lootItems) do
-      local diff = diffNames[loot.difficulty] or "?"
-      lootStr = lootStr .. " " .. (loot.name or loot.itemId) .. " (" .. diff .. ")\n"
-    end
-  else
-    lootStr = lootStr .. " (kill more to discover)"
-  end
-  detail:recursiveGetChildById('detailLoot'):setText(lootStr)
+  -- Element resistance bars
+  local elementsPanel = detail:recursiveGetChildById('elementsPanel')
+  local elementsTitle = detail:recursiveGetChildById('elementsTitle')
+  elementsPanel:destroyChildren()
 
-  -- Elements (available at level > 2)
-  if data.level and data.level > 2 and data.elements then
-    local elemStr = "Weaknesses:\n"
+  if data.level and data.level > 2 and data.elements and #data.elements > 0 then
+    elementsTitle:show()
     for _, elem in ipairs(data.elements) do
-      local eName = ELEMENT_NAMES[elem.id] or ("Element " .. elem.id)
-      elemStr = elemStr .. " " .. eName .. ": " .. elem.value .. "%\n"
+      local eName  = ELEMENT_NAMES[elem.id] or ("Element " .. elem.id)
+      local eColor = ELEMENT_COLORS[elem.id] or "#888888"
+      local eVal   = math.min(100, elem.value or 0)
+
+      local row = g_ui.createWidget('BestiaryElementRow', elementsPanel)
+      row:recursiveGetChildById('elemName'):setText(eName)
+      local bar = row:recursiveGetChildById('elemBar')
+      bar:setBackgroundColor(eColor)
+      bar:setPercent(eVal)
+      row:recursiveGetChildById('elemValue'):setText(eVal .. "%")
     end
-    detail:recursiveGetChildById('detailElements'):setText(elemStr)
-    detail:recursiveGetChildById('detailLocations'):setText("Location: " .. (data.locations or "Unknown"))
+    elementsPanel:setHeight(#data.elements * 16)
   else
-    detail:recursiveGetChildById('detailElements'):setText("")
-    detail:recursiveGetChildById('detailLocations'):setText("")
+    elementsTitle:hide()
+    elementsPanel:setHeight(0)
+  end
+
+  -- Loot items
+  local lootPanel = detail:recursiveGetChildById('lootPanel')
+  local lootTitle = detail:recursiveGetChildById('lootTitle')
+  lootPanel:destroyChildren()
+
+  local validLoot = {}
+  if data.lootItems then
+    for _, loot in ipairs(data.lootItems) do
+      if loot.itemId and loot.itemId > 0 then
+        table.insert(validLoot, loot)
+      end
+    end
+  end
+
+  if #validLoot > 0 then
+    lootTitle:show()
+    for _, loot in ipairs(validLoot) do
+      local item = g_ui.createWidget('BestiaryLootItem', lootPanel)
+      item:setItemId(loot.itemId)
+      if loot.maxCount and loot.maxCount > 1 then
+        item:setItemCount(loot.maxCount)
+      end
+      local diffName = LOOT_DIFFICULTY_NAMES[loot.difficulty] or "?"
+      item:setTooltip((loot.name ~= "" and loot.name or ("Item " .. loot.itemId)) ..
+                      "\n" .. diffName)
+    end
+    local cols = math.max(1, math.floor((lootPanel:getWidth()) / 34))
+    local numRows = math.max(1, math.ceil(#validLoot / cols))
+    lootPanel:setHeight(numRows * 34)
+  else
+    lootTitle:hide()
+    lootPanel:setHeight(0)
+  end
+
+  -- Locations
+  if data.level and data.level > 2 and data.locations and data.locations ~= "" then
+    detail:recursiveGetChildById('detailLocations'):setText(
+      "Locations: " .. data.locations)
+  else
+    detail:recursiveGetChildById('detailLocations'):setText('')
   end
 
   -- Tracker button
@@ -612,18 +697,15 @@ end
 function refreshCharmsUI()
   local win = bestiaryWindow
 
-  -- Points
   win:recursiveGetChildById('charmPointsLabel'):setText(
     tr('Charm Points: ') .. charmPoints)
   win:recursiveGetChildById('charmInfoLabel'):setText(
     tr('Slots: ') .. charmSlots .. "  |  " ..
     tr('Reset Cost: ') .. charmResetCost)
 
-  -- Build charm list
   local list = win:recursiveGetChildById('charmList')
   list:destroyChildren()
 
-  -- 25 charms, 0-indexed
   for i = 0, 24 do
     local c = charms[i]
     if c then
@@ -658,16 +740,13 @@ function onTrackerClick()
   local raceId = currentCreatureId
 
   if trackedMonsters[raceId] then
-    -- Remove from tracker
     g_game.requestBestiaryTrackerStatus(raceId, false)
     trackedMonsters[raceId] = nil
   else
-    -- Add to tracker
     g_game.requestBestiaryTrackerStatus(raceId, true)
     trackedMonsters[raceId] = {}
   end
 
-  -- Refresh tracker button
   local detail = bestiaryWindow:recursiveGetChildById('creatureDetail')
   local btn = detail:recursiveGetChildById('trackerBtn')
   if trackedMonsters[raceId] then
@@ -681,8 +760,7 @@ function onCharmClick(charmId, c)
   if not c then return end
 
   if c.unlocked and c.raceId and c.raceId > 0 then
-    -- Ask to remove (action=1)
-    local dialog = displayGeneralBox(
+    displayGeneralBox(
       tr('Remove Charm'),
       tr('Remove this charm assignment? Cost: ') .. (c.removeCost or 0),
       {
@@ -693,9 +771,7 @@ function onCharmClick(charmId, c)
       },
       nil, nil, true)
   elseif c.unlocked then
-    -- Assign: ask which monster
-    -- For simplicity, show a text input dialog
-    local dialog = displayInputBox(
+    displayInputBox(
       tr('Assign Charm'),
       tr('Enter race ID to assign charm to:'),
       function(raceId)
@@ -705,7 +781,6 @@ function onCharmClick(charmId, c)
         end
       end)
   else
-    -- Buy/unlock charm
     displayGeneralBox(
       tr('Unlock Charm'),
       tr('Unlock this charm?'),

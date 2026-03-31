@@ -16,10 +16,48 @@ BestiaryCharmButton < Button
   text-align: left
   padding-left: 4
 
+BestiaryElementRow < UIWidget
+  height: 14
+  margin-top: 2
+
+  Label
+    id: elemValue
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    width: 36
+    font: verdana-11px-monochrome
+    color: #ffffff
+    text-align: right
+
+  Label
+    id: elemName
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    width: 72
+    font: verdana-11px-monochrome
+    color: #aaaaaa
+
+  ProgressBar
+    id: elemBar
+    anchors.left: elemName.right
+    anchors.right: elemValue.left
+    anchors.verticalCenter: parent.verticalCenter
+    height: 10
+    margin-left: 2
+    margin-right: 2
+    background-color: #44aa44
+
+BestiaryLootItem < UIItem
+  size: 32 32
+  focusable: false
+  phantom: false
+
 MainWindow
   id: bestiaryWindow
   !text: tr('Bestiary')
-  size: 600 440
+  size: 660 500
   @onEscape: modules.game_bestiary.toggle()
 
   Button
@@ -89,133 +127,175 @@ MainWindow
       step: 14
       pixels-scroll: true
 
-    UIWidget
+    VerticalScrollBar
+      id: detailScrollBar
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      step: 20
+      pixels-scroll: true
+
+    ScrollablePanel
       id: creatureDetail
       anchors.top: parent.top
       anchors.left: creatureList.right
-      anchors.right: parent.right
+      anchors.right: detailScrollBar.left
       anchors.bottom: parent.bottom
       margin-left: 6
       padding: 4
+      vertical-scrollbar: detailScrollBar
+      layout: verticalBox
+
+      UIWidget
+        id: detailHeaderRow
+        height: 80
+        margin-bottom: 6
+
+        UIWidget
+          id: creatureSpriteBox
+          anchors.top: parent.top
+          anchors.left: parent.left
+          width: 76
+          height: 76
+          background-color: #111111
+          border-width: 1
+          border-color: #444444
+
+          UICreature
+            id: creatureSprite
+            anchors.fill: parent
+            phantom: true
+            outfit-center: true
+            old-scaling: true
+
+        Label
+          id: detailName
+          anchors.top: parent.top
+          anchors.left: creatureSpriteBox.right
+          anchors.right: parent.right
+          font: verdana-11px-monochrome
+          color: #ffaf00
+          text-align: center
+          height: 18
+          margin-left: 4
+
+        Label
+          id: detailStars
+          anchors.top: detailName.bottom
+          anchors.left: creatureSpriteBox.right
+          anchors.right: parent.right
+          font: verdana-11px-monochrome
+          color: #ffcc00
+          text-align: center
+          height: 14
+          margin-left: 4
+          margin-top: 2
+
+        Label
+          id: detailClass
+          anchors.top: detailStars.bottom
+          anchors.left: creatureSpriteBox.right
+          anchors.right: parent.right
+          font: verdana-11px-monochrome
+          color: #aaaaaa
+          text-align: center
+          height: 14
+          margin-left: 4
+          margin-top: 2
+
+        Label
+          id: detailOccurrence
+          anchors.top: detailClass.bottom
+          anchors.left: creatureSpriteBox.right
+          anchors.right: parent.right
+          font: verdana-11px-monochrome
+          color: #88ccff
+          text-align: center
+          height: 14
+          margin-left: 4
+          margin-top: 2
+
+      UIWidget
+        id: detailKillSection
+        height: 34
+        margin-bottom: 4
+
+        Label
+          id: detailKillsLabel
+          anchors.top: parent.top
+          anchors.left: parent.left
+          anchors.right: parent.right
+          font: verdana-11px-monochrome
+          height: 14
+
+        ProgressBar
+          id: killProgressBar
+          anchors.top: detailKillsLabel.bottom
+          anchors.left: parent.left
+          anchors.right: parent.right
+          height: 10
+          margin-top: 4
+          background-color: #c8a050
 
       Label
-        id: detailName
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        id: detailStats
         font: verdana-11px-monochrome
-        color: #ffaf00
-        text-align: center
-        height: 16
-
-      Label
-        id: detailClass
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        color: #aaaaaa
-        text-align: center
-        height: 14
-        margin-top: 2
-
-      Label
-        id: detailProgress
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        color: #88ccff
-        height: 14
-        margin-top: 6
-
-      Label
-        id: detailKills
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        height: 14
-
-      Label
-        id: detailHealth
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        height: 14
-        margin-top: 6
-
-      Label
-        id: detailExp
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        height: 14
-
-      Label
-        id: detailArmor
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        height: 14
-
-      Label
-        id: detailSpeed
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        font: verdana-11px-monochrome
-        height: 14
+        height: 28
+        text-wrap: true
+        margin-bottom: 4
 
       Label
         id: detailCharmPts
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
         font: verdana-11px-monochrome
         color: #ffcc44
         height: 14
-        margin-top: 6
+        text-align: center
+        margin-bottom: 6
 
       Label
-        id: detailLoot
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        id: elementsTitle
         font: verdana-11px-monochrome
-        height: 60
-        margin-top: 4
+        color: #aaaaaa
+        text: Resistances:
+        height: 14
+
+      UIWidget
+        id: elementsPanel
+        height: 0
+        margin-top: 2
+        margin-bottom: 6
+        layout: verticalBox
 
       Label
-        id: detailElements
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        id: lootTitle
         font: verdana-11px-monochrome
-        height: 40
-        margin-top: 4
+        color: #aaaaaa
+        text: Loot:
+        height: 14
+
+      UIWidget
+        id: lootPanel
+        height: 34
+        margin-top: 2
+        margin-bottom: 6
+        layout:
+          type: grid
+          cell-size: 34 34
+          flow: true
 
       Label
         id: detailLocations
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
         font: verdana-11px-monochrome
         color: #88bb88
         height: 28
-        margin-top: 4
+        margin-bottom: 6
+        text-wrap: true
 
       Button
         id: trackerBtn
         !text: tr('Track')
         width: 64
         height: 18
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        @onClick: modules.game_bestiary.onTrackerClick()
 
   UIWidget
     id: charmsPanel
