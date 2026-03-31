@@ -153,6 +153,7 @@ end
 
 function parseMonsterData(protocol, msg)
   local raceId    = msg:getU16()
+  local name      = msg:getString()
   local className = msg:getString()
   local level     = msg:getU8()
   msg:getU16() -- animusMasteryBonus
@@ -211,7 +212,7 @@ function parseMonsterData(protocol, msg)
   end
 
   onBestiaryMonsterData({
-    raceId = raceId, className = className, level = level,
+    raceId = raceId, name = name, className = className, level = level,
     kills = kills, firstUnlock = firstUnlock, secondUnlock = secondUnlock,
     toUnlock = toUnlock, stars = stars, occurrence = occurrence,
     lootItems = lootItems, charmPoints = charmPts, attackMode = attackMode,
@@ -391,6 +392,15 @@ function onBestiaryMonsterData(data)
   --         stars, occurrence, lootItems, charmPoints, attackMode, healthMax,
   --         experience, baseSpeed, armor, elements, locations }
   monsterData[data.raceId] = data
+  -- Update creature list button label if visible
+  local list = bestiaryWindow:recursiveGetChildById('creatureList')
+  for _, child in ipairs(list:getChildren()) do
+    if child.raceId == data.raceId then
+      local progressStr = ({ [0]="[?]", [1]="[I]", [2]="[II]", [3]="[III]" })[data.level] or "[?]"
+      child:setText(data.name .. " " .. progressStr)
+      break
+    end
+  end
   if currentCreatureId == data.raceId then
     refreshCreatureDetail(data.raceId)
   end
