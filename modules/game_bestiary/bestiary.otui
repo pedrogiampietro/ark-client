@@ -67,7 +67,7 @@ BestiaryElementRow < UIWidget
     background-color: #44aa44
 
 BestiaryLootEntry < UIWidget
-  width: 36
+  width: 56
   height: 50
 
   UIItem
@@ -325,7 +325,7 @@ MainWindow
         margin-bottom: 4
         layout:
           type: grid
-          cell-size: 38 50
+          cell-size: 58 52
           flow: true
 
       Label

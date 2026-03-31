@@ -693,9 +693,9 @@ function refreshCreatureDetail(raceId)
       entry:setTooltip(itemName .. "\n" .. diffName)
     end
     local panelW = lootPanel:getWidth()
-    local cols = panelW > 0 and math.max(1, math.floor(panelW / 38)) or 7
+    local cols = panelW > 0 and math.max(1, math.floor(panelW / 58)) or 5
     local numRows = math.max(1, math.ceil(#validLoot / cols))
-    lootPanel:setHeight(numRows * 50)
+    lootPanel:setHeight(numRows * 52)
   else
     lootTitle:hide()
     lootPanel:setHeight(0)
