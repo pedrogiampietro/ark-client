@@ -80,6 +80,14 @@ function init()
     bestiaryButton = modules.game_sidebuttons.bestiaryButton
   end
 
+  -- Register protocol opcodes directly (bypasses GameTibia12Protocol guard)
+  ProtocolGame.registerOpcode(0xD5, parseRaces)
+  ProtocolGame.registerOpcode(0xD6, parseOverview)
+  ProtocolGame.registerOpcode(0xD7, parseMonsterData)
+  ProtocolGame.registerOpcode(0xD8, parseCharms)
+  ProtocolGame.registerOpcode(0xD9, parseEntryChanged)
+  ProtocolGame.registerOpcode(0xB9, parseTracker)
+
   if g_game.isOnline() then
     onGameStart()
   end
@@ -93,10 +101,171 @@ function terminate()
 
   g_keyboard.unbindKeyDown('Alt+L')
 
+  ProtocolGame.unregisterOpcode(0xD5)
+  ProtocolGame.unregisterOpcode(0xD6)
+  ProtocolGame.unregisterOpcode(0xD7)
+  ProtocolGame.unregisterOpcode(0xD8)
+  ProtocolGame.unregisterOpcode(0xD9)
+  ProtocolGame.unregisterOpcode(0xB9)
+
   if bestiaryWindow then
     bestiaryWindow:destroy()
     bestiaryWindow = nil
   end
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Protocol parsers (registered directly, no GameTibia12Protocol guard)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+function parseRaces(protocol, msg)
+  local count = msg:getU16()
+  local raceData = {}
+  for i = 1, count do
+    local name     = msg:getString()
+    local total    = msg:getU16()
+    local unlocked = msg:getU16()
+    table.insert(raceData, { name = name, total = total, unlocked = unlocked })
+  end
+  onBestiaryData(raceData)
+end
+
+function parseOverview(protocol, msg)
+  local raceName = msg:getString()
+  local count    = msg:getU16()
+  local list = {}
+  for i = 1, count do
+    local raceId     = msg:getU16()
+    local progress   = msg:getU8()
+    local occurrence = 0
+    if progress > 0 then
+      occurrence = msg:getU8()
+    end
+    local animusBonus = msg:getU16()
+    table.insert(list, { raceId = raceId, progress = progress,
+                         occurrence = occurrence, animusBonus = animusBonus })
+  end
+  local totalAnimus = msg:getU16()
+  onBestiaryOverview(raceName, list, totalAnimus)
+end
+
+function parseMonsterData(protocol, msg)
+  local raceId    = msg:getU16()
+  local className = msg:getString()
+  local level     = msg:getU8()
+  msg:getU16() -- animusMasteryBonus
+  msg:getU16() -- animusMasteryPoints
+  local kills        = msg:getU32()
+  local firstUnlock  = msg:getU16()
+  local secondUnlock = msg:getU16()
+  local toUnlock     = msg:getU16()
+  local stars        = msg:getU8()
+  local occurrence   = msg:getU8()
+
+  local lootCount = msg:getU8()
+  local lootItems = {}
+  for i = 1, lootCount do
+    local itemId     = msg:getU16()
+    local difficulty = msg:getU8()
+    local special    = msg:getU8()
+    local name = ""
+    local maxCount = 0
+    if itemId ~= 0 then
+      name     = msg:getString()
+      maxCount = msg:getU8()
+    end
+    table.insert(lootItems, { itemId = itemId, difficulty = difficulty,
+                               name = name, maxCount = maxCount })
+  end
+
+  local charmPts = 0
+  local attackMode = 0
+  local healthMax = 0
+  local experience = 0
+  local baseSpeed = 0
+  local armor = 0
+  if level > 1 then
+    charmPts   = msg:getU16()
+    attackMode = msg:getU8()
+    msg:getU8() -- unknown
+    healthMax  = msg:getU32()
+    experience = msg:getU32()
+    baseSpeed  = msg:getU16()
+    armor      = msg:getU16()
+    msg:getU64() -- mitigation double
+  end
+
+  local elements = {}
+  local locations = ""
+  if level > 2 then
+    local elemCount = msg:getU8()
+    for i = 1, elemCount do
+      local eId  = msg:getU8()
+      local eVal = msg:getU16()
+      table.insert(elements, { id = eId, value = eVal })
+    end
+    msg:getU16() -- unknown
+    locations = msg:getString()
+  end
+
+  onBestiaryMonsterData({
+    raceId = raceId, className = className, level = level,
+    kills = kills, firstUnlock = firstUnlock, secondUnlock = secondUnlock,
+    toUnlock = toUnlock, stars = stars, occurrence = occurrence,
+    lootItems = lootItems, charmPoints = charmPts, attackMode = attackMode,
+    healthMax = healthMax, experience = experience, baseSpeed = baseSpeed,
+    armor = armor, elements = elements, locations = locations
+  })
+end
+
+function parseCharms(protocol, msg)
+  local resetCost  = msg:getU64()
+  local charmCount = msg:getU8()
+  local charmList  = {}
+  for i = 1, charmCount do
+    local id         = msg:getU8()
+    local tier       = msg:getU8()
+    local unlocked   = msg:getU8() > 0
+    local raceId     = 0
+    local removeCost = 0
+    if unlocked then
+      raceId     = msg:getU16()
+      removeCost = msg:getU32()
+    end
+    table.insert(charmList, { id = id, tier = tier, unlocked = unlocked,
+                               raceId = raceId, removeCost = removeCost })
+  end
+  local slots         = msg:getU8()
+  local finishedCount = msg:getU16()
+  local finished = {}
+  for i = 1, finishedCount do
+    table.insert(finished, msg:getU16())
+  end
+  onBestiaryCharms({ resetCost = resetCost, charms = charmList,
+                     slots = slots, finished = finished })
+end
+
+function parseEntryChanged(protocol, msg)
+  local raceId = msg:getU16()
+  onBestiaryEntryChanged(raceId)
+end
+
+function parseTracker(protocol, msg)
+  local trackerType = msg:getU8()
+  local count = msg:getU8()
+  local entries = {}
+  for i = 1, count do
+    local raceId   = msg:getU16()
+    local kills    = msg:getU32()
+    local first    = msg:getU16()
+    local second   = msg:getU16()
+    local toUnlock = msg:getU16()
+    local progress = msg:getU8()
+    table.insert(entries, { raceId = raceId, kills = kills,
+                             firstUnlock = first, secondUnlock = second,
+                             toUnlock = toUnlock, progress = progress })
+  end
+  onBestiaryTracker(entries)
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
