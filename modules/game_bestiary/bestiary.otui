@@ -16,9 +16,26 @@ BestiaryCharmButton < Button
   text-align: left
   padding-left: 4
 
+BestiaryStar < UIWidget
+  size: 8 8
+  margin-right: 2
+  background-color: #ffcc00
+
+BestiaryEmptyStar < UIWidget
+  size: 8 8
+  margin-right: 2
+  background-color: #3a3a3a
+
+BestiarySectionLabel < Label
+  font: verdana-11px-monochrome
+  color: #777777
+  height: 12
+  margin-top: 8
+  margin-bottom: 2
+
 BestiaryElementRow < UIWidget
   height: 14
-  margin-top: 2
+  margin-top: 3
 
   Label
     id: elemValue
@@ -27,7 +44,7 @@ BestiaryElementRow < UIWidget
     anchors.bottom: parent.bottom
     width: 36
     font: verdana-11px-monochrome
-    color: #ffffff
+    color: #cccccc
     text-align: right
 
   Label
@@ -44,15 +61,33 @@ BestiaryElementRow < UIWidget
     anchors.left: elemName.right
     anchors.right: elemValue.left
     anchors.verticalCenter: parent.verticalCenter
-    height: 10
-    margin-left: 2
-    margin-right: 2
+    height: 8
+    margin-left: 4
+    margin-right: 4
     background-color: #44aa44
 
-BestiaryLootItem < UIItem
-  size: 32 32
-  focusable: false
-  phantom: false
+BestiaryLootEntry < UIWidget
+  width: 36
+  height: 50
+
+  UIItem
+    id: lootIcon
+    size: 32 32
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    focusable: false
+    phantom: false
+
+  Label
+    id: lootRarity
+    anchors.top: lootIcon.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    font: verdana-11px-monochrome
+    text-align: center
+    height: 14
+    margin-top: 2
+    color: #aaaaaa
 
 MainWindow
   id: bestiaryWindow
@@ -142,24 +177,23 @@ MainWindow
       anchors.right: detailScrollBar.left
       anchors.bottom: parent.bottom
       margin-left: 6
-      padding: 4
+      padding: 6
       vertical-scrollbar: detailScrollBar
       layout: verticalBox
 
       UIWidget
         id: detailHeaderRow
-        height: 80
-        margin-bottom: 6
+        height: 84
 
         UIWidget
           id: creatureSpriteBox
           anchors.top: parent.top
           anchors.left: parent.left
-          width: 76
-          height: 76
-          background-color: #111111
+          width: 78
+          height: 78
+          background-color: #0d0d0d
           border-width: 1
-          border-color: #444444
+          border-color: #555555
 
           UICreature
             id: creatureSprite
@@ -176,32 +210,29 @@ MainWindow
           font: verdana-11px-monochrome
           color: #ffaf00
           text-align: center
-          height: 18
-          margin-left: 4
+          height: 20
+          margin-left: 6
 
-        Label
-          id: detailStars
+        UIWidget
+          id: detailStarsRow
           anchors.top: detailName.bottom
-          anchors.left: creatureSpriteBox.right
-          anchors.right: parent.right
-          font: verdana-11px-monochrome
-          color: #ffcc00
-          text-align: center
-          height: 14
-          margin-left: 4
-          margin-top: 2
+          anchors.horizontalCenter: detailName.horizontalCenter
+          width: 52
+          height: 10
+          margin-top: 4
+          layout: horizontalBox
 
         Label
           id: detailClass
-          anchors.top: detailStars.bottom
+          anchors.top: detailStarsRow.bottom
           anchors.left: creatureSpriteBox.right
           anchors.right: parent.right
           font: verdana-11px-monochrome
-          color: #aaaaaa
+          color: #999999
           text-align: center
           height: 14
-          margin-left: 4
-          margin-top: 2
+          margin-left: 6
+          margin-top: 4
 
         Label
           id: detailOccurrence
@@ -212,13 +243,17 @@ MainWindow
           color: #88ccff
           text-align: center
           height: 14
-          margin-left: 4
+          margin-left: 6
           margin-top: 2
+
+      HorizontalSeparator
+        height: 2
+        margin-top: 4
+        margin-bottom: 2
 
       UIWidget
         id: detailKillSection
-        height: 34
-        margin-bottom: 4
+        height: 36
 
         Label
           id: detailKillsLabel
@@ -226,23 +261,37 @@ MainWindow
           anchors.left: parent.left
           anchors.right: parent.right
           font: verdana-11px-monochrome
-          height: 14
+          color: #dddddd
+          height: 16
 
         ProgressBar
           id: killProgressBar
           anchors.top: detailKillsLabel.bottom
           anchors.left: parent.left
           anchors.right: parent.right
-          height: 10
+          height: 8
           margin-top: 4
           background-color: #c8a050
+
+      BestiarySectionLabel
+        id: statsTitle
+        text: STATS
 
       Label
         id: detailStats
         font: verdana-11px-monochrome
         height: 28
         text-wrap: true
-        margin-bottom: 4
+        color: #cccccc
+
+      Label
+        id: detailStageHint
+        font: verdana-11px-monochrome
+        color: #666666
+        height: 14
+        text-align: center
+        margin-top: 2
+        margin-bottom: 2
 
       Label
         id: detailCharmPts
@@ -250,37 +299,33 @@ MainWindow
         color: #ffcc44
         height: 14
         text-align: center
-        margin-bottom: 6
+        margin-top: 2
+        margin-bottom: 4
 
-      Label
+      BestiarySectionLabel
         id: elementsTitle
-        font: verdana-11px-monochrome
-        color: #aaaaaa
-        text: Resistances:
-        height: 14
+        text: RESISTANCES
 
       UIWidget
         id: elementsPanel
         height: 0
         margin-top: 2
-        margin-bottom: 6
+        margin-bottom: 2
         layout: verticalBox
 
-      Label
+      BestiarySectionLabel
         id: lootTitle
-        font: verdana-11px-monochrome
-        color: #aaaaaa
-        text: Loot:
-        height: 14
+        text: LOOT
+        margin-top: 8
 
       UIWidget
         id: lootPanel
-        height: 34
-        margin-top: 2
-        margin-bottom: 6
+        height: 50
+        margin-top: 4
+        margin-bottom: 4
         layout:
           type: grid
-          cell-size: 34 34
+          cell-size: 38 50
           flow: true
 
       Label
@@ -288,6 +333,7 @@ MainWindow
         font: verdana-11px-monochrome
         color: #88bb88
         height: 28
+        margin-top: 4
         margin-bottom: 6
         text-wrap: true
 

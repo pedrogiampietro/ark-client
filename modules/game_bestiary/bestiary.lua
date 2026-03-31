@@ -52,6 +52,14 @@ local LOOT_DIFFICULTY_NAMES = {
   [4] = "Very Rare"
 }
 
+local LOOT_RARITY_COLORS = {
+  [0] = "#ffffff",
+  [1] = "#aaaaaa",
+  [2] = "#44cc44",
+  [3] = "#ffaa00",
+  [4] = "#ff4444"
+}
+
 local CHARM_NAMES = {
   [0]  = "Wound",        [1]  = "Enflame",     [2]  = "Poison",
   [3]  = "Freeze",       [4]  = "Zap",         [5]  = "Curse",
@@ -511,12 +519,13 @@ function clearCreatureDetail()
   local detail = bestiaryWindow:recursiveGetChildById('creatureDetail')
 
   detail:recursiveGetChildById('detailName'):setText('')
-  detail:recursiveGetChildById('detailStars'):setText('')
+  detail:recursiveGetChildById('detailStarsRow'):destroyChildren()
   detail:recursiveGetChildById('detailClass'):setText('')
   detail:recursiveGetChildById('detailOccurrence'):setText('')
   detail:recursiveGetChildById('detailKillsLabel'):setText('')
   detail:recursiveGetChildById('killProgressBar'):setPercent(0)
   detail:recursiveGetChildById('detailStats'):setText('')
+  detail:recursiveGetChildById('detailStageHint'):setText('')
   detail:recursiveGetChildById('detailCharmPts'):setText('')
   detail:recursiveGetChildById('elementsTitle'):hide()
 
@@ -553,10 +562,14 @@ function refreshCreatureDetail(raceId)
   -- Name
   detail:recursiveGetChildById('detailName'):setText(data.name or "Unknown")
 
-  -- Stars (0–5 filled, remainder empty)
-  local numStars = data.stars or 0
-  local starsStr = string.rep("*", numStars) .. string.rep(".", math.max(0, 5 - numStars))
-  detail:recursiveGetChildById('detailStars'):setText(starsStr)
+  -- Stars: small colored squares (gold=filled, dark=empty)
+  local starsRow = detail:recursiveGetChildById('detailStarsRow')
+  starsRow:destroyChildren()
+  local numStars = math.max(0, math.min(5, data.stars or 0))
+  for i = 1, 5 do
+    local style = (i <= numStars) and 'BestiaryStar' or 'BestiaryEmptyStar'
+    g_ui.createWidget(style, starsRow)
+  end
 
   -- Class + Occurrence
   detail:recursiveGetChildById('detailClass'):setText(data.className or "")
@@ -599,16 +612,22 @@ function refreshCreatureDetail(raceId)
 
   -- Stats
   if data.level and data.level > 1 then
+    local hp  = data.healthMax  or 0
+    local exp = data.experience or 0
+    local arm = data.armor      or 0
+    local spd = data.baseSpeed  or 0
     detail:recursiveGetChildById('detailStats'):setText(
-      "HP: " .. (data.healthMax or "?") ..
-      "  Exp: " .. (data.experience or "?") ..
-      "\nArmor: " .. (data.armor or "?") ..
-      "  Speed: " .. (data.baseSpeed or "?"))
+      "HP: " .. hp .. "   Exp: " .. exp ..
+      "\nArmor: " .. arm .. "   Speed: " .. spd)
+    detail:recursiveGetChildById('detailStageHint'):setText('')
     detail:recursiveGetChildById('detailCharmPts'):setText(
       "Charm Points: " .. (data.charmPoints or 0))
   else
-    detail:recursiveGetChildById('detailStats'):setText(
-      "HP: ???  Exp: ???\nArmor: ???  Speed: ???")
+    detail:recursiveGetChildById('detailStats'):setText('')
+    local unlockAt = data.firstUnlock or 0
+    if data.level and data.level == 1 then unlockAt = data.secondUnlock or 0 end
+    detail:recursiveGetChildById('detailStageHint'):setText(
+      "Kill " .. unlockAt .. " to unlock stats")
     detail:recursiveGetChildById('detailCharmPts'):setText('')
   end
 
@@ -654,19 +673,29 @@ function refreshCreatureDetail(raceId)
   if #validLoot > 0 then
     lootTitle:show()
     for _, loot in ipairs(validLoot) do
-      local item = g_ui.createWidget('BestiaryLootItem', lootPanel)
-      item:setItemId(loot.itemId)
-      if loot.maxCount and loot.maxCount > 1 then
-        item:setItemCount(loot.maxCount)
+      local entry = g_ui.createWidget('BestiaryLootEntry', lootPanel)
+      local icon = entry:getChildById('lootIcon')
+      local rarityLabel = entry:getChildById('lootRarity')
+      if icon then
+        icon:setItemId(loot.itemId)
+        if loot.maxCount and loot.maxCount > 1 then
+          icon:setItemCount(loot.maxCount)
+        end
       end
-      local diffName = LOOT_DIFFICULTY_NAMES[loot.difficulty] or "?"
-      item:setTooltip((loot.name ~= "" and loot.name or ("Item " .. loot.itemId)) ..
-                      "\n" .. diffName)
+      local diff = loot.difficulty or 1
+      local diffName = LOOT_DIFFICULTY_NAMES[diff] or "?"
+      local color   = LOOT_RARITY_COLORS[diff] or "#aaaaaa"
+      if rarityLabel then
+        rarityLabel:setText(diffName)
+        rarityLabel:setColor(color)
+      end
+      local itemName = (loot.name ~= "" and loot.name) or ("Item " .. loot.itemId)
+      entry:setTooltip(itemName .. "\n" .. diffName)
     end
     local panelW = lootPanel:getWidth()
-    local cols = panelW > 0 and math.max(1, math.floor(panelW / 34)) or 8
+    local cols = panelW > 0 and math.max(1, math.floor(panelW / 38)) or 7
     local numRows = math.max(1, math.ceil(#validLoot / cols))
-    lootPanel:setHeight(numRows * 34)
+    lootPanel:setHeight(numRows * 50)
   else
     lootTitle:hide()
     lootPanel:setHeight(0)
