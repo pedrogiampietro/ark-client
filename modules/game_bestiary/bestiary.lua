@@ -87,6 +87,7 @@ function init()
   ProtocolGame.registerOpcode(0xD8, parseCharms)
   ProtocolGame.registerOpcode(0xD9, parseEntryChanged)
   ProtocolGame.registerOpcode(0xB9, parseTracker)
+  ProtocolGame.registerOpcode(0x4B, parseResourceBalance)
 
   if g_game.isOnline() then
     onGameStart()
@@ -107,6 +108,7 @@ function terminate()
   ProtocolGame.unregisterOpcode(0xD8)
   ProtocolGame.unregisterOpcode(0xD9)
   ProtocolGame.unregisterOpcode(0xB9)
+  ProtocolGame.unregisterOpcode(0x4B)
 
   if bestiaryWindow then
     bestiaryWindow:destroy()
@@ -266,6 +268,20 @@ function parseTracker(protocol, msg)
                              toUnlock = toUnlock, progress = progress })
   end
   onBestiaryTracker(entries)
+end
+
+function parseResourceBalance(protocol, msg)
+  local resourceType = msg:getU8()
+  local amount = msg:getU64()
+  if resourceType == 1 then
+    charmPoints = amount
+    if bestiaryWindow and bestiaryWindow:isVisible() then
+      local label = bestiaryWindow:recursiveGetChildById('charmPointsLabel')
+      if label then
+        label:setText(tr('Charm Points: ') .. charmPoints)
+      end
+    end
+  end
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
