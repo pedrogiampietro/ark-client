@@ -38,10 +38,10 @@ local ELEMENT_COLORS = {
 }
 
 local OCCURRENCE_NAMES = {
-  [0] = "Common",
+  [0] = "Rare",
   [1] = "Uncommon",
-  [2] = "Rare",
-  [3] = "Very Rare"
+  [2] = "Common",
+  [3] = "Special"
 }
 
 local LOOT_DIFFICULTY_NAMES = {
@@ -580,27 +580,21 @@ function refreshCreatureDetail(raceId)
 
   local killLabel
   if data.level and data.level >= 3 then
-    killLabel = "Kills: " .. kills .. "  (Bestiary Complete)"
+    killLabel = "Kills: " .. kills .. " / " .. toUnlock .. "  [Complete]"
   else
-    killLabel = "Kills: " .. kills .. " / " .. nextTarget ..
-                "  (I:" .. firstUnlock .. "  II:" .. secondUnlock .. "  III:" .. toUnlock .. ")"
+    local stageLabels = { [0]="Next: "..firstUnlock, [1]="Next: "..secondUnlock, [2]="Next: "..toUnlock }
+    killLabel = "Kills: " .. kills .. " / " .. toUnlock ..
+                "  (" .. (stageLabels[data.level] or "") .. ")"
   end
   detail:recursiveGetChildById('detailKillsLabel'):setText(killLabel)
 
+  -- Kill progress bar: cumulative kills / toUnlock so it always shows progress
   local killBar = detail:recursiveGetChildById('killProgressBar')
-  if nextTarget > 0 and data.level < 3 then
-    local prevTarget = 0
-    if data.level == 1 then prevTarget = firstUnlock
-    elseif data.level == 2 then prevTarget = secondUnlock
-    end
-    local span = nextTarget - prevTarget
-    local done = kills - prevTarget
-    local pct = span > 0 and math.min(100, math.floor(done / span * 100)) or 0
-    killBar:setPercent(pct)
-  elseif data.level >= 3 then
-    killBar:setPercent(100)
+  if toUnlock > 0 then
+    local pct = math.min(100, math.floor(kills / toUnlock * 100))
+    killBar:setPercent(math.max(1, pct))
   else
-    killBar:setPercent(0)
+    killBar:setPercent(data.level >= 3 and 100 or 1)
   end
 
   -- Stats
@@ -669,7 +663,8 @@ function refreshCreatureDetail(raceId)
       item:setTooltip((loot.name ~= "" and loot.name or ("Item " .. loot.itemId)) ..
                       "\n" .. diffName)
     end
-    local cols = math.max(1, math.floor((lootPanel:getWidth()) / 34))
+    local panelW = lootPanel:getWidth()
+    local cols = panelW > 0 and math.max(1, math.floor(panelW / 34)) or 8
     local numRows = math.max(1, math.ceil(#validLoot / cols))
     lootPanel:setHeight(numRows * 34)
   else
