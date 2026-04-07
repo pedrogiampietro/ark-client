@@ -146,7 +146,8 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
     Cyclopedia.SetBestiaryDiamonds(occurence[data.ocorrence] or 1)
     Cyclopedia.SetBestiaryStars(data.difficulty or 0)
     UI.ListBase.CreatureInfo.LeftBase.Sprite:setOutfit(raceData.outfit)
-    UI.ListBase.CreatureInfo.LeftBase.Sprite:getCreature():setStaticWalking(1000)
+    local creatureInfo = UI.ListBase.CreatureInfo.LeftBase.Sprite:getCreature()
+    if creatureInfo then creatureInfo:setStaticWalking(1000) end
 
     Cyclopedia.SetBestiaryProgress(60,
         UI.ListBase.CreatureInfo.ProgressBack,
@@ -239,12 +240,37 @@ function Cyclopedia.ShowBestiaryCreatures(Category)
     g_game.requestBestiaryCreatures(Category)
 end
 
+local RACE_ICON_MAP = {
+    ["amphibians"]       = "amphibic",
+    ["aquatics"]         = "aquatic",
+    ["birds"]            = "bird",
+    ["constructs"]       = "construct",
+    ["demons"]           = "demon",
+    ["dragons"]          = "dragon",
+    ["elementals"]       = "elemental",
+    ["extra dimensionals"] = "extra_dimensional",
+    ["extra_dimensionals"] = "extra_dimensional",
+    ["feys"]             = "fey",
+    ["giants"]           = "giant",
+    ["humans"]           = "human",
+    ["humanoids"]        = "humanoid",
+    ["lycanthropes"]     = "lycanthrope",
+    ["magicals"]         = "magical",
+    ["mammals"]          = "mammal",
+    ["plants"]           = "plant",
+    ["reptiles"]         = "reptile",
+    ["slimes"]           = "slime",
+    ["undeads"]          = "undead",
+    ["vermins"]          = "vermin",
+}
+
 function Cyclopedia.CreateBestiaryCategoryItem(Data)
     UI.BackPageButton:setEnabled(false)
 
     local widget = g_ui.createWidget("BestiaryCategory", UI.ListBase.CategoryList)
     widget:setText(Data.name)
-    local iconName = Data.name:lower():gsub(" ", "_")
+    local key = Data.name:lower():gsub(" ", "_")
+    local iconName = RACE_ICON_MAP[Data.name:lower()] or RACE_ICON_MAP[key] or key
     widget.ClassIcon:setImageSource("/game_cyclopedia/images/bestiary/creatures/" .. iconName)
     widget.Category = Data.name
     widget:setColor("#C0C0C0")
@@ -360,7 +386,8 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
 
     widget.Name:setText(truncate(raceData.name))
     widget.Sprite:setOutfit(raceData.outfit)
-    widget.Sprite:getCreature():setStaticWalking(1000)
+    local wCreature = widget.Sprite:getCreature()
+    if wCreature then wCreature:setStaticWalking(1000) end
 
     if data.AnimusMasteryBonus and data.AnimusMasteryBonus > 0 then
         widget.AnimusMastery:setTooltip("Animus Mastery unlocked.")
@@ -594,7 +621,8 @@ function Cyclopedia.refreshBestiaryTracker()
         local btn = g_ui.createWidget('TrackerButton', contents)
         local raceData = Cyclopedia.getMonsterCache(entry.raceId)
         btn.creature:setOutfit(raceData.outfit)
-        btn.creature:getCreature():setStaticWalking(1000)
+        local tc = btn.creature:getCreature()
+        if tc then tc:setStaticWalking(1000) end
         btn.label:setText(raceData.name)
         btn.kills:setText(tostring(entry.kills))
 

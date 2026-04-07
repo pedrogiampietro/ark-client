@@ -103,7 +103,7 @@ UIWidget
     UIWidget
       id: CreatureInfo
       anchors.fill: parent
-      image-source: /images/ui/minipanel
+      image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
       image-border: 20
       visible: false
       !text: tr('Creature Name')

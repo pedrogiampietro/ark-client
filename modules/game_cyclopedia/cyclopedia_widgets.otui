@@ -12,7 +12,7 @@ BorderBox < UIWidget
   border-color: #555555
 
 SubPanel < UIWidget
-  image-source: /images/ui/minipanel
+  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 3
   image-border-top: 22
   color: #929292
@@ -20,7 +20,7 @@ SubPanel < UIWidget
   text-align: top
 
 BestiaryCategory < UIWidget
-  image-source: /images/ui/minipanel
+  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 20
   !text: tr('Name')
   text-align: top
@@ -56,7 +56,7 @@ BestiaryCategory < UIWidget
     color: #C2C2C2
 
 BestiaryCreature < UIWidget
-  image-source: /images/ui/minipanel
+  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 20
   Label
     id: Name
@@ -180,7 +180,7 @@ CharmCreatureName < UICheckBox
 
 CharmItem < UICheckBox
   !text: tr('Title')
-  image-source: /images/ui/minipanel
+  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 3
   image-border-top: 22
   color: #929292
