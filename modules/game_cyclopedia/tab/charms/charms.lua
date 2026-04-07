@@ -104,7 +104,7 @@ function Cyclopedia.CreateCharmItem(data)
         if raceData.outfit.type > 0 then
             widget.InfoBase.Sprite:setOutfit(raceData.outfit)
             local sc = widget.InfoBase.Sprite:getCreature()
-            if sc then sc:setStaticWalking(1000) end
+            if sc and sc.setStaticWalking then sc:setStaticWalking(1000) end
         end
     end
 

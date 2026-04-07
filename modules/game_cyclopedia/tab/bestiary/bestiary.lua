@@ -147,7 +147,7 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
     Cyclopedia.SetBestiaryStars(data.difficulty or 0)
     UI.ListBase.CreatureInfo.LeftBase.Sprite:setOutfit(raceData.outfit)
     local creatureInfo = UI.ListBase.CreatureInfo.LeftBase.Sprite:getCreature()
-    if creatureInfo then creatureInfo:setStaticWalking(1000) end
+    if creatureInfo and creatureInfo.setStaticWalking then creatureInfo:setStaticWalking(1000) end
 
     Cyclopedia.SetBestiaryProgress(60,
         UI.ListBase.CreatureInfo.ProgressBack,
@@ -387,7 +387,7 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
     widget.Name:setText(truncate(raceData.name))
     widget.Sprite:setOutfit(raceData.outfit)
     local wCreature = widget.Sprite:getCreature()
-    if wCreature then wCreature:setStaticWalking(1000) end
+    if wCreature and wCreature.setStaticWalking then wCreature:setStaticWalking(1000) end
 
     if data.AnimusMasteryBonus and data.AnimusMasteryBonus > 0 then
         widget.AnimusMastery:setTooltip("Animus Mastery unlocked.")
@@ -622,7 +622,7 @@ function Cyclopedia.refreshBestiaryTracker()
         local raceData = Cyclopedia.getMonsterCache(entry.raceId)
         btn.creature:setOutfit(raceData.outfit)
         local tc = btn.creature:getCreature()
-        if tc then tc:setStaticWalking(1000) end
+        if tc and tc.setStaticWalking then tc:setStaticWalking(1000) end
         btn.label:setText(raceData.name)
         btn.kills:setText(tostring(entry.kills))
 
