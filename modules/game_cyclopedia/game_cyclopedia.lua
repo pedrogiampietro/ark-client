@@ -30,7 +30,9 @@ function init()
 
     g_keyboard.bindKeyDown('Alt+B', toggle)
 
-    -- Register custom protocol opcodes
+    -- Unregister first in case another module claimed these opcodes, then re-register
+    local opcodes = {0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xB9, 0x4B}
+    for _, op in ipairs(opcodes) do ProtocolGame.unregisterOpcode(op) end
     ProtocolGame.registerOpcode(0xD5, parseRaces)
     ProtocolGame.registerOpcode(0xD6, parseOverview)
     ProtocolGame.registerOpcode(0xD7, parseMonsterData)
