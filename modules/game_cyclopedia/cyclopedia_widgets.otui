@@ -1,0 +1,351 @@
+ProgressBackground < UIWidget
+  image-source: /images/ui/panel_flat
+  image-border: 5
+  padding: 1
+  UIWidget
+    background-color: #1a1a1a
+    anchors.fill: parent
+    phantom: true
+
+BorderBox < UIWidget
+  border-width: 1
+  border-color: #555555
+
+SubPanel < UIWidget
+  image-source: /images/ui/minipanel
+  image-border: 3
+  image-border-top: 22
+  color: #929292
+  text-offset: 0 3
+  text-align: top
+
+BestiaryCategory < UIWidget
+  image-source: /images/ui/minipanel
+  image-border: 20
+  !text: tr('Name')
+  text-align: top
+  text-offset: 0 4
+  color: #909090
+  UIWidget
+    id: ClassBase
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 22
+    size: 64 64
+    image-source: /images/ui/item
+    image-border: 10
+    $pressed:
+      background-color: #333333
+  UIWidget
+    id: ClassIcon
+    anchors.centerIn: ClassBase
+    phantom: true
+  Label
+    id: KnownValue
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 5
+    !text: tr('Known: ') .. '00'
+    color: #C2C2C2
+  Label
+    id: TotalValue
+    anchors.bottom: KnownValue.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 0
+    !text: tr('Total: ') .. '00'
+    color: #C2C2C2
+
+BestiaryCreature < UIWidget
+  image-source: /images/ui/minipanel
+  image-border: 20
+  Label
+    id: Name
+    height: 20
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-left: 2
+    margin-right: 2
+    text-align: center
+    text-offset: 0 3
+    color: #919191
+  UIWidget
+    id: ClassBase
+    anchors.top: Name.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 2
+    size: 64 64
+    image-source: /images/ui/item
+    image-border: 10
+    phantom: false
+    $pressed:
+      background-color: #333333
+  UICreature
+    id: Sprite
+    anchors.centerIn: ClassBase
+    size: 64 64
+    phantom: true
+  UIWidget
+    id: AnimusMastery
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 2
+    margin-left: 2
+    image-source: /game_cyclopedia/images/indicator_soulcore
+    visible: false
+  UIWidget
+    id: Finalized
+    anchors.centerIn: ClassBase
+    size: 16 16
+    image-source: /game_cyclopedia/images/bestiary/creatureCheck
+    visible: false
+  Label
+    id: KillsLabel
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 5
+    text-auto-resize: true
+    !text: tr('?')
+    color: #C2C2C2
+
+BestiaryResistProgress < UIWidget
+  image-source: /game_cyclopedia/images/bestiary/barra
+  UIWidget
+    id: Fill
+    anchors.fill: parent
+    background-color: red
+    margin-left: 1
+    margin-bottom: 2
+    margin-top: 2
+    margin-right: 1
+    phantom: true
+  UIWidget
+    id: Border
+    anchors.fill: parent
+    image-source: /game_cyclopedia/images/bestiary/barra
+    phantom: true
+
+BestiaryItem < UIItem
+  image-source: /images/ui/item
+  image-border: 10
+  size: 34 34
+  anchors.verticalCenter: parent.verticalCenter
+  padding: 1
+  $checked:
+    image-source: /images/ui/panel_flat
+  $first:
+    anchors.left: parent.left
+  $!first:
+    anchors.left: prev.right
+    margin-left: 2
+  UIWidget
+    id: undefinedItem
+    image-source: /images/ui/item
+    anchors.fill: parent
+    visible: false
+  Label
+    id: Stackable
+    text-auto-resize: true
+    font: verdana-11px-rounded
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    color: #BFBFBF
+    margin-bottom: -1
+  UIWidget
+    id: Rarity
+    image-border: 5
+    padding: 1
+    anchors.fill: parent
+
+BestiaryItemGroup < UIWidget
+  height: 45
+  UIWidget
+    id: Items
+    anchors.fill: parent
+    margin-left: 108
+  Label
+    id: Title
+    anchors.left: parent.left
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 5
+    !text: tr('Common') .. ':'
+    text-auto-resize: true
+
+CharmCreatureName < UICheckBox
+  color: #C0C0C0
+  background-color: #484848
+  @onClick: modules.game_cyclopedia.Cyclopedia.selectCreatureCharm(self, self:isChecked())
+  $checked:
+    background-color: #585858
+
+CharmItem < UICheckBox
+  !text: tr('Title')
+  image-source: /images/ui/minipanel
+  image-border: 3
+  image-border-top: 22
+  color: #929292
+  text-offset: 0 3
+  text-align: top
+  border: 0 white
+  @onClick: modules.game_cyclopedia.Cyclopedia.selectCharm(self, self:isChecked())
+  $checked:
+    border: 2 white
+  $!checked:
+    border: 0 white
+  BorderBox
+    id: InfoBase
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    margin-bottom: 5
+    margin-right: 5
+    image-source: /images/ui/panel_flat
+    image-border: 10
+    size: 66 66
+    phantom: true
+    UICreature
+      size: 64 64
+      id: Sprite
+      anchors.centerIn: parent
+      phantom: true
+  UIWidget
+    id: PriceBase
+    size: 73 20
+    anchors.left: parent.left
+    anchors.bottom: InfoBase.bottom
+    margin-left: 8
+    image-source: /images/ui/item
+    image-border: 10
+    phantom: true
+    Label
+      id: Value
+      anchors.centerIn: parent
+      !text: tr('0')
+      text-auto-resize: true
+      margin-right: 3
+    UIWidget
+      id: Charm
+      anchors.left: Value.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 2
+      image-source: /game_cyclopedia/images/icon_charms
+    UIWidget
+      id: Gold
+      anchors.left: Value.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 2
+      image-source: /game_cyclopedia/images/icon_gold
+      visible: false
+  BorderBox
+    id: charmBase
+    anchors.bottom: PriceBase.top
+    anchors.horizontalCenter: PriceBase.horizontalCenter
+    margin-bottom: 7
+    size: 37 37
+    image-source: /images/ui/panel_flat
+    image-border: 10
+    phantom: true
+    UIWidget
+      size: 32 32
+      id: image
+      anchors.centerIn: parent
+      phantom: true
+    UIWidget
+      id: lockedMask
+      size: 35 35
+      anchors.centerIn: parent
+      image-source: /images/options/ditherpattern
+      phantom: true
+    UIWidget
+      id: border
+      anchors.centerIn: parent
+      phantom: true
+      visible: false
+
+TrackerButton < Panel
+  height: 34
+  margin-bottom: 5
+  phantom: false
+  border-width: 1
+  border-color: alpha
+  padding: 1
+  $hover:
+    border-color: white
+  UICreature
+    id: creature
+    size: 16 16
+    anchors.left: parent.left
+    anchors.top: parent.top
+    phantom: true
+  UIWidget
+    id: spacer
+    width: 3
+    anchors.left: creature.right
+    anchors.top: creature.top
+  Label
+    id: label
+    anchors.left: spacer.right
+    anchors.top: creature.top
+    text-auto-resize: true
+    color: #888888
+    margin-left: 2
+  Label
+    id: kills
+    anchors.right: parent.right
+    anchors.top: creature.top
+    text-align: right
+    text-auto-resize: true
+    color: #888888
+    margin-left: 2
+  ProgressBackground
+    id: ProgressBorder2
+    anchors.left: spacer.right
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: creature.bottom
+    margin-top: 2
+    size: 54 15
+  ProgressBackground
+    id: ProgressBorder1
+    anchors.right: ProgressBorder2.left
+    anchors.top: creature.bottom
+    margin-right: 2
+    margin-top: 2
+    size: 54 15
+  ProgressBackground
+    id: ProgressBorder3
+    anchors.left: ProgressBorder2.right
+    anchors.top: creature.bottom
+    margin-top: 2
+    margin-left: 2
+    size: 54 15
+  UIWidget
+    id: killsBar2
+    anchors.left: ProgressBorder1.left
+    anchors.top: creature.bottom
+    height: 12
+    phantom: true
+    margin-top: 3
+  UIWidget
+    id: ProgressBack33
+    anchors.left: ProgressBorder2.left
+    anchors.top: creature.bottom
+    height: 12
+    phantom: true
+    margin-top: 3
+  UIWidget
+    id: ProgressBack55
+    anchors.left: ProgressBorder3.left
+    anchors.top: creature.bottom
+    height: 12
+    phantom: true
+    margin-top: 3
+
+BestiaryTracker < MiniWindow
+  id: BestiaryTracker
+  !text: tr('Bestiary Tracker')
+  @onClose: modules.game_cyclopedia.onTrackerClose()
+  MiniWindowContents
+    id: contentsPanel
+    layout: verticalBox
+    padding-left: 5
+    padding-right: 5
+    padding-bottom: 3

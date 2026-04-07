@@ -1,0 +1,127 @@
+MainWindow
+  id: cyclopediaWindow
+  size: 700 560
+  !text: tr('Cyclopedia')
+  @onEscape: modules.game_cyclopedia.toggle()
+
+  UIWidget
+    id: tabBar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 28
+    background-color: #2a2a2a
+
+    Button
+      id: tabBestiary
+      !text: tr('Bestiary')
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-left: 2
+      margin-top: 3
+      width: 90
+      height: 22
+      @onClick: modules.game_cyclopedia.showTab('bestiary')
+      $on:
+        color: #ffaf00
+
+    Button
+      id: tabCharms
+      !text: tr('Charms')
+      anchors.top: tabBestiary.top
+      anchors.left: tabBestiary.right
+      margin-left: 2
+      width: 90
+      height: 22
+      @onClick: modules.game_cyclopedia.showTab('charms')
+      $on:
+        color: #ffaf00
+
+  UIWidget
+    id: contentContainer
+    anchors.top: tabBar.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: bottomBar.top
+    margin-top: 2
+
+  HorizontalSeparator
+    id: bottomSep
+    anchors.bottom: bottomBar.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-bottom: 2
+
+  UIWidget
+    id: bottomBar
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 24
+
+    UIWidget
+      id: GoldBase
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      image-source: /images/ui/item
+      image-border: 10
+      size: 131 20
+      UIWidget
+        id: Icon
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        margin-right: 4
+        image-source: /game_cyclopedia/images/icon_gold
+      Label
+        id: Value
+        anchors.right: Icon.left
+        anchors.verticalCenter: parent.verticalCenter
+        margin-right: 4
+        !text: tr('0')
+        text-auto-resize: true
+        color: #BDBDBD
+
+    UIWidget
+      id: CharmsBase
+      anchors.bottom: parent.bottom
+      anchors.left: GoldBase.right
+      margin-left: 5
+      image-source: /images/ui/item
+      image-border: 10
+      size: 100 20
+      UIWidget
+        id: Icon
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        margin-right: 4
+        image-source: /game_cyclopedia/images/icon_charms
+      Label
+        id: Value
+        anchors.right: Icon.left
+        anchors.verticalCenter: parent.verticalCenter
+        margin-right: 4
+        !text: tr('0')
+        text-auto-resize: true
+        color: #BDBDBD
+
+    Button
+      id: BestiaryTrackerButton
+      size: 90 20
+      anchors.bottom: parent.bottom
+      anchors.left: CharmsBase.right
+      margin-left: 5
+      !text: tr('Tracker')
+      font: small-9px
+      @onClick: modules.game_cyclopedia.toggleTracker()
+      text-offset: 0 -1
+      color: #C0C0C0
+
+    Button
+      id: CloseButton
+      size: 50 20
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      !text: tr('Close')
+      text-offset: 0 -1
+      color: #C0C0C0
+      @onClick: modules.game_cyclopedia.toggle()

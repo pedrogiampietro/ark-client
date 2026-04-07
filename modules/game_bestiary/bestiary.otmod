@@ -2,6 +2,7 @@ Module
   name: game_bestiary
   description: Bestiary and Charms system
   sandboxed: true
+  autoload: false
   scripts: [ bestiary ]
   @onLoad: init()
   @onUnload: terminate()

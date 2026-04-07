@@ -1,0 +1,11 @@
+Module
+  name: game_cyclopedia
+  description: Bestiary & Charms Cyclopedia
+  sandboxed: true
+  autoload: true
+  scripts: [ game_cyclopedia, tab/bestiary/bestiary, tab/charms/charms ]
+  @onLoad: init()
+  @onUnload: terminate()
+  dependencies:
+    - game_interface
+    - game_sidebuttons
