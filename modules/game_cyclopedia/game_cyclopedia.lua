@@ -27,6 +27,10 @@ local function onTextMessage(mode, text)
         end
     end
 
+    -- Remember every creature name we've seen from loot, for better search hints
+    Cyclopedia.seenCreatureNames = Cyclopedia.seenCreatureNames or {}
+    Cyclopedia.seenCreatureNames[lower] = true
+
     if foundId then
         print("[Bestiary] kill detected '" .. name .. "' raceId=" .. foundId .. " -> requesting update")
         g_game.requestBestiaryMonsterData(foundId)
@@ -141,6 +145,7 @@ function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
     Cyclopedia.wantsFullCache = false
+    Cyclopedia.seenCreatureNames = {}
     Cyclopedia.storedTrackerData = nil
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()

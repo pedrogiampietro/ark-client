@@ -421,8 +421,14 @@ function Cyclopedia.BestiarySearch()
         table.sort(list, function(a, b) return a.id < b.id end)
         Cyclopedia.loadBestiarySearchCreatures(list)
     else
-        -- Nothing in cache yet — request all races and show message
-        displayInfoBox(tr("Search"), tr("No creatures found matching: ") .. text)
+        local msg = tr("No creatures found matching: ") .. text
+        -- Check if we've seen this creature in loot messages but it hasn't reached stage I yet
+        if Cyclopedia.seenCreatureNames and Cyclopedia.seenCreatureNames[lower] then
+            msg = msg .. "\n\n" .. tr("You have killed this creature but it has not yet reached Bestiary Stage I.")
+        else
+            msg = msg .. "\n\n" .. tr("Only creatures you have unlocked to Stage I or higher appear in search.")
+        end
+        displayInfoBox(tr("Search"), msg)
     end
 end
 
