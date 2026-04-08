@@ -11,6 +11,8 @@ local trackerButton = nil
 
 -- Detect creature kills from loot messages and request fresh bestiary data.
 -- The server (Eldera) does not push opcode 0xD9 on kill, so we poll on loot events.
+local raceRefreshTimer = nil
+
 local function onTextMessage(mode, text)
     -- Match "Loot of a rat:", "Loot of an ant:", "Loot of the demon:", etc.
     local name = text:match("[Ll]oot of %a+ (.-)%s*:")
@@ -29,9 +31,14 @@ local function onTextMessage(mode, text)
         print("[Bestiary] kill detected '" .. name .. "' raceId=" .. foundId .. " -> requesting update")
         g_game.requestBestiaryMonsterData(foundId)
     else
-        -- Creature not in cache yet (first kill) — refresh races to pick up new unlocks
-        print("[Bestiary] kill detected '" .. name .. "' (not in cache) -> refreshing races")
-        g_game.requestBestiaryRaces()
+        -- Creature not in cache yet (hasn't reached stage 1) — debounced race refresh
+        -- to detect when a new category becomes unlocked (unlockedCount 0→1).
+        if raceRefreshTimer then return end
+        print("[Bestiary] kill detected '" .. name .. "' (not in cache) -> refreshing races (debounced)")
+        raceRefreshTimer = scheduleEvent(function()
+            raceRefreshTimer = nil
+            g_game.requestBestiaryRaces()
+        end, 4000)
     end
 end
 
@@ -110,6 +117,8 @@ function terminate()
 end
 
 function onGameStart()
+    Cyclopedia.monsterCache = {}
+    Cyclopedia.knownCategories = {}
     -- Setup tracker miniwindow
     if not trackerMiniWindow then
         trackerMiniWindow = g_ui.createWidget('BestiaryTracker', modules.game_interface.getMiniWindowContainer and modules.game_interface.getMiniWindowContainer() or modules.game_interface.getRightPanel())
@@ -122,7 +131,12 @@ end
 
 function onGameEnd()
     Cyclopedia.monsterCache = {}
+    Cyclopedia.knownCategories = {}
     Cyclopedia.storedTrackerData = nil
+    if raceRefreshTimer then
+        raceRefreshTimer:cancel()
+        raceRefreshTimer = nil
+    end
     if cyclopediaWindow then cyclopediaWindow:hide() end
     if cyclopediaButton then cyclopediaButton:setOn(false) end
     if trackerMiniWindow then trackerMiniWindow:hide() end
@@ -202,10 +216,11 @@ function parseRaces(protocol, msg)
     end
     Cyclopedia.loadBestiaryCategories(raceData)
 
-    -- Pre-populate search cache: request creatures for all categories that have
-    -- unlocked entries, so search works without having to open each category first
+    -- Request creatures for categories that are unlocked but not yet in our cache.
+    -- Using knownCategories prevents re-fetching all overviews on every kill-triggered refresh.
+    Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
     for _, r in ipairs(raceData) do
-        if r.unlockedCount > 0 then
+        if r.unlockedCount > 0 and not Cyclopedia.knownCategories[r.bestClass] then
             g_game.requestBestiaryCreatures(r.bestClass)
         end
     end
@@ -215,6 +230,8 @@ function parseOverview(protocol, msg)
     local raceName = msg:getString()
     local count    = msg:getU16()
     print("[Bestiary] parseOverview: race='" .. raceName .. "' count=" .. count)
+    Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
+    Cyclopedia.knownCategories[raceName] = true
     local list = {}
     for i = 1, count do
         local raceId     = msg:getU16()
