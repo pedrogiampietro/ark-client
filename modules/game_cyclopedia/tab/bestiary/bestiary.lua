@@ -60,6 +60,9 @@ function showBestiary()
         end
     end, UI.SearchEdit)
 
+    -- Request races; set flag so parseRaces fetches ALL categories (not just unlocked),
+    -- enabling search to find every creature regardless of kill progress.
+    Cyclopedia.wantsFullCache = true
     g_game.requestBestiaryRaces()
 end
 

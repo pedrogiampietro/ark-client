@@ -126,6 +126,7 @@ end
 function onGameStart()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
+    Cyclopedia.wantsFullCache = false
     -- Setup tracker miniwindow
     if not trackerMiniWindow then
         trackerMiniWindow = g_ui.createWidget('BestiaryTracker', modules.game_interface.getMiniWindowContainer and modules.game_interface.getMiniWindowContainer() or modules.game_interface.getRightPanel())
@@ -139,6 +140,7 @@ end
 function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
+    Cyclopedia.wantsFullCache = false
     Cyclopedia.storedTrackerData = nil
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()
@@ -223,11 +225,15 @@ function parseRaces(protocol, msg)
     end
     Cyclopedia.loadBestiaryCategories(raceData)
 
-    -- Request creatures for categories that are unlocked but not yet in our cache.
-    -- Using knownCategories prevents re-fetching all overviews on every kill-triggered refresh.
     Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
+    local fullCache = Cyclopedia.wantsFullCache
+    Cyclopedia.wantsFullCache = false
+
     for _, r in ipairs(raceData) do
-        if r.unlockedCount > 0 and not Cyclopedia.knownCategories[r.bestClass] then
+        local isNew = not Cyclopedia.knownCategories[r.bestClass]
+        -- Full cache (cyclopedia opened): fetch every category so search finds all creatures.
+        -- Kill-triggered refresh: only fetch categories that newly became unlocked.
+        if fullCache or (r.unlockedCount > 0 and isNew) then
             g_game.requestBestiaryCreatures(r.bestClass)
         end
     end
@@ -254,10 +260,9 @@ function parseOverview(protocol, msg)
     end
     local totalAnimus = msg:getU16()
 
-    -- Background cache population: request monster data for unlocked creatures
-    -- not yet in cache (drives search functionality)
+    -- Cache all creatures in this category (including level-0) so search finds them.
     for _, entry in ipairs(list) do
-        if (entry.currentLevel or 0) >= 1 and not Cyclopedia.monsterCache[entry.id] then
+        if not Cyclopedia.monsterCache[entry.id] then
             g_game.requestBestiaryMonsterData(entry.id)
         end
     end
