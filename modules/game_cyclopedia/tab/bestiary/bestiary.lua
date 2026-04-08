@@ -139,6 +139,11 @@ function Cyclopedia.CreateCreatureItems(data)
 end
 
 function Cyclopedia.loadBestiarySelectedCreature(data)
+    -- Switch to creature view if not already there
+    if Cyclopedia.Bestiary.Stage ~= STAGES.CREATURE then
+        Cyclopedia.ShowBestiaryCreature()
+    end
+
     local occurence = { [0] = 1, 2, 3, 4 }
     local raceData = Cyclopedia.getMonsterCache(data.id)
 
@@ -203,7 +208,7 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
         end
     else
         for i = 1, 8 do
-            UI.ListBase.CreatureInfo[resists[i]].Fill:setMarginRight(65)
+            UI.ListBase.CreatureInfo[resists[i]].Fill:setMarginRight(88)
         end
     end
 
@@ -416,7 +421,7 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
         if data.currentLevel < 1 then return end
         UI.BackPageButton:setEnabled(true)
         g_game.requestBestiaryMonsterData(widget:getId())
-        Cyclopedia.ShowBestiaryCreature()
+        -- ShowBestiaryCreature() called from loadBestiarySelectedCreature when data arrives
     end
 end
 
@@ -554,6 +559,23 @@ function Cyclopedia.changeBestiaryPage(prev, next)
     Cyclopedia.verifyBestiaryButtons()
 end
 
+-- Called by game_cyclopedia.lua after parseMonsterData updates the cache
+function Cyclopedia.refreshCreatureListItem(raceId)
+    if not UI or not UI.ListBase.CreatureList:isVisible() then return end
+    local widget = UI.ListBase.CreatureList:getChildById(raceId)
+    if not widget then return end
+    local raceData = Cyclopedia.getMonsterCache(raceId)
+    local function truncate(name)
+        if #name > 18 then return name:sub(1, 15) .. "..." end
+        return name
+    end
+    widget.Name:setText(truncate(raceData.name))
+    local outfit = raceData.outfit
+    if outfit and outfit.type and outfit.type > 0 then
+        widget.Sprite:setOutfit(outfit)
+    end
+end
+
 function Cyclopedia.loadBestiaryCreature(page, search)
     local state = search and "Search" or "Creatures"
     if not Cyclopedia.Bestiary[state] or not Cyclopedia.Bestiary[state][page] then return end
@@ -566,8 +588,8 @@ end
 
 function Cyclopedia.calculateCombatValues(value)
     -- value is 0-100 (resistance percentage)
-    -- margin-right controls how much of the bar is "empty" (inverted)
-    local margin = math.max(0, math.floor((1 - (value / 100)) * 65))
+    -- margin-right controls how much of the bar is "empty" (bar inner = 90-2 = 88px)
+    local margin = math.max(0, math.floor((1 - (value / 100)) * 88))
     local color
     if value >= 100 then
         color = "#4444cc"  -- immune

@@ -280,6 +280,11 @@ function parseMonsterData(protocol, msg)
         level    = level,
     }
 
+    -- Refresh creature list widget if visible (fixes "Unknown #id" names)
+    if Cyclopedia.refreshCreatureListItem then
+        Cyclopedia.refreshCreatureListItem(raceId)
+    end
+
     -- Build cyclopedia-format data
     local data = {
         id                  = raceId,
