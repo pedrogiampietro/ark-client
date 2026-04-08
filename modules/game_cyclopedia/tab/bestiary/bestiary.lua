@@ -66,12 +66,6 @@ function showBestiary()
     Cyclopedia.currentViewingRaceId = nil
     Cyclopedia.currentCategory      = nil
 
-    -- Full cache load: request ALL category overviews once per session so search
-    -- finds every creature. On subsequent opens just refresh category counts.
-    if not Cyclopedia.fullCacheLoaded then
-        Cyclopedia.fullCacheLoaded  = true
-        Cyclopedia.wantsFullCache   = true
-    end
     g_game.requestBestiaryRaces()
 end
 

@@ -179,8 +179,6 @@ end
 function onGameStart()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
-    Cyclopedia.wantsFullCache = false
-    Cyclopedia.fullCacheLoaded = false
     -- Setup tracker miniwindow
     if not trackerMiniWindow then
         trackerMiniWindow = g_ui.createWidget('BestiaryTracker', modules.game_interface.getMiniWindowContainer and modules.game_interface.getMiniWindowContainer() or modules.game_interface.getRightPanel())
@@ -194,8 +192,6 @@ end
 function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
-    Cyclopedia.wantsFullCache = false
-    Cyclopedia.fullCacheLoaded = false
     Cyclopedia.seenCreatureNames = {}
     Cyclopedia.storedTrackerData = nil
     clearMonsterDataQueue()
@@ -283,14 +279,12 @@ function parseRaces(protocol, msg)
     Cyclopedia.loadBestiaryCategories(raceData)
 
     Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
-    local fullCache = Cyclopedia.wantsFullCache
-    Cyclopedia.wantsFullCache = false
 
     for _, r in ipairs(raceData) do
         local isNew = not Cyclopedia.knownCategories[r.bestClass]
-        -- Full cache (cyclopedia opened): fetch every category so search finds all creatures.
-        -- Kill-triggered refresh: only fetch categories that newly became unlocked.
-        if fullCache or (r.unlockedCount > 0 and isNew) then
+        -- Only fetch categories that newly became unlocked (e.g. first kill of a new class).
+        -- Do NOT bulk-prefetch all categories on open — that causes the ping spike.
+        if r.unlockedCount > 0 and isNew then
             g_game.requestBestiaryCreatures(r.bestClass)
         end
     end
@@ -317,12 +311,8 @@ function parseOverview(protocol, msg)
     end
     local totalAnimus = msg:getU16()
 
-    -- Queue monster-data requests for uncached creatures (throttled to avoid lag).
-    for _, entry in ipairs(list) do
-        queueMonsterDataRequest(entry.id)
-    end
-
     -- Only update the creature list UI when this is the category the user navigated to.
+    -- Monster data is fetched lazily per-page in loadBestiaryCreature, not here.
     -- Background full-cache requests must NOT touch the page counter or rebuild the list.
     if raceName == Cyclopedia.currentCategory then
         Cyclopedia.loadBestiaryOverview(raceName, list, totalAnimus)
