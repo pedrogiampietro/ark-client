@@ -390,20 +390,25 @@ end
 
 function Cyclopedia.BestiarySearch()
     local text = UI.SearchEdit:getText()
-    -- Search local cache
+    if text == "" then return end
+
+    local lower = text:lower()
     local list = {}
     for raceId, data in pairs(Cyclopedia.monsterCache) do
-        if data.name and data.name:lower():find(text:lower(), 1, true) then
+        if data.name and data.name:lower():find(lower, 1, true) then
             list[#list + 1] = { id = raceId, currentLevel = data.level or 0, creatureAnimusMasteryBonus = 0 }
         end
     end
+
+    UI.SearchEdit:setText("")
+
     if #list > 0 then
+        table.sort(list, function(a, b) return a.id < b.id end)
         Cyclopedia.loadBestiarySearchCreatures(list)
     else
-        -- Request from server
-        g_game.requestBestiaryCreatures("Result")
+        -- Nothing in cache yet — request all races and show message
+        displayInfoBox(tr("Search"), tr("No creatures found matching: ") .. text)
     end
-    UI.SearchEdit:setText("")
 end
 
 function Cyclopedia.BestiarySearchText(text)

@@ -172,6 +172,14 @@ function parseRaces(protocol, msg)
         })
     end
     Cyclopedia.loadBestiaryCategories(raceData)
+
+    -- Pre-populate search cache: request creatures for all categories that have
+    -- unlocked entries, so search works without having to open each category first
+    for _, r in ipairs(raceData) do
+        if r.unlockedCount > 0 then
+            g_game.requestBestiaryCreatures(r.bestClass)
+        end
+    end
 end
 
 function parseOverview(protocol, msg)
@@ -191,6 +199,15 @@ function parseOverview(protocol, msg)
         })
     end
     local totalAnimus = msg:getU16()
+
+    -- Background cache population: request monster data for unlocked creatures
+    -- not yet in cache (drives search functionality)
+    for _, entry in ipairs(list) do
+        if entry.progress >= 1 and not Cyclopedia.monsterCache[entry.id] then
+            g_game.requestBestiaryMonsterData(entry.id)
+        end
+    end
+
     Cyclopedia.loadBestiaryOverview(raceName, list, totalAnimus)
 end
 
