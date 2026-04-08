@@ -203,7 +203,7 @@ function parseOverview(protocol, msg)
     -- Background cache population: request monster data for unlocked creatures
     -- not yet in cache (drives search functionality)
     for _, entry in ipairs(list) do
-        if entry.progress >= 1 and not Cyclopedia.monsterCache[entry.id] then
+        if (entry.currentLevel or 0) >= 1 and not Cyclopedia.monsterCache[entry.id] then
             g_game.requestBestiaryMonsterData(entry.id)
         end
     end
