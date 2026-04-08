@@ -448,7 +448,7 @@ UIWidget
           image-source: /game_cyclopedia/images/bestiary/icons/monster-icon-physical-resist
           anchors.left: parent.left
           anchors.top: parent.top
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: PhysicalProgress
           anchors.left: PhysicalResist.right
@@ -462,7 +462,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: PhysicalResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: FireProgress
           anchors.left: FireResist.right
@@ -476,7 +476,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: FireResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: EarthProgress
           anchors.left: EarthResist.right
@@ -490,7 +490,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: EarthResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: EnergyProgress
           anchors.left: EnergyResist.right
@@ -511,7 +511,7 @@ UIWidget
           image-source: /game_cyclopedia/images/bestiary/icons/monster-icon-ice-resist
           anchors.left: parent.left
           anchors.top: parent.top
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: IceProgress
           anchors.left: IceResist.right
@@ -525,7 +525,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: IceResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: HolyProgress
           anchors.left: HolyResist.right
@@ -539,7 +539,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: HolyResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: DeathProgress
           anchors.left: DeathResist.right
@@ -553,7 +553,7 @@ UIWidget
           anchors.left: parent.left
           anchors.top: DeathResist.bottom
           margin-top: 8
-          size: 14 14
+          size: 9 9
         BestiaryResistProgress
           id: HealingProgress
           anchors.left: HealingResist.right

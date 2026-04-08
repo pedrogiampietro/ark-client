@@ -227,15 +227,23 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
         colB.IceProgress,      colB.HolyProgress, colB.DeathProgress, colB.HealingProgress,
     }
     local resistNames = {"Physical","Fire","Earth","Energy","Ice","Holy","Death","Healing"}
+    local hasElements = data.currentLevel >= 3 and data.combat and not table.empty(data.combat)
     for i = 1, 8 do
         local bar = resistMap[i]
         if bar then
-            local val = (data.combat and data.combat[i]) or 0
-            local combat = Cyclopedia.calculateCombatValues(val)
-            bar.Fill:setMarginRight(combat.margin)
-            bar.Fill:setBackgroundColor(combat.color)
-            bar.ValueLabel:setText(combat.label)
-            bar:setTooltip(resistNames[i] .. ": " .. combat.tooltip)
+            if hasElements then
+                local val = data.combat[i] or 0
+                local combat = Cyclopedia.calculateCombatValues(val)
+                bar.Fill:setMarginRight(combat.margin)
+                bar.Fill:setBackgroundColor(combat.color)
+                bar.ValueLabel:setText(combat.label)
+                bar:setTooltip(resistNames[i] .. ": " .. combat.tooltip)
+            else
+                bar.Fill:setMarginRight(88)
+                bar.Fill:setBackgroundColor("#333333")
+                bar.ValueLabel:setText("?")
+                bar:setTooltip(resistNames[i] .. ": " .. tr("Not yet unlocked"))
+            end
         end
     end
 
