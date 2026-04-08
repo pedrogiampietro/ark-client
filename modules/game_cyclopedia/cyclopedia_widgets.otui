@@ -35,7 +35,11 @@ BestiaryCategory < UIWidget
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 22
     size: 72 72
-    phantom: true
+    phantom: false
+    $hover:
+      image-color: #dddddd
+    $pressed:
+      image-color: #aaaaaa
   UIWidget
     id: ClassIcon
     anchors.centerIn: ClassBase
