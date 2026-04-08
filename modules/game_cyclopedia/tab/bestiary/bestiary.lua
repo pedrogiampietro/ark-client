@@ -139,6 +139,8 @@ function Cyclopedia.CreateCreatureItems(data)
 end
 
 function Cyclopedia.loadBestiarySelectedCreature(data)
+    if not UI then return end
+
     -- Switch to creature view if not already there
     if Cyclopedia.Bestiary.Stage ~= STAGES.CREATURE then
         Cyclopedia.ShowBestiaryCreature()
@@ -198,17 +200,29 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
     UI.ListBase.CreatureInfo.SubTextLabel:setImageSource("")
 
     -- Resistances: combat[1..8] = Physical, Fire, Earth, Energy, Ice, Holy, Death, Healing
-    local resists = {"PhysicalProgress","FireProgress","EarthProgress","EnergyProgress","IceProgress","HolyProgress","DeathProgress","HealingProgress"}
+    -- ColA: Physical(1), Fire(2), Earth(3), Energy(4)
+    -- ColB: Ice(5), Holy(6), Death(7), Healing(8)
+    local colA = UI.ListBase.CreatureInfo.ResistColA
+    local colB = UI.ListBase.CreatureInfo.ResistColB
+    local resistMap = {
+        colA.PhysicalProgress, colA.FireProgress, colA.EarthProgress, colA.EnergyProgress,
+        colB.IceProgress,      colB.HolyProgress, colB.DeathProgress, colB.HealingProgress,
+    }
+    local resistNames = {"Physical","Fire","Earth","Energy","Ice","Holy","Death","Healing"}
     if data.combat and not table.empty(data.combat) then
         for i = 1, 8 do
-            local combat = Cyclopedia.calculateCombatValues(data.combat[i] or 0)
-            UI.ListBase.CreatureInfo[resists[i]].Fill:setMarginRight(combat.margin)
-            UI.ListBase.CreatureInfo[resists[i]].Fill:setBackgroundColor(combat.color)
-            UI.ListBase.CreatureInfo[resists[i]]:setTooltip(string.format("Sensitive to %s: %s", resists[i]:gsub("Progress",""):lower(), combat.tooltip))
+            local bar = resistMap[i]
+            if bar then
+                local combat = Cyclopedia.calculateCombatValues(data.combat[i] or 0)
+                bar.Fill:setMarginRight(combat.margin)
+                bar.Fill:setBackgroundColor(combat.color)
+                bar:setTooltip(string.format("%s: %s", resistNames[i], combat.tooltip))
+            end
         end
     else
         for i = 1, 8 do
-            UI.ListBase.CreatureInfo[resists[i]].Fill:setMarginRight(88)
+            local bar = resistMap[i]
+            if bar then bar.Fill:setMarginRight(88) end
         end
     end
 
