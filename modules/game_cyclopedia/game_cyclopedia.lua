@@ -265,14 +265,18 @@ function parseOverview(protocol, msg)
     end
     local totalAnimus = msg:getU16()
 
-    -- Cache all creatures in this category (including level-0) so search finds them.
+    -- Cache all creatures in this category so search finds them.
     for _, entry in ipairs(list) do
         if not Cyclopedia.monsterCache[entry.id] then
             g_game.requestBestiaryMonsterData(entry.id)
         end
     end
 
-    Cyclopedia.loadBestiaryOverview(raceName, list, totalAnimus)
+    -- Only update the creature list UI when this is the category the user navigated to.
+    -- Background full-cache requests must NOT touch the page counter or rebuild the list.
+    if raceName == Cyclopedia.currentCategory then
+        Cyclopedia.loadBestiaryOverview(raceName, list, totalAnimus)
+    end
 end
 
 function parseMonsterData(protocol, msg)

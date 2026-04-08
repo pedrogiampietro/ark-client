@@ -482,9 +482,13 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
     end
 
     function widget.ClassBase:onClick()
-        if data.currentLevel < 1 then return end
-        UI.BackPageButton:setEnabled(true)
         local id = widget:getId()
+        -- Use live cache level — data.currentLevel can be stale if a kill happened
+        -- after the widget was created (e.g., 0xD9 arrived and updated the cache).
+        local cached = Cyclopedia.monsterCache[id]
+        local level = cached and (cached.level or 0) or data.currentLevel
+        if level < 1 then return end
+        UI.BackPageButton:setEnabled(true)
         Cyclopedia.pendingViewRaceId = id
         g_game.requestBestiaryMonsterData(id)
     end
@@ -638,6 +642,25 @@ function Cyclopedia.refreshCreatureListItem(raceId)
     local outfit = raceData.outfit
     if outfit and outfit.type and outfit.type > 0 then
         widget.Sprite:setOutfit(outfit)
+    end
+    -- Refresh level indicators so the widget looks correct after a kill
+    local cached = Cyclopedia.monsterCache[raceId]
+    local level = cached and (cached.level or 0) or 0
+    local stageSymbols = { [0]="—", [1]="I", [2]="II", [3]="III" }
+    if level >= 3 then
+        widget.Finalized:setVisible(true)
+        widget.KillsLabel:setVisible(false)
+        widget.Name:setColor("#e8c050")
+    elseif level < 1 then
+        widget.KillsLabel:setText("?")
+        widget.KillsLabel:setColor("#666666")
+        widget.Name:setColor("#666666")
+    else
+        widget.Finalized:setVisible(false)
+        widget.KillsLabel:setVisible(true)
+        widget.KillsLabel:setText(stageSymbols[level] or "?")
+        widget.KillsLabel:setColor("#c8a030")
+        widget.Name:setColor("#e8d090")
     end
 end
 
