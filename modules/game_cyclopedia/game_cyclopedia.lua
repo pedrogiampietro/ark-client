@@ -35,10 +35,17 @@ local function onTextMessage(mode, text)
         -- to detect when a new category becomes unlocked (unlockedCount 0→1).
         if raceRefreshTimer then return end
         print("[Bestiary] kill detected '" .. name .. "' (not in cache) -> refreshing races (debounced)")
-        raceRefreshTimer = scheduleEvent(function()
+        local function doRefresh()
             raceRefreshTimer = nil
             g_game.requestBestiaryRaces()
-        end, 4000)
+        end
+        if scheduleEvent then
+            raceRefreshTimer = scheduleEvent(doRefresh, 4000)
+        else
+            -- scheduleEvent unavailable: fire immediately but still gate on the timer flag
+            raceRefreshTimer = true
+            doRefresh()
+        end
     end
 end
 
@@ -133,10 +140,10 @@ function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
     Cyclopedia.storedTrackerData = nil
-    if raceRefreshTimer then
+    if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()
-        raceRefreshTimer = nil
     end
+    raceRefreshTimer = nil
     if cyclopediaWindow then cyclopediaWindow:hide() end
     if cyclopediaButton then cyclopediaButton:setOn(false) end
     if trackerMiniWindow then trackerMiniWindow:hide() end
