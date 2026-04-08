@@ -208,6 +208,7 @@ function onGameEnd()
     Cyclopedia.pendingSearchOriginal = nil
     Cyclopedia.pendingSearchOverviews = 0
     Cyclopedia.searchRequestedCategories = {}
+    Cyclopedia.categoryCreatures = {}
     Cyclopedia.storedTrackerData = nil
     clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
@@ -311,6 +312,7 @@ function parseOverview(protocol, msg)
     print("[Bestiary] parseOverview: race='" .. raceName .. "' count=" .. count)
     Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
     Cyclopedia.knownCategories[raceName] = true
+    Cyclopedia.categoryCreatures = Cyclopedia.categoryCreatures or {}
     local list = {}
     for i = 1, count do
         local raceId     = msg:getU16()
@@ -325,6 +327,11 @@ function parseOverview(protocol, msg)
         })
     end
     local totalAnimus = msg:getU16()
+
+    -- Record which raceIds belong to this category so search can check cache completeness.
+    local ids = {}
+    for _, entry in ipairs(list) do ids[#ids + 1] = entry.id end
+    Cyclopedia.categoryCreatures[raceName] = ids
 
     -- If a search is waiting on this category, queue ALL its monster data now.
     -- Track how many search-requested overviews are still pending so we know when to run the search.

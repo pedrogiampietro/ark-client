@@ -461,11 +461,21 @@ function Cyclopedia.BestiarySearch()
         return
     end
 
-    -- Build list of categories not yet loaded
+    -- A category is "fully cached" only if every one of its creatures has monster data loaded.
+    -- knownCategories only means the overview was received, NOT that monster data was fetched.
+    local function isCategoryFullyCached(catName)
+        local ids = Cyclopedia.categoryCreatures and Cyclopedia.categoryCreatures[catName]
+        if not ids then return false end  -- overview never received
+        for _, raceId in ipairs(ids) do
+            if not Cyclopedia.monsterCache[raceId] then return false end
+        end
+        return true
+    end
+
     local toFetch = {}
     for _, pages in pairs(Cyclopedia.Bestiary.Categories or {}) do
         for _, cat in ipairs(pages) do
-            if not Cyclopedia.knownCategories[cat.name] then
+            if not isCategoryFullyCached(cat.name) then
                 table.insert(toFetch, cat.name)
             end
         end
