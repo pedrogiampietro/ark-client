@@ -159,6 +159,7 @@ end
 
 function parseRaces(protocol, msg)
     local count = msg:getU16()
+    print("[Bestiary] parseRaces: " .. count .. " races")
     local raceData = {}
     for i = 1, count do
         local name     = msg:getString()
@@ -185,6 +186,7 @@ end
 function parseOverview(protocol, msg)
     local raceName = msg:getString()
     local count    = msg:getU16()
+    print("[Bestiary] parseOverview: race='" .. raceName .. "' count=" .. count)
     local list = {}
     for i = 1, count do
         local raceId     = msg:getU16()
@@ -215,6 +217,7 @@ function parseMonsterData(protocol, msg)
     local raceId    = msg:getU16()
     local lookType  = msg:getU16()
     local name      = msg:getString()
+    print("[Bestiary] parseMonsterData: raceId=" .. raceId .. " name='" .. name .. "'")
     local className = msg:getString()
     local level     = msg:getU8()
     msg:getU16() -- animusMasteryBonus
@@ -297,11 +300,6 @@ function parseMonsterData(protocol, msg)
         level    = level,
     }
 
-    -- Refresh creature list widget if visible (fixes "Unknown #id" names)
-    if Cyclopedia.refreshCreatureListItem then
-        Cyclopedia.refreshCreatureListItem(raceId)
-    end
-
     -- Build cyclopedia-format data
     local data = {
         id                  = raceId,
@@ -326,7 +324,10 @@ function parseMonsterData(protocol, msg)
         AnimusMasteryBonus  = 0,
     }
 
-    Cyclopedia.loadBestiarySelectedCreature(data)
+    -- Route to UI: show creature view if user-requested, otherwise just cache + list refresh
+    if Cyclopedia.onMonsterDataReceived then
+        Cyclopedia.onMonsterDataReceived(data)
+    end
 end
 
 function parseCharms(protocol, msg)
@@ -374,18 +375,26 @@ end
 
 function parseEntryChanged(protocol, msg)
     local raceId = msg:getU16()
-    -- Invalidate cache so next view gets fresh data
-    Cyclopedia.monsterCache[raceId] = nil
+    print("[Bestiary] parseEntryChanged fired! raceId=" .. tostring(raceId))
 
-    -- Always refresh category counts
+    -- Invalidate cache
+    Cyclopedia.monsterCache[raceId] = nil
+    print("[Bestiary] cache cleared for raceId=" .. tostring(raceId))
+
+    -- Refresh category counts
+    print("[Bestiary] requesting races...")
     g_game.requestBestiaryRaces()
 
-    -- If creature list is visible, refresh it
+    -- Refresh creature list if a category is open
     if Cyclopedia.currentCategory then
+        print("[Bestiary] currentCategory=" .. tostring(Cyclopedia.currentCategory) .. ", refreshing creature list")
         g_game.requestBestiaryCreatures(Cyclopedia.currentCategory)
+    else
+        print("[Bestiary] currentCategory is nil, no creature list refresh")
     end
 
-    -- If viewing this specific creature's detail, refresh it
+    -- Refresh monster data
+    print("[Bestiary] requesting monster data for raceId=" .. tostring(raceId))
     g_game.requestBestiaryMonsterData(raceId)
 end
 

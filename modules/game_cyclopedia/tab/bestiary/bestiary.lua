@@ -14,6 +14,11 @@ local animusMasteryPoints = 0
 -- Monster data cache: raceId -> {name, lookType, level}
 Cyclopedia.monsterCache = Cyclopedia.monsterCache or {}
 
+-- Which raceId the user explicitly clicked to view (nil = background request)
+Cyclopedia.pendingViewRaceId = nil
+-- Which raceId is currently shown in the creature detail view
+Cyclopedia.currentViewingRaceId = nil
+
 function Cyclopedia.getMonsterCache(id)
     local c = Cyclopedia.monsterCache[id]
     if c then
@@ -163,6 +168,8 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
     if Cyclopedia.Bestiary.Stage ~= STAGES.CREATURE then
         Cyclopedia.ShowBestiaryCreature()
     end
+
+    Cyclopedia.currentViewingRaceId = data.id
 
     local occurence = { [0] = 1, 2, 3, 4 }
     local raceData = Cyclopedia.getMonsterCache(data.id)
@@ -463,8 +470,9 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
     function widget.ClassBase:onClick()
         if data.currentLevel < 1 then return end
         UI.BackPageButton:setEnabled(true)
-        g_game.requestBestiaryMonsterData(widget:getId())
-        -- ShowBestiaryCreature() called from loadBestiarySelectedCreature when data arrives
+        local id = widget:getId()
+        Cyclopedia.pendingViewRaceId = id
+        g_game.requestBestiaryMonsterData(id)
     end
 end
 
@@ -616,6 +624,31 @@ function Cyclopedia.refreshCreatureListItem(raceId)
     local outfit = raceData.outfit
     if outfit and outfit.type and outfit.type > 0 then
         widget.Sprite:setOutfit(outfit)
+    end
+end
+
+-- Called by game_cyclopedia.lua for every parseMonsterData response.
+-- Only updates the creature view when it was user-requested (pendingViewRaceId)
+-- or when the detail view is already showing this creature (live refresh after a kill).
+function Cyclopedia.onMonsterDataReceived(data)
+    local id = data.id
+    print("[Bestiary] onMonsterDataReceived id=" .. tostring(id)
+        .. " pending=" .. tostring(Cyclopedia.pendingViewRaceId)
+        .. " viewing=" .. tostring(Cyclopedia.currentViewingRaceId))
+
+    if id == Cyclopedia.pendingViewRaceId then
+        -- User clicked this creature: show the detail view
+        Cyclopedia.pendingViewRaceId = nil
+        Cyclopedia.loadBestiarySelectedCreature(data)
+    elseif Cyclopedia.Bestiary.Stage == STAGES.CREATURE and Cyclopedia.currentViewingRaceId == id then
+        -- Creature detail is already open for this id: refresh in-place (live update after kill)
+        print("[Bestiary] live-refreshing creature view for id=" .. tostring(id))
+        Cyclopedia.loadBestiarySelectedCreature(data)
+    else
+        -- Background cache fill: only refresh the creature list row if visible
+        if Cyclopedia.refreshCreatureListItem then
+            Cyclopedia.refreshCreatureListItem(id)
+        end
     end
 end
 
