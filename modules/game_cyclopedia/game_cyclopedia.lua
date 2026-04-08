@@ -20,7 +20,13 @@ local QUEUE_INTERVAL    = 250  -- ms between batches
 
 local function flushMonsterDataQueue()
     monsterQueueTimer = nil
-    if #monsterDataQueue == 0 then return end
+    if #monsterDataQueue == 0 then
+        -- Queue fully drained: if a search is waiting for data, run it now
+        if Cyclopedia.onSearchDataReady then
+            Cyclopedia.onSearchDataReady()
+        end
+        return
+    end
 
     for i = 1, math.min(QUEUE_BATCH, #monsterDataQueue) do
         g_game.requestBestiaryMonsterData(table.remove(monsterDataQueue, 1))
@@ -33,6 +39,11 @@ local function flushMonsterDataQueue()
             flushMonsterDataQueue()
         end
     end
+end
+
+-- Returns true when the monster-data queue is fully idle (nothing in-flight).
+function Cyclopedia.isMonsterDataQueueEmpty()
+    return #monsterDataQueue == 0 and monsterQueueTimer == nil
 end
 
 local function queueMonsterDataRequest(id)
@@ -193,6 +204,10 @@ function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
     Cyclopedia.seenCreatureNames = {}
+    Cyclopedia.pendingSearchText = nil
+    Cyclopedia.pendingSearchOriginal = nil
+    Cyclopedia.pendingSearchOverviews = 0
+    Cyclopedia.searchRequestedCategories = {}
     Cyclopedia.storedTrackerData = nil
     clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
@@ -311,9 +326,23 @@ function parseOverview(protocol, msg)
     end
     local totalAnimus = msg:getU16()
 
+    -- If a search is waiting on this category, queue ALL its monster data now.
+    -- Track how many search-requested overviews are still pending so we know when to run the search.
+    if Cyclopedia.searchRequestedCategories and Cyclopedia.searchRequestedCategories[raceName] then
+        Cyclopedia.searchRequestedCategories[raceName] = nil
+        Cyclopedia.pendingSearchOverviews = (Cyclopedia.pendingSearchOverviews or 1) - 1
+        for _, entry in ipairs(list) do
+            queueMonsterDataRequest(entry.id)
+        end
+        -- If all overviews are in AND the queue is already empty (categories had 0 creatures),
+        -- fire the search check immediately.
+        if Cyclopedia.pendingSearchOverviews == 0 and Cyclopedia.isMonsterDataQueueEmpty() then
+            if Cyclopedia.onSearchDataReady then Cyclopedia.onSearchDataReady() end
+        end
+    end
+
     -- Only update the creature list UI when this is the category the user navigated to.
     -- Monster data is fetched lazily per-page in loadBestiaryCreature, not here.
-    -- Background full-cache requests must NOT touch the page counter or rebuild the list.
     if raceName == Cyclopedia.currentCategory then
         Cyclopedia.loadBestiaryOverview(raceName, list, totalAnimus)
     end
@@ -434,6 +463,12 @@ function parseMonsterData(protocol, msg)
         AnimusMasteryPoints = 0,
         AnimusMasteryBonus  = 0,
     }
+
+    -- If a search is pending and all overviews are in, check whether the queue just drained.
+    if Cyclopedia.pendingSearchText and (Cyclopedia.pendingSearchOverviews or 1) == 0
+            and Cyclopedia.isMonsterDataQueueEmpty() then
+        if Cyclopedia.onSearchDataReady then Cyclopedia.onSearchDataReady() end
+    end
 
     -- Route to UI: show creature view if user-requested, otherwise just cache + list refresh
     if Cyclopedia.onMonsterDataReceived then

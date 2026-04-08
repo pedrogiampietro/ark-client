@@ -406,32 +406,91 @@ function Cyclopedia.loadBestiaryCreatures(data)
     Cyclopedia.verifyBestiaryButtons()
 end
 
-function Cyclopedia.BestiarySearch()
-    local text = UI.SearchEdit:getText()
-    if text == "" then return end
-
-    local lower = text:lower()
+local function searchCache(lower)
     local list = {}
     for raceId, data in pairs(Cyclopedia.monsterCache) do
         if data.name and data.name:lower():find(lower, 1, true) then
             list[#list + 1] = { id = raceId, currentLevel = data.level or 0, creatureAnimusMasteryBonus = 0 }
         end
     end
+    return list
+end
 
-    UI.SearchEdit:setText("")
+local function showSearchNotFound(original, lower)
+    local msg = tr("No creatures found matching: ") .. original
+    if Cyclopedia.seenCreatureNames and Cyclopedia.seenCreatureNames[lower] then
+        msg = msg .. "\n\n" .. tr("You have killed this creature but it has not yet reached Bestiary Stage I.")
+    else
+        msg = msg .. "\n\n" .. tr("Creature not found in the bestiary.")
+    end
+    displayInfoBox(tr("Search"), msg)
+end
 
+-- Called by game_cyclopedia.lua once all pending search data has loaded.
+function Cyclopedia.onSearchDataReady()
+    if not Cyclopedia.pendingSearchText then return end
+    if (Cyclopedia.pendingSearchOverviews or 0) > 0 then return end  -- still waiting for overviews
+
+    local lower    = Cyclopedia.pendingSearchText
+    local original = Cyclopedia.pendingSearchOriginal or lower
+    Cyclopedia.pendingSearchText     = nil
+    Cyclopedia.pendingSearchOriginal = nil
+
+    if not UI then return end  -- bestiary was closed while loading
+
+    local list = searchCache(lower)
     if #list > 0 then
         table.sort(list, function(a, b) return a.id < b.id end)
         Cyclopedia.loadBestiarySearchCreatures(list)
     else
-        local msg = tr("No creatures found matching: ") .. text
-        -- Check if we've seen this creature in loot messages but it hasn't reached stage I yet
-        if Cyclopedia.seenCreatureNames and Cyclopedia.seenCreatureNames[lower] then
-            msg = msg .. "\n\n" .. tr("You have killed this creature but it has not yet reached Bestiary Stage I.")
-        else
-            msg = msg .. "\n\n" .. tr("Only creatures you have unlocked to Stage I or higher appear in search.")
+        showSearchNotFound(original, lower)
+    end
+end
+
+function Cyclopedia.BestiarySearch()
+    local text = UI.SearchEdit:getText()
+    if text == "" then return end
+    UI.SearchEdit:setText("")
+
+    local lower = text:lower()
+    local list  = searchCache(lower)
+
+    if #list > 0 then
+        table.sort(list, function(a, b) return a.id < b.id end)
+        Cyclopedia.loadBestiarySearchCreatures(list)
+        return
+    end
+
+    -- Build list of categories not yet loaded
+    local toFetch = {}
+    for _, pages in pairs(Cyclopedia.Bestiary.Categories or {}) do
+        for _, cat in ipairs(pages) do
+            if not Cyclopedia.knownCategories[cat.name] then
+                table.insert(toFetch, cat.name)
+            end
         end
-        displayInfoBox(tr("Search"), msg)
+    end
+
+    if #toFetch == 0 then
+        -- All categories already loaded — creature simply doesn't exist
+        showSearchNotFound(text, lower)
+        return
+    end
+
+    -- Kick off a background load: request each missing category overview.
+    -- parseOverview will queue their monster data; onSearchDataReady fires when done.
+    Cyclopedia.pendingSearchText               = lower
+    Cyclopedia.pendingSearchOriginal           = text
+    Cyclopedia.pendingSearchOverviews          = #toFetch
+    Cyclopedia.searchRequestedCategories       = {}
+    for _, catName in ipairs(toFetch) do
+        Cyclopedia.searchRequestedCategories[catName] = true
+        g_game.requestBestiaryCreatures(catName)
+    end
+
+    -- Show a brief loading hint in the page label
+    if UI and UI.PageValue then
+        UI.PageValue:setText(tr("Loading..."))
     end
 end
 
