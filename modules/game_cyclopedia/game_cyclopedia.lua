@@ -9,6 +9,32 @@ local currentTab = nil
 trackerMiniWindow = nil
 local trackerButton = nil
 
+-- Detect creature kills from loot messages and request fresh bestiary data.
+-- The server (Eldera) does not push opcode 0xD9 on kill, so we poll on loot events.
+local function onTextMessage(mode, text)
+    -- Match "Loot of a rat:", "Loot of an ant:", "Loot of the demon:", etc.
+    local name = text:match("[Ll]oot of %a+ (.-)%s*:")
+    if not name or name == "" then return end
+
+    local lower = name:lower()
+    local foundId = nil
+    for raceId, data in pairs(Cyclopedia.monsterCache) do
+        if data.name and data.name:lower() == lower then
+            foundId = raceId
+            break
+        end
+    end
+
+    if foundId then
+        print("[Bestiary] kill detected '" .. name .. "' raceId=" .. foundId .. " -> requesting update")
+        g_game.requestBestiaryMonsterData(foundId)
+    else
+        -- Creature not in cache yet (first kill) — refresh races to pick up new unlocks
+        print("[Bestiary] kill detected '" .. name .. "' (not in cache) -> refreshing races")
+        g_game.requestBestiaryRaces()
+    end
+end
+
 function init()
     cyclopediaWindow = g_ui.loadUI('game_cyclopedia', rootWidget)
     if not cyclopediaWindow then
@@ -24,8 +50,9 @@ function init()
     contentContainer = cyclopediaWindow:recursiveGetChildById('contentContainer')
 
     connect(g_game, {
-        onGameStart = onGameStart,
-        onGameEnd   = onGameEnd,
+        onGameStart   = onGameStart,
+        onGameEnd     = onGameEnd,
+        onTextMessage = onTextMessage,
     })
 
     g_keyboard.bindKeyDown('Alt+B', toggle)
@@ -56,8 +83,9 @@ end
 
 function terminate()
     disconnect(g_game, {
-        onGameStart = onGameStart,
-        onGameEnd   = onGameEnd,
+        onGameStart   = onGameStart,
+        onGameEnd     = onGameEnd,
+        onTextMessage = onTextMessage,
     })
 
     g_keyboard.unbindKeyDown('Alt+B')
