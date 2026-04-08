@@ -357,8 +357,19 @@ end
 
 function parseEntryChanged(protocol, msg)
     local raceId = msg:getU16()
+    -- Invalidate cache so next view gets fresh data
     Cyclopedia.monsterCache[raceId] = nil
+
+    -- Always refresh category counts
     g_game.requestBestiaryRaces()
+
+    -- If creature list is visible, refresh it
+    if Cyclopedia.currentCategory then
+        g_game.requestBestiaryCreatures(Cyclopedia.currentCategory)
+    end
+
+    -- If viewing this specific creature's detail, refresh it
+    g_game.requestBestiaryMonsterData(raceId)
 end
 
 function parseTracker(protocol, msg)
