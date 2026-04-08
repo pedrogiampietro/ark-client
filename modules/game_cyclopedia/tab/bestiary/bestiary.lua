@@ -98,11 +98,29 @@ function Cyclopedia.SetBestiaryProgress(fit, firstBar, secondBar, thirdBar, kill
 end
 
 function Cyclopedia.SetBestiaryStars(value)
-    UI.ListBase.CreatureInfo.StarFill:setWidth(value * 9)
+    local row = UI.ListBase.CreatureInfo.StarsRow
+    row:destroyChildren()
+    for i = 1, 5 do
+        local star = g_ui.createWidget('UIWidget', row)
+        star:setSize("9 10")
+        local src = (i <= value)
+            and "/game_cyclopedia/images/boss/icon_star_active"
+            or  "/game_cyclopedia/images/boss/icon_star_inactive"
+        star:setImageSource(src)
+    end
 end
 
 function Cyclopedia.SetBestiaryDiamonds(value)
-    UI.ListBase.CreatureInfo.DiamondFill:setWidth(value * 9)
+    local row = UI.ListBase.CreatureInfo.DiamondsRow
+    row:destroyChildren()
+    for i = 1, 4 do
+        local diamond = g_ui.createWidget('UIWidget', row)
+        diamond:setSize("9 10")
+        local src = (i <= value)
+            and "/game_cyclopedia/images/bestiary/icons/monster-icon-diamond-active"
+            or  "/game_cyclopedia/images/bestiary/icons/monster-icon-diamond-inactive"
+        diamond:setImageSource(src)
+    end
 end
 
 function Cyclopedia.CreateCreatureItems(data)
@@ -416,19 +434,21 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
         widget.AnimusMastery:setVisible(false)
     end
 
+    local stageSymbols = { [0]="—", [1]="I", [2]="II", [3]="III" }
     if data.currentLevel >= 3 then
         widget.Finalized:setVisible(true)
         widget.KillsLabel:setVisible(false)
-        widget.Sprite:getCreature():setShader("")
+        widget.Name:setColor("#e8c050")
+    elseif data.currentLevel < 1 then
+        widget.KillsLabel:setText("?")
+        widget.KillsLabel:setColor("#666666")
+        widget.Name:setText("?")
+        widget.Name:setColor("#666666")
+        widget.AnimusMastery:setVisible(false)
     else
-        if data.currentLevel < 1 then
-            widget.KillsLabel:setText("?")
-            widget.Sprite:getCreature():setShader("Outfit - cyclopedia-black")
-            widget.Name:setText("Unknown")
-            widget.AnimusMastery:setVisible(false)
-        else
-            widget.KillsLabel:setText(string.format("%d / 3", data.currentLevel - 1))
-        end
+        local sym = stageSymbols[data.currentLevel] or "?"
+        widget.KillsLabel:setText(sym)
+        widget.KillsLabel:setColor("#c8a030")
     end
 
     function widget.ClassBase:onClick()

@@ -202,40 +202,28 @@ UIWidget
         margin-bottom: 2
         !text: tr('Total Kills')
         color: #C7C7C7
-      UIWidget
-        id: StarBase
+      Panel
+        id: StarsRow
         anchors.left: ProgressBorder1.left
         anchors.top: ProgressBorder2.bottom
         margin-top: 4
-        image-source: /game_cyclopedia/images/boss/icon_star
-        image-repeated: true
-        width: 45
-      UIWidget
-        id: StarFill
+        size: 47 10
+        layout:
+          type: horizontalBox
+          spacing: 1
+      Panel
+        id: DiamondsRow
         anchors.left: ProgressBorder1.left
-        anchors.top: StarBase.top
-        image-source: /game_cyclopedia/images/boss/icon_star_active
-        image-repeated: true
-        width: 45
-      UIWidget
-        id: DiamondBase
-        anchors.left: ProgressBorder1.left
-        anchors.top: StarFill.bottom
+        anchors.top: StarsRow.bottom
         margin-top: 5
-        image-source: /game_cyclopedia/images/bestiary/icons/monster-icon-diamond-inactive
-        image-repeated: true
-        width: 36
-      UIWidget
-        id: DiamondFill
-        anchors.left: ProgressBorder1.left
-        anchors.top: DiamondBase.top
-        image-source: /game_cyclopedia/images/bestiary/icons/monster-icon-diamond-active
-        image-repeated: true
-        width: 36
+        size: 47 10
+        layout:
+          type: horizontalBox
+          spacing: 1
       UIWidget
         id: SubTextLabel
-        anchors.top: DiamondBase.bottom
-        anchors.left: DiamondBase.left
+        anchors.top: DiamondsRow.bottom
+        anchors.left: DiamondsRow.left
         margin-top: 5
         text-auto-resize: true
 

@@ -25,42 +25,45 @@ BestiaryCategory < UIWidget
   !text: tr('Name')
   text-align: top
   text-offset: 0 4
-  color: #909090
+  font: verdana-11px-rounded
+  color: #e8d090
+  $pressed:
+    image-color: #cccccc
   UIWidget
     id: ClassBase
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 22
-    size: 64 64
-    image-source: /images/ui/item
-    image-border: 10
-    $pressed:
-      background-color: #333333
+    size: 72 72
+    phantom: true
   UIWidget
     id: ClassIcon
     anchors.centerIn: ClassBase
+    size: 64 64
     phantom: true
   Label
     id: KnownValue
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 5
-    !text: tr('Known: ') .. '00'
-    color: #C2C2C2
+    margin-bottom: 4
+    font: verdana-11px-rounded
+    !text: tr('Known: ') .. '0'
+    color: #aaaaaa
   Label
     id: TotalValue
     anchors.bottom: KnownValue.top
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 0
-    !text: tr('Total: ') .. '00'
-    color: #C2C2C2
+    margin-bottom: 1
+    font: verdana-11px-rounded
+    !text: tr('Total: ') .. '0'
+    color: #aaaaaa
 
 BestiaryCreature < UIWidget
   image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 20
   Label
     id: Name
-    height: 20
+    height: 18
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
@@ -68,7 +71,8 @@ BestiaryCreature < UIWidget
     margin-right: 2
     text-align: center
     text-offset: 0 3
-    color: #919191
+    font: verdana-11px-rounded
+    color: #e8d090
   UIWidget
     id: ClassBase
     anchors.top: Name.bottom
@@ -103,10 +107,11 @@ BestiaryCreature < UIWidget
     id: KillsLabel
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 5
+    margin-bottom: 4
+    font: verdana-11px-rounded
     text-auto-resize: true
     !text: tr('?')
-    color: #C2C2C2
+    color: #aaaaaa
 
 BestiaryResistProgress < UIWidget
   image-source: /game_cyclopedia/images/bestiary/barra
