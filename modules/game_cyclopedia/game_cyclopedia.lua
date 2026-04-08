@@ -9,6 +9,55 @@ local currentTab = nil
 trackerMiniWindow = nil
 local trackerButton = nil
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Throttled monster-data request queue
+-- Sends requests in small batches to avoid flooding the server on first open.
+-- ─────────────────────────────────────────────────────────────────────────────
+local monsterDataQueue  = {}
+local monsterQueueTimer = nil
+local QUEUE_BATCH       = 8    -- requests per tick
+local QUEUE_INTERVAL    = 250  -- ms between batches
+
+local function flushMonsterDataQueue()
+    monsterQueueTimer = nil
+    if #monsterDataQueue == 0 then return end
+
+    for i = 1, math.min(QUEUE_BATCH, #monsterDataQueue) do
+        g_game.requestBestiaryMonsterData(table.remove(monsterDataQueue, 1))
+    end
+
+    if #monsterDataQueue > 0 then
+        if scheduleEvent then
+            monsterQueueTimer = scheduleEvent(flushMonsterDataQueue, QUEUE_INTERVAL)
+        else
+            flushMonsterDataQueue()
+        end
+    end
+end
+
+local function queueMonsterDataRequest(id)
+    if Cyclopedia.monsterCache[id] then return end   -- already cached
+    for _, qid in ipairs(monsterDataQueue) do        -- no duplicates
+        if qid == id then return end
+    end
+    table.insert(monsterDataQueue, id)
+    if not monsterQueueTimer then
+        if scheduleEvent then
+            monsterQueueTimer = scheduleEvent(flushMonsterDataQueue, QUEUE_INTERVAL)
+        else
+            flushMonsterDataQueue()
+        end
+    end
+end
+
+local function clearMonsterDataQueue()
+    monsterDataQueue = {}
+    if monsterQueueTimer and type(monsterQueueTimer) ~= "boolean" then
+        monsterQueueTimer:cancel()
+    end
+    monsterQueueTimer = nil
+end
+
 -- Detect creature kills from loot messages and request fresh bestiary data.
 -- The server (Eldera) does not push opcode 0xD9 on kill, so we poll on loot events.
 local raceRefreshTimer = nil
@@ -149,6 +198,7 @@ function onGameEnd()
     Cyclopedia.fullCacheLoaded = false
     Cyclopedia.seenCreatureNames = {}
     Cyclopedia.storedTrackerData = nil
+    clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()
     end
@@ -267,11 +317,9 @@ function parseOverview(protocol, msg)
     end
     local totalAnimus = msg:getU16()
 
-    -- Cache all creatures in this category so search finds them.
+    -- Queue monster-data requests for uncached creatures (throttled to avoid lag).
     for _, entry in ipairs(list) do
-        if not Cyclopedia.monsterCache[entry.id] then
-            g_game.requestBestiaryMonsterData(entry.id)
-        end
+        queueMonsterDataRequest(entry.id)
     end
 
     -- Only update the creature list UI when this is the category the user navigated to.
@@ -361,12 +409,17 @@ function parseMonsterData(protocol, msg)
         if idx then combat[idx] = val end
     end
 
-    -- Update monster cache
+    -- Update monster cache and remove from queue (prevents duplicate sends)
     Cyclopedia.monsterCache[raceId] = {
         name     = name,
         lookType = lookType,
         level    = level,
     }
+    for i = #monsterDataQueue, 1, -1 do
+        if monsterDataQueue[i] == raceId then
+            table.remove(monsterDataQueue, i)
+        end
+    end
 
     -- Build cyclopedia-format data
     local data = {
