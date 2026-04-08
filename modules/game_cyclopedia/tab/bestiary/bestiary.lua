@@ -617,6 +617,10 @@ function Cyclopedia.loadBestiaryCreature(page, search)
     UI.ListBase.CreatureList:destroyChildren()
     for _, data in ipairs(Cyclopedia.Bestiary[state][page]) do
         Cyclopedia.CreateBestiaryCreaturesItem(data)
+        -- Request data for unknown creatures so names/sprites update automatically
+        if not Cyclopedia.monsterCache[data.id] and data.currentLevel >= 1 then
+            g_game.requestBestiaryMonsterData(data.id)
+        end
     end
 end
 
