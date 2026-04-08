@@ -131,6 +131,7 @@ function onGameStart()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
     Cyclopedia.wantsFullCache = false
+    Cyclopedia.fullCacheLoaded = false
     -- Setup tracker miniwindow
     if not trackerMiniWindow then
         trackerMiniWindow = g_ui.createWidget('BestiaryTracker', modules.game_interface.getMiniWindowContainer and modules.game_interface.getMiniWindowContainer() or modules.game_interface.getRightPanel())
@@ -145,6 +146,7 @@ function onGameEnd()
     Cyclopedia.monsterCache = {}
     Cyclopedia.knownCategories = {}
     Cyclopedia.wantsFullCache = false
+    Cyclopedia.fullCacheLoaded = false
     Cyclopedia.seenCreatureNames = {}
     Cyclopedia.storedTrackerData = nil
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then

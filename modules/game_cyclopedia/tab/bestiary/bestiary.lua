@@ -60,9 +60,18 @@ function showBestiary()
         end
     end, UI.SearchEdit)
 
-    -- Request races; set flag so parseRaces fetches ALL categories (not just unlocked),
-    -- enabling search to find every creature regardless of kill progress.
-    Cyclopedia.wantsFullCache = true
+    -- Clear pending state from any previous open so stale in-flight responses
+    -- don't unexpectedly switch views after the window is closed and reopened.
+    Cyclopedia.pendingViewRaceId    = nil
+    Cyclopedia.currentViewingRaceId = nil
+    Cyclopedia.currentCategory      = nil
+
+    -- Full cache load: request ALL category overviews once per session so search
+    -- finds every creature. On subsequent opens just refresh category counts.
+    if not Cyclopedia.fullCacheLoaded then
+        Cyclopedia.fullCacheLoaded  = true
+        Cyclopedia.wantsFullCache   = true
+    end
     g_game.requestBestiaryRaces()
 end
 
@@ -482,9 +491,9 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
     end
 
     function widget.ClassBase:onClick()
-        local id = widget:getId()
-        -- Use live cache level — data.currentLevel can be stale if a kill happened
-        -- after the widget was created (e.g., 0xD9 arrived and updated the cache).
+        -- Use data.id (number) — widget:getId() returns a string in OTClient,
+        -- which would fail the equality check in onMonsterDataReceived.
+        local id = data.id
         local cached = Cyclopedia.monsterCache[id]
         local level = cached and (cached.level or 0) or data.currentLevel
         if level < 1 then return end
