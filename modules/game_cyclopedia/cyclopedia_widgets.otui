@@ -118,21 +118,27 @@ BestiaryCreature < UIWidget
     color: #aaaaaa
 
 BestiaryResistProgress < UIWidget
-  image-source: /game_cyclopedia/images/bestiary/barra
+  size: 90 14
+  background-color: #1a1a1a
+  border-width: 1
+  border-color: #444444
   UIWidget
     id: Fill
-    anchors.fill: parent
-    background-color: red
-    margin-left: 1
-    margin-bottom: 2
-    margin-top: 2
-    margin-right: 1
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    background-color: #335533
+    margin: 1
     phantom: true
-  UIWidget
-    id: Border
-    anchors.fill: parent
-    image-source: /game_cyclopedia/images/bestiary/barra
+  Label
+    id: ValueLabel
+    anchors.centerIn: parent
+    font: verdana-11px-rounded
+    text-auto-resize: true
+    color: #dddddd
     phantom: true
+    !text: '?'
 
 BestiaryItem < UIItem
   image-source: /images/ui/item

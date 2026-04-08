@@ -227,20 +227,15 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
         colB.IceProgress,      colB.HolyProgress, colB.DeathProgress, colB.HealingProgress,
     }
     local resistNames = {"Physical","Fire","Earth","Energy","Ice","Holy","Death","Healing"}
-    if data.combat and not table.empty(data.combat) then
-        for i = 1, 8 do
-            local bar = resistMap[i]
-            if bar then
-                local combat = Cyclopedia.calculateCombatValues(data.combat[i] or 0)
-                bar.Fill:setMarginRight(combat.margin)
-                bar.Fill:setBackgroundColor(combat.color)
-                bar:setTooltip(string.format("%s: %s", resistNames[i], combat.tooltip))
-            end
-        end
-    else
-        for i = 1, 8 do
-            local bar = resistMap[i]
-            if bar then bar.Fill:setMarginRight(88) end
+    for i = 1, 8 do
+        local bar = resistMap[i]
+        if bar then
+            local val = (data.combat and data.combat[i]) or 0
+            local combat = Cyclopedia.calculateCombatValues(val)
+            bar.Fill:setMarginRight(combat.margin)
+            bar.Fill:setBackgroundColor(combat.color)
+            bar.ValueLabel:setText(combat.label)
+            bar:setTooltip(resistNames[i] .. ": " .. combat.tooltip)
         end
     end
 
@@ -625,22 +620,30 @@ function Cyclopedia.loadBestiaryCreature(page, search)
 end
 
 function Cyclopedia.calculateCombatValues(value)
-    -- value is 0-100 (resistance percentage)
-    -- margin-right controls how much of the bar is "empty" (bar inner = 90-2 = 88px)
-    local margin = math.max(0, math.floor((1 - (value / 100)) * 88))
-    local color
+    -- inner bar width = 90 - 2 margins = 88px
+    local fillWidth = math.max(2, math.floor((value / 100) * 88))
+    local marginRight = 88 - fillWidth
+    local color, label
     if value >= 100 then
-        color = "#4444cc"  -- immune
+        color = "#5555dd"  -- immune (blue)
+        label = "Immune"
     elseif value >= 75 then
-        color = "#44cc44"  -- resistant
+        color = "#44bb44"  -- resistant (green)
+        label = tostring(value) .. "%"
     elseif value >= 25 then
-        color = "#cccc44"  -- neutral
+        color = "#bbaa22"  -- neutral (yellow)
+        label = tostring(value) .. "%"
+    elseif value > 0 then
+        color = "#cc4444"  -- weak (red)
+        label = tostring(value) .. "%"
     else
-        color = "#cc4444"  -- weak
+        color = "#882222"  -- very weak/0 (dark red)
+        label = "0%"
     end
     return {
-        margin = margin,
-        color = color,
+        margin  = marginRight,
+        color   = color,
+        label   = label,
         tooltip = string.format("%d%%", value)
     }
 end

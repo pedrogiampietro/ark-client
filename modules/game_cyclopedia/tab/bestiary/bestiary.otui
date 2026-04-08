@@ -454,7 +454,7 @@ UIWidget
           anchors.left: PhysicalResist.right
           anchors.verticalCenter: PhysicalResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Fire
         UIWidget
           id: FireResist
@@ -468,7 +468,7 @@ UIWidget
           anchors.left: FireResist.right
           anchors.verticalCenter: FireResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Earth
         UIWidget
           id: EarthResist
@@ -482,7 +482,7 @@ UIWidget
           anchors.left: EarthResist.right
           anchors.verticalCenter: EarthResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Energy
         UIWidget
           id: EnergyResist
@@ -496,7 +496,7 @@ UIWidget
           anchors.left: EnergyResist.right
           anchors.verticalCenter: EnergyResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
       UIWidget
         id: ResistColB
         anchors.left: ResistColA.right
@@ -517,7 +517,7 @@ UIWidget
           anchors.left: IceResist.right
           anchors.verticalCenter: IceResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Holy
         UIWidget
           id: HolyResist
@@ -531,7 +531,7 @@ UIWidget
           anchors.left: HolyResist.right
           anchors.verticalCenter: HolyResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Death
         UIWidget
           id: DeathResist
@@ -545,7 +545,7 @@ UIWidget
           anchors.left: DeathResist.right
           anchors.verticalCenter: DeathResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
         // Healing
         UIWidget
           id: HealingResist
@@ -559,7 +559,7 @@ UIWidget
           anchors.left: HealingResist.right
           anchors.verticalCenter: HealingResist.verticalCenter
           margin-left: 4
-          size: 90 7
+          size: 90 14
       UIWidget
         id: ItemsBase
         anchors.left: parent.left
