@@ -28,6 +28,7 @@ function Cyclopedia.getMonsterCache(id)
 end
 
 function Cyclopedia.loadBestiaryOverview(name, creatures, totalAnimus)
+    if not UI then return end
     if (name == "Result" or name == "") and #creatures > 0 then
         if #creatures == 1 then
             g_game.requestBestiaryMonsterData(creatures[1].id)
@@ -275,11 +276,13 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
 end
 
 function Cyclopedia.ShowBestiaryCreature()
+    if not UI then return end
     Cyclopedia.Bestiary.Stage = STAGES.CREATURE
     Cyclopedia.onStageChange()
 end
 
 function Cyclopedia.ShowBestiaryCreatures(Category)
+    if not UI then return end
     UI.ListBase.CreatureList:destroyChildren()
     UI.ListBase.CategoryList:setVisible(false)
     UI.ListBase.CreatureInfo:setVisible(false)
@@ -334,6 +337,7 @@ function Cyclopedia.CreateBestiaryCategoryItem(Data)
 end
 
 function Cyclopedia.loadBestiarySearchCreatures(data)
+    if not UI then return end
     UI.ListBase.CategoryList:setVisible(false)
     UI.ListBase.CreatureInfo:setVisible(false)
     UI.ListBase.CreatureList:setVisible(true)
@@ -369,6 +373,7 @@ function Cyclopedia.loadBestiarySearchCreatures(data)
 end
 
 function Cyclopedia.loadBestiaryCreatures(data)
+    if not UI then return end
     Cyclopedia.Bestiary.Creatures = {}
     Cyclopedia.Bestiary.Page = 1
 
