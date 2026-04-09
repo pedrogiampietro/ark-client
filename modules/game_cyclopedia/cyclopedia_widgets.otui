@@ -199,7 +199,7 @@ CharmCreatureName < UICheckBox
     background-color: #585858
 
 CharmItem < UICheckBox
-  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
+  image-source: /images/ui/minipanel
   image-border: 3
   image-border-top: 14
   color: #c8c8c8
