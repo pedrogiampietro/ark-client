@@ -199,32 +199,27 @@ CharmCreatureName < UICheckBox
     background-color: #585858
 
 CharmItem < UICheckBox
-  image-source: /images/ui/minipanel
+  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
   image-border: 3
+  image-border-top: 14
+  color: #c8c8c8
+  text-offset: 0 2
+  text-align: top
+  font: verdana-11px-rounded
   focusable: false
   border-width: 0
   @onClick: modules.game_cyclopedia.Cyclopedia.selectCharm(self, self:isChecked())
   $checked:
-    border-width: 1
+    border-width: 2
     border-color: white
   $!checked:
     border-width: 0
-  Label
-    id: NameLabel
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: 14
-    margin-top: 4
-    text-align: center
-    font: verdana-11px-rounded
-    color: #d0d0d0
   BorderBox
     id: charmBase
-    anchors.top: NameLabel.bottom
+    anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 5
-    size: 37 37
+    margin-top: 18
+    size: 64 64
     image-source: /images/ui/panel_flat
     image-border: 10
     phantom: true
@@ -235,7 +230,7 @@ CharmItem < UICheckBox
       phantom: true
     UIWidget
       id: lockedMask
-      size: 35 35
+      size: 62 62
       anchors.centerIn: parent
       image-source: /images/options/ditherpattern
       phantom: true

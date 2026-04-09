@@ -187,7 +187,7 @@ UIWidget
     padding-bottom: 2
     layout:
       type: grid
-      cell-size: 158 94
+      cell-size: 158 112
       cell-spacing: 2
       flow: true
   VerticalScrollBar

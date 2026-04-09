@@ -124,7 +124,7 @@ function Cyclopedia.CreateCharmItem(data)
     widget.data = data
 
     local charmData = charms[data.id]
-    widget.NameLabel:setText(charmData and charmData.name or ("Charm " .. (data.id or "?")))
+    widget:setText(charmData and charmData.name or ("Charm " .. (data.id or "?")))
 
     -- Charm icon from sprite sheet (800x32, 25 charms × 32px)
     widget.charmBase.image:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
