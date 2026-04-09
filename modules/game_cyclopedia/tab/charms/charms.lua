@@ -1,4 +1,5 @@
 local UI = nil
+local selectedCharmId = nil  -- tracks which charm is currently selected
 Cyclopedia.Charms = {}
 
 local charms = {
@@ -85,6 +86,7 @@ function Cyclopedia.loadCharms(charmsData)
         table.insert(Cyclopedia.Charms.Monsters, raceId)
     end
 
+    selectedCharmId = nil
     CharmList:destroyChildren()
 
     -- Sort: unlocked first, then alphabetically
@@ -116,12 +118,18 @@ function Cyclopedia.loadCharms(charmsData)
     end
 end
 
+local function deselectAllCharms()
+    if not UI or not UI.CharmList then return end
+    for _, child in ipairs(UI.CharmList:getChildren()) do
+        child:setBorderWidth(0)
+    end
+end
+
 function Cyclopedia.CreateCharmItem(data)
     if not UI then return end
 
     local widget = g_ui.createWidget("CharmItem", UI.CharmList)
     widget:setId(data.id)
-    widget.data = data
 
     local charmData = charms[data.id]
     widget:setText(charmData and charmData.name or ("Charm " .. (data.id or "?")))
@@ -146,31 +154,24 @@ function Cyclopedia.CreateCharmItem(data)
         local canAfford = (UI.CharmsPoints or 0) >= pts
         widget.PriceBase.Value:setColor(canAfford and "#C0C0C0" or "#D33C3C")
     end
-end
 
-function Cyclopedia.selectCharm(widget, checked)
-    if not UI then return end
-
-    -- Uncheck all other charms
-    local CharmList = UI.CharmList
-    if CharmList then
-        for _, child in ipairs(CharmList:getChildren()) do
-            if child ~= widget then
-                child:setChecked(false)
-            end
+    -- Click handler via closure — avoids UICheckBox state issues and widget.data lookup
+    function widget:onClick()
+        if not UI then return end
+        if selectedCharmId == data.id then
+            -- Clicking again deselects
+            selectedCharmId = nil
+            self:setBorderWidth(0)
+            Cyclopedia.clearCharmInfo()
+        else
+            -- Select this charm
+            deselectAllCharms()
+            selectedCharmId = data.id
+            self:setBorderWidth(2)
+            self:setBorderColor("white")
+            Cyclopedia.showCharmInfo(data, charmData)
         end
     end
-
-    if not checked then
-        Cyclopedia.clearCharmInfo()
-        return
-    end
-
-    local data = widget.data
-    if not data then return end
-
-    local charmData = charms[data.id]
-    Cyclopedia.showCharmInfo(data, charmData)
 end
 
 function Cyclopedia.showCharmInfo(data, charmData)
@@ -214,6 +215,8 @@ function Cyclopedia.showCharmInfo(data, charmData)
 end
 
 function Cyclopedia.clearCharmInfo()
+    selectedCharmId = nil
+    deselectAllCharms()
     if not UI or not UI.InformationBase then return end
     UI.InformationBase.TextBase:setText("")
     if UI.InformationBase.ItemBase then

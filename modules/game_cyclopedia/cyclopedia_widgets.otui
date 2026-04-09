@@ -198,7 +198,7 @@ CharmCreatureName < UICheckBox
   $checked:
     background-color: #585858
 
-CharmItem < UICheckBox
+CharmItem < UIWidget
   image-source: /images/ui/minipanel
   image-border: 3
   image-border-top: 14
@@ -208,12 +208,6 @@ CharmItem < UICheckBox
   font: verdana-11px-rounded
   focusable: false
   border-width: 0
-  @onClick: modules.game_cyclopedia.Cyclopedia.selectCharm(self, self:isChecked())
-  $checked:
-    border-width: 2
-    border-color: white
-  $!checked:
-    border-width: 0
   BorderBox
     id: charmBase
     anchors.top: parent.top
