@@ -67,6 +67,7 @@ NonClosableMiniWindow
       anchors.left: prev.right
       anchors.top: prev.top
       margin-left: 4
+      margin-top: 0
       width: 42
       height: 20
       @onClick: modules.game_interface.tryLogout()
