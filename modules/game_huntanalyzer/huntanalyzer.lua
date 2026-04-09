@@ -351,10 +351,11 @@ function showRuneWindow()
       runeSessionStart = os.time()
     end
     runeWindow:show()
-    updateRuneTracker()
+    if not runeUpdateEvent then
+      updateRuneTracker()
+    end
   else
     runeWindow:hide()
-    if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
   end
 end
 
@@ -369,6 +370,9 @@ function resetRuneTracker()
 end
 
 function updateRuneTracker()
+  if runeUpdateEvent then removeEvent(runeUpdateEvent) end
+  runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
+
   if not runeWindow or not runeWindow:isVisible() then return end
 
   -- Session timer (starts when window opens)
@@ -390,11 +394,7 @@ function updateRuneTracker()
   local hasData = next(runeTrackerData) ~= nil
   if noDataLabel then noDataLabel:setVisible(not hasData) end
 
-  if not runeList then
-    if runeUpdateEvent then removeEvent(runeUpdateEvent) end
-    runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
-    return
-  end
+  if not runeList then return end
 
   runeList:destroyChildren()
 
@@ -416,9 +416,6 @@ function updateRuneTracker()
       end
     end
   end
-
-  if runeUpdateEvent then removeEvent(runeUpdateEvent) end
-  runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
 end
 
 function terminate()
@@ -829,6 +826,9 @@ function refresh()
 	local player = g_game.getLocalPlayer()
 	if not player then return end
 	resetExpH()
+	if runeWindow and runeWindow:isVisible() and not runeUpdateEvent then
+		updateRuneTracker()
+	end
 end
 
 function offline()
@@ -836,8 +836,6 @@ function offline()
 	resetLootedItems()
 	resetKilledMonsters()
 	resetSupplyItems()
-	runeTrackerData  = {}
-	runeSessionStart = nil
 	if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
 end
 
