@@ -310,49 +310,58 @@ function resetExpH()
 end
 --//########## REAL MAGIC ##########//--
 
--- Rune Tracker (charm proc data from game_cyclopedia)
+-- Rune Tracker (self-contained, notified via onCharmProc from game_cyclopedia)
+local runeTrackerData   = {}  -- [charmId] = { procs=N, totalDamage=N, name=S }
+local runeSessionStart  = nil -- os.time() when window was opened
+
 local charmNames = {
-  [10] = 'Wound',    [11] = 'Enflame',  [12] = 'Poison',   [13] = 'Freeze',
-  [14] = 'Zap',      [15] = 'Curse',    [16] = 'Cripple',  [17] = 'Parry',
-  [18] = 'Dodge',    [19] = 'Adrenaline Burst', [20] = 'Numb', [21] = 'Cleanse',
-  [22] = 'Bless',    [23] = 'Scavenge', [24] = 'Gut',      [25] = 'Low Blow',
-  [26] = 'Divine Wrath', [27] = 'Vampiric Embrace', [28] = 'Void Call',
-  [29] = 'Rune Sling',
+  [ 0] = 'Wound',        [ 1] = 'Enflame',      [ 2] = 'Poison',
+  [ 3] = 'Freeze',       [ 4] = 'Zap',           [ 5] = 'Curse',
+  [ 6] = 'Cripple',      [ 7] = 'Parry',         [ 8] = 'Dodge',
+  [ 9] = 'Adrenaline',   [10] = 'Numb',           [11] = 'Cleanse',
+  [12] = 'Bless',        [13] = 'Scavenge',       [14] = 'Gut',
+  [15] = 'Low Blow',     [16] = 'Divine Wrath',   [17] = 'Vampiric',
+  [18] = "Void's Call",  [19] = 'Savage Blow',    [20] = 'Fatal Hold',
+  [21] = 'Void Inv.',    [22] = 'Carnage',        [23] = 'Overpower',
+  [24] = 'Overflux',
 }
 
-local charmIcons = {
-  [10] = '/game_cyclopedia/images/charms/wound',
-  [11] = '/game_cyclopedia/images/charms/enflame',
-  [12] = '/game_cyclopedia/images/charms/poison',
-  [13] = '/game_cyclopedia/images/charms/freeze',
-  [14] = '/game_cyclopedia/images/charms/zap',
-  [15] = '/game_cyclopedia/images/charms/curse',
-  [16] = '/game_cyclopedia/images/charms/cripple',
-  [17] = '/game_cyclopedia/images/charms/parry',
-  [18] = '/game_cyclopedia/images/charms/dodge',
-  [19] = '/game_cyclopedia/images/charms/adrenaline',
-  [20] = '/game_cyclopedia/images/charms/numb',
-  [21] = '/game_cyclopedia/images/charms/cleanse',
-  [22] = '/game_cyclopedia/images/charms/bless',
-  [23] = '/game_cyclopedia/images/charms/scavenge',
-  [24] = '/game_cyclopedia/images/charms/gut',
-  [25] = '/game_cyclopedia/images/charms/low_blow',
-  [26] = '/game_cyclopedia/images/charms/divine_wrath',
-  [27] = '/game_cyclopedia/images/charms/vampiric_embrace',
-  [28] = '/game_cyclopedia/images/charms/void_call',
-  [29] = '/game_cyclopedia/images/charms/rune_sling',
-}
+-- Called by game_cyclopedia.parseCharmProc each time a charm fires
+function onCharmProc(charmId, damage)
+  local entry = runeTrackerData[charmId]
+  if not entry then
+    runeTrackerData[charmId] = {
+      procs      = 1,
+      totalDamage = damage,
+      name       = charmNames[charmId] or ('Charm #' .. charmId),
+    }
+  else
+    entry.procs       = entry.procs + 1
+    entry.totalDamage = entry.totalDamage + damage
+  end
+  -- Trigger immediate UI refresh if the window is open
+  if runeWindow and runeWindow:isVisible() then
+    updateRuneTracker()
+  end
+end
 
 function showRuneWindow()
   if not runeWindow:isVisible() then
+    if not runeSessionStart then
+      runeSessionStart = os.time()
+    end
     runeWindow:show()
     updateRuneTracker()
   else
     runeWindow:hide()
+    if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
   end
 end
 
 function resetRuneTracker()
+  runeTrackerData  = {}
+  runeSessionStart = os.time()
+  -- Also reset cyclopedia's own tracker if accessible
   if modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia then
     modules.game_cyclopedia.Cyclopedia.resetCharmAnalyzer()
   end
@@ -362,16 +371,12 @@ end
 function updateRuneTracker()
   if not runeWindow or not runeWindow:isVisible() then return end
 
-  local cyclopedia = modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia
-  local procData = (cyclopedia and cyclopedia.charmProcData) or {}
-  local startTime = cyclopedia and cyclopedia.charmAnalyzerStart
-
-  -- Update session timer
+  -- Session timer (starts when window opens)
   local sessionLabel = runeWindow:recursiveGetChildById('sessionLabel')
   if sessionLabel then
     local secs = 0
-    if startTime and startTime > 0 then
-      secs = math.floor(os.time() - startTime)
+    if runeSessionStart then
+      secs = math.floor(os.time() - runeSessionStart)
     end
     local h = math.floor(secs / 3600)
     local m = math.floor((secs % 3600) / 60)
@@ -380,44 +385,38 @@ function updateRuneTracker()
   end
 
   local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
-  local runeList = runeWindow:recursiveGetChildById('runeList')
+  local runeList    = runeWindow:recursiveGetChildById('runeList')
 
-  local hasData = false
-  for _ in pairs(procData) do hasData = true; break end
-
+  local hasData = next(runeTrackerData) ~= nil
   if noDataLabel then noDataLabel:setVisible(not hasData) end
 
-  if not runeList then return end
+  if not runeList then
+    if runeUpdateEvent then removeEvent(runeUpdateEvent) end
+    runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
+    return
+  end
+
   runeList:destroyChildren()
 
-  for charmId, data in pairs(procData) do
+  for charmId, data in pairs(runeTrackerData) do
     local row = g_ui.createWidget('RuneRow', runeList)
-    local name = charmNames[charmId] or ('Charm #' .. charmId)
-    local procs = data.procs or 0
-    local totalDmg = data.totalDamage or 0
+    if not row then break end
 
-    local iconWidget = row:getChildById('runeIcon')
-    if iconWidget and charmIcons[charmId] then
-      iconWidget:setImageSource(charmIcons[charmId])
-    end
-
-    local nameLabel = row:getChildById('runeName')
-    if nameLabel then nameLabel:setText(name .. ':') end
-
+    local nameLabel  = row:getChildById('runeName')
     local procsLabel = row:getChildById('runeProcs')
-    if procsLabel then procsLabel:setText(procs .. 'x') end
+    local dmgLabel   = row:getChildById('runeDmg')
 
-    local dmgLabel = row:getChildById('runeDmg')
-    if dmgLabel then
-      if totalDmg > 0 then
-        dmgLabel:setText('(' .. number_format(totalDmg) .. ' dmg)')
+    if nameLabel  then nameLabel:setText(data.name .. ':') end
+    if procsLabel then procsLabel:setText(data.procs .. 'x') end
+    if dmgLabel   then
+      if data.totalDamage > 0 then
+        dmgLabel:setText('(' .. number_format(data.totalDamage) .. ' dmg)')
       else
         dmgLabel:setText('')
       end
     end
   end
 
-  -- Schedule next update
   if runeUpdateEvent then removeEvent(runeUpdateEvent) end
   runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
 end
@@ -837,6 +836,8 @@ function offline()
 	resetLootedItems()
 	resetKilledMonsters()
 	resetSupplyItems()
+	runeTrackerData  = {}
+	runeSessionStart = nil
 	if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
 end
 

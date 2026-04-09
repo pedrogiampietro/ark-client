@@ -589,6 +589,11 @@ function parseCharmProc(protocol, msg)
     end
 
     Cyclopedia.refreshCharmAnalyzer()
+
+    -- Notify hunt analyzer if loaded
+    if modules.game_hunteranalyzer and modules.game_hunteranalyzer.onCharmProc then
+        modules.game_hunteranalyzer.onCharmProc(charmId, damage)
+    end
 end
 
 function Cyclopedia.resetCharmAnalyzer()
