@@ -148,13 +148,7 @@ function init()
     ProtocolGame.registerOpcode(0xB9, parseTracker)
     ProtocolGame.registerOpcode(0x4B, parseResourceBalance)
 
-    -- Connect sidebutton
-    if modules.game_sidebuttons then
-        cyclopediaButton = modules.game_sidebuttons.bestiaryButton
-        if cyclopediaButton then
-            cyclopediaButton.onClick = function() toggle() end
-        end
-    end
+    -- Cyclopedia has no dedicated sidebutton; opened via right-click menu
 
     if g_game.isOnline() then
         onGameStart()

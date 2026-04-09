@@ -1,5 +1,5 @@
 NonClosableMiniWindow
-  height: 80
+  height: 50
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -62,16 +62,6 @@ NonClosableMiniWindow
       width: 34
       @onClick: modules.game_viplist.toggle()
 
-    InventoryButton
-      id: bestiaryButton
-      !text: tr('Bestiary')
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      margin-top: 5
-      height: 20
-      width: 50
-      @onClick: modules.game_bestiary.toggle()
-    
     InventoryButton
       !text: tr('Logout')
       anchors.left: prev.right

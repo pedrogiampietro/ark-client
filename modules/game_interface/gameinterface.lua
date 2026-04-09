@@ -481,9 +481,13 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 
     if creatureThing:isLocalPlayer() then
       menu:addOption(tr('Set Outfit'), function()
-        print("[OUTFIT] Menu 'Set Outfit' clicked, calling g_game.requestOutfit()")
         g_game.requestOutfit()
-        print("[OUTFIT] g_game.requestOutfit() returned")
+      end)
+
+      menu:addOption(tr('Bestiary'), function()
+        if modules.game_cyclopedia then
+          modules.game_cyclopedia.toggle()
+        end
       end)
 
       if g_game.getFeature(GamePlayerMounts) then
