@@ -461,46 +461,34 @@ function Cyclopedia.BestiarySearch()
         return
     end
 
-    -- A category is "fully cached" only if every one of its creatures has monster data loaded.
-    -- knownCategories only means the overview was received, NOT that monster data was fetched.
-    local function isCategoryFullyCached(catName)
-        local ids = Cyclopedia.categoryCreatures and Cyclopedia.categoryCreatures[catName]
-        if not ids then return false end  -- overview never received
+    -- Collect uncached creature IDs from categories whose overviews we already have.
+    -- Do NOT re-request overviews — that would bulk-load all creatures and cause lag.
+    local uncachedIds = {}
+    for _, ids in pairs(Cyclopedia.categoryCreatures or {}) do
         for _, raceId in ipairs(ids) do
-            if not Cyclopedia.monsterCache[raceId] then return false end
-        end
-        return true
-    end
-
-    local toFetch = {}
-    for _, pages in pairs(Cyclopedia.Bestiary.Categories or {}) do
-        for _, cat in ipairs(pages) do
-            if not isCategoryFullyCached(cat.name) then
-                table.insert(toFetch, cat.name)
+            if not Cyclopedia.monsterCache[raceId] then
+                uncachedIds[#uncachedIds + 1] = raceId
             end
         end
     end
 
-    if #toFetch == 0 then
-        -- All categories already loaded — creature simply doesn't exist
+    if #uncachedIds == 0 then
+        -- Everything known is cached and still nothing matches
         showSearchNotFound(text, lower)
         return
     end
 
-    -- Kick off a background load: request each missing category overview.
-    -- parseOverview will queue their monster data; onSearchDataReady fires when done.
-    Cyclopedia.pendingSearchText               = lower
-    Cyclopedia.pendingSearchOriginal           = text
-    Cyclopedia.pendingSearchOverviews          = #toFetch
-    Cyclopedia.searchRequestedCategories       = {}
-    for _, catName in ipairs(toFetch) do
-        Cyclopedia.searchRequestedCategories[catName] = true
-        g_game.requestBestiaryCreatures(catName)
+    -- Queue only those specific IDs through the throttled queue. No new overview requests.
+    Cyclopedia.pendingSearchText      = lower
+    Cyclopedia.pendingSearchOriginal  = text
+    Cyclopedia.pendingSearchOverviews = 0   -- no overviews pending
+    Cyclopedia.searchRequestedCategories = {}
+    for _, raceId in ipairs(uncachedIds) do
+        queueMonsterDataRequest(raceId)
     end
 
-    -- Show a brief loading hint in the page label
     if UI and UI.PageValue then
-        UI.PageValue:setText(tr("Loading..."))
+        UI.PageValue:setText(tr("Searching..."))
     end
 end
 

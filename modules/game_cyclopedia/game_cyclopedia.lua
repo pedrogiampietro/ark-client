@@ -15,8 +15,8 @@ local trackerButton = nil
 -- ─────────────────────────────────────────────────────────────────────────────
 local monsterDataQueue  = {}
 local monsterQueueTimer = nil
-local QUEUE_BATCH       = 8    -- requests per tick
-local QUEUE_INTERVAL    = 250  -- ms between batches
+local QUEUE_BATCH       = 2    -- requests per tick (keep concurrent load low)
+local QUEUE_INTERVAL    = 150  -- ms between batches
 
 local function flushMonsterDataQueue()
     monsterQueueTimer = nil
@@ -188,8 +188,9 @@ function terminate()
 end
 
 function onGameStart()
-    Cyclopedia.monsterCache = {}
-    Cyclopedia.knownCategories = {}
+    Cyclopedia.monsterCache     = {}
+    Cyclopedia.knownCategories  = {}
+    Cyclopedia.storedRaceCounts = {}
     -- Setup tracker miniwindow
     if not trackerMiniWindow then
         trackerMiniWindow = g_ui.createWidget('BestiaryTracker', modules.game_interface.getMiniWindowContainer and modules.game_interface.getMiniWindowContainer() or modules.game_interface.getRightPanel())
@@ -209,6 +210,7 @@ function onGameEnd()
     Cyclopedia.pendingSearchOverviews = 0
     Cyclopedia.searchRequestedCategories = {}
     Cyclopedia.categoryCreatures = {}
+    Cyclopedia.storedRaceCounts  = {}
     Cyclopedia.storedTrackerData = nil
     clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
@@ -294,13 +296,27 @@ function parseRaces(protocol, msg)
     end
     Cyclopedia.loadBestiaryCategories(raceData)
 
-    Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
+    Cyclopedia.knownCategories  = Cyclopedia.knownCategories or {}
+    Cyclopedia.storedRaceCounts = Cyclopedia.storedRaceCounts or {}
+
+    local windowOpen = cyclopediaWindow and cyclopediaWindow:isVisible()
+    -- First-ever parseRaces for this session: storedRaceCounts is empty.
+    -- In that case countRose would fire for EVERY category (all go from 0 → N),
+    -- which would bulk-load all overviews on login. Suppress that by only using
+    -- countRose logic once we have a previous snapshot to compare against.
+    local hasPrevSnapshot = next(Cyclopedia.storedRaceCounts) ~= nil
 
     for _, r in ipairs(raceData) do
-        local isNew = not Cyclopedia.knownCategories[r.bestClass]
-        -- Only fetch categories that newly became unlocked (e.g. first kill of a new class).
-        -- Do NOT bulk-prefetch all categories on open — that causes the ping spike.
-        if r.unlockedCount > 0 and isNew then
+        local prevCount = Cyclopedia.storedRaceCounts[r.bestClass] or 0
+        local countRose = hasPrevSnapshot and (r.unlockedCount > prevCount)
+        local isNew     = not Cyclopedia.knownCategories[r.bestClass]
+        Cyclopedia.storedRaceCounts[r.bestClass] = r.unlockedCount
+
+        -- Fetch overview only when:
+        --   a) bestiary window is open and category is unlocked+new (user just opened it)
+        --   b) unlock count increased vs last snapshot (kill just happened — window may be closed)
+        -- Never bulk-fetch on the first server-pushed parseRaces at login (window closed).
+        if (windowOpen and r.unlockedCount > 0 and isNew) or countRose then
             g_game.requestBestiaryCreatures(r.bestClass)
         end
     end
