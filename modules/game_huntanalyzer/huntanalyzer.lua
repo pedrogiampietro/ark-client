@@ -331,17 +331,61 @@ function onCharmProc(charmId, damage)
   local entry = runeTrackerData[charmId]
   if not entry then
     runeTrackerData[charmId] = {
-      procs      = 1,
+      procs       = 1,
       totalDamage = damage,
-      name       = charmNames[charmId] or ('Charm #' .. charmId),
+      name        = charmNames[charmId] or ('Charm #' .. charmId),
     }
   else
     entry.procs       = entry.procs + 1
     entry.totalDamage = entry.totalDamage + damage
   end
-  -- Trigger immediate UI refresh if the window is open
+  -- Update (or create) only this charm's row directly in the UI
   if runeWindow and runeWindow:isVisible() then
-    updateRuneTracker()
+    runeDrawCharmRow(charmId, runeTrackerData[charmId])
+    local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
+    if noDataLabel then noDataLabel:setVisible(false) end
+  end
+end
+
+-- Draw/update a single charm row without touching other rows
+function runeDrawCharmRow(charmId, data)
+  local runeList = runeWindow:recursiveGetChildById('runeList')
+  if not runeList then return end
+
+  local rowId = 'charmRow_' .. charmId
+  local row   = runeList:getChildById(rowId)
+  if not row then
+    row = g_ui.createWidget('RuneRow', runeList)
+    if not row then return end
+    row:setId(rowId)
+  end
+
+  local nameLabel  = row:getChildById('runeName')
+  local procsLabel = row:getChildById('runeProcs')
+  local dmgLabel   = row:getChildById('runeDmg')
+
+  if nameLabel  then nameLabel:setText(data.name .. ':') end
+  if procsLabel then procsLabel:setText(data.procs .. 'x') end
+  if dmgLabel   then
+    if data.totalDamage > 0 then
+      dmgLabel:setText('(' .. number_format(data.totalDamage) .. ' dmg)')
+    else
+      dmgLabel:setText('')
+    end
+  end
+end
+
+-- Rebuild the full list from runeTrackerData (used when window is reopened)
+function runeRebuildList()
+  if not runeWindow then return end
+  local runeList    = runeWindow:recursiveGetChildById('runeList')
+  local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
+  if runeList then runeList:destroyChildren() end
+  local hasData = next(runeTrackerData) ~= nil
+  if noDataLabel then noDataLabel:setVisible(not hasData) end
+  if not runeList then return end
+  for charmId, data in pairs(runeTrackerData) do
+    runeDrawCharmRow(charmId, data)
   end
 end
 
@@ -351,6 +395,7 @@ function showRuneWindow()
       runeSessionStart = os.time()
     end
     runeWindow:show()
+    runeRebuildList()
     if not runeUpdateEvent then
       updateRuneTracker()
     end
@@ -362,20 +407,24 @@ end
 function resetRuneTracker()
   runeTrackerData  = {}
   runeSessionStart = os.time()
+  -- Clear the charm rows from the UI
+  local runeList    = runeWindow and runeWindow:recursiveGetChildById('runeList')
+  local noDataLabel = runeWindow and runeWindow:recursiveGetChildById('noDataLabel')
+  if runeList    then runeList:destroyChildren() end
+  if noDataLabel then noDataLabel:setVisible(true) end
   -- Also reset cyclopedia's own tracker if accessible
   if modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia then
     modules.game_cyclopedia.Cyclopedia.resetCharmAnalyzer()
   end
-  updateRuneTracker()
 end
 
+-- Only ticks the session timer; never touches the charm rows
 function updateRuneTracker()
   if runeUpdateEvent then removeEvent(runeUpdateEvent) end
   runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
 
   if not runeWindow or not runeWindow:isVisible() then return end
 
-  -- Session timer (starts when window opens)
   local sessionLabel = runeWindow:recursiveGetChildById('sessionLabel')
   if sessionLabel then
     local secs = 0
@@ -386,35 +435,6 @@ function updateRuneTracker()
     local m = math.floor((secs % 3600) / 60)
     local s = secs % 60
     sessionLabel:setText(string.format('Session: %02d:%02d:%02d', h, m, s))
-  end
-
-  local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
-  local runeList    = runeWindow:recursiveGetChildById('runeList')
-
-  local hasData = next(runeTrackerData) ~= nil
-  if noDataLabel then noDataLabel:setVisible(not hasData) end
-
-  if not runeList then return end
-
-  runeList:destroyChildren()
-
-  for charmId, data in pairs(runeTrackerData) do
-    local row = g_ui.createWidget('RuneRow', runeList)
-    if not row then break end
-
-    local nameLabel  = row:getChildById('runeName')
-    local procsLabel = row:getChildById('runeProcs')
-    local dmgLabel   = row:getChildById('runeDmg')
-
-    if nameLabel  then nameLabel:setText(data.name .. ':') end
-    if procsLabel then procsLabel:setText(data.procs .. 'x') end
-    if dmgLabel   then
-      if data.totalDamage > 0 then
-        dmgLabel:setText('(' .. number_format(data.totalDamage) .. ' dmg)')
-      else
-        dmgLabel:setText('')
-      end
-    end
   end
 end
 
