@@ -80,10 +80,13 @@ function Cyclopedia.loadCharms(charmsData)
     cyclopediaWindow.bottomBar.CharmsBase.Value:setText(tostring(charmsData.points or 0))
     UI.CharmsPoints = charmsData.points or 0
 
-    -- Build finished monsters list
+    -- Build finished monsters list and pre-fetch uncached names
     Cyclopedia.Charms.Monsters = {}
     for _, raceId in ipairs(charmsData.finishedMonsters or {}) do
         table.insert(Cyclopedia.Charms.Monsters, raceId)
+        if not Cyclopedia.monsterCache[raceId] then
+            Cyclopedia.queueMonsterDataRequest(raceId)
+        end
     end
 
     selectedCharmId = nil
@@ -201,8 +204,23 @@ function Cyclopedia.showCharmInfo(data, charmData)
         end
     end
 
-    -- Unlock/Assign/Remove button
+    -- Price display in info panel
     local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
+    local infoPrice = UI.InformationBase.PriceBase
+    if infoPrice then
+        if isUnlocked then
+            infoPrice.Value:setText(tostring(data.removeCost or 0))
+            infoPrice.Charm:setVisible(false)
+            infoPrice.Gold:setVisible(true)
+        else
+            local pts = charmData and charmData.points and charmData.points[1] or 0
+            infoPrice.Value:setText(tostring(pts))
+            infoPrice.Charm:setVisible(true)
+            infoPrice.Gold:setVisible(false)
+        end
+    end
+
+    -- Unlock/Assign/Remove button
     UI.InformationBase.UnlockButton:setEnabled(true)
     if isUnlocked and data.asignedStatus then
         UI.InformationBase.UnlockButton:setText(tr("Remove"))
@@ -252,21 +270,23 @@ function Cyclopedia.showCreatureCharmPicker(charmData)
 
     creatureList:destroyChildren()
 
+    local selectedWidget = nil
+    local capturedCharmId = charmData.id
+
     for _, raceId in ipairs(Cyclopedia.Charms.Monsters or {}) do
         local raceInfo = Cyclopedia.getMonsterCache(raceId)
         local btn = g_ui.createWidget('CharmCreatureName', creatureList)
         btn:setText(raceInfo.name)
-        btn.raceId  = raceId
-        btn.charmId = charmData.id
-    end
-end
 
-function Cyclopedia.selectCreatureCharm(widget, checked)
-    if not checked then return end
-    local raceId  = widget.raceId
-    local charmId = widget.charmId
-    if raceId and charmId then
-        g_game.requestBestiaryBuyCharmRune(charmId, 1, raceId)  -- action=1: assign to creature
+        local capturedRaceId = raceId
+        function btn:onClick()
+            if selectedWidget then
+                selectedWidget:setBackgroundColor("#484848")
+            end
+            selectedWidget = self
+            self:setBackgroundColor("#585858")
+            g_game.requestBestiaryBuyCharmRune(capturedCharmId, 1, capturedRaceId)
+        end
     end
 end
 

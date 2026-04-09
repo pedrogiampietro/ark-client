@@ -191,12 +191,10 @@ BestiaryItemGroup < UIWidget
     !text: tr('Common') .. ':'
     text-auto-resize: true
 
-CharmCreatureName < UICheckBox
+CharmCreatureName < UIWidget
   color: #C0C0C0
   background-color: #484848
-  @onClick: modules.game_cyclopedia.Cyclopedia.selectCreatureCharm(self, self:isChecked())
-  $checked:
-    background-color: #585858
+  focusable: false
 
 CharmItem < UIWidget
   image-source: /images/ui/minipanel
