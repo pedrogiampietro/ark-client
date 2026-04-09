@@ -302,6 +302,30 @@ function onCancelWalk(player)
   end
 end
 
+-- Returns true when transitioning between a diagonal and one of its cardinal components.
+-- These are natural diagonal-walk transitions and should NOT trigger walkTurnDelay.
+local diagonalComponents = {
+  [NorthEast] = {North, East},
+  [SouthEast] = {South, East},
+  [SouthWest] = {South, West},
+  [NorthWest] = {North, West},
+}
+function isDiagonalTransition(from, to)
+  local comps = diagonalComponents[from]
+  if comps then
+    for _, c in ipairs(comps) do
+      if c == to then return true end
+    end
+  end
+  comps = diagonalComponents[to]
+  if comps then
+    for _, c in ipairs(comps) do
+      if c == from then return true end
+    end
+  end
+  return false
+end
+
 function walk(dir, ticks)
   -- Mouse has priority: ignore keyboard walk for a short time after any map click
   if g_clock.millis() < mousePriorityUntil then
@@ -457,7 +481,7 @@ function walk(dir, ticks)
   end
   g_game.walk(dir, preWalked)
 
-  if not firstStep and lastWalkDir ~= dir then
+  if not firstStep and lastWalkDir ~= dir and not isDiagonalTransition(lastWalkDir, dir) then
     walkLock = g_clock.millis() + g_settings.getNumber('walkTurnDelay')
   end
 
