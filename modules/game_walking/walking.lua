@@ -444,7 +444,10 @@ function walk(dir, ticks)
   end  
   
   firstStep = false
-  if player:isServerWalking() and not dash then
+  if player:isServerWalking() and not dash and lastWalkDir == dir then
+    -- Only penalise same-direction walking to prevent packet flooding.
+    -- Direction changes already cancel via g_game.stop(); the extra lockout
+    -- only causes stutter (most noticeable after diagonal steps).
     walkLock = walkLock + math.max(g_settings.getNumber('walkFirstStepDelay'), 100)
   end
   
