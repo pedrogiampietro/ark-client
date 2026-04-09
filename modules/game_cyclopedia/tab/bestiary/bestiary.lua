@@ -325,15 +325,16 @@ function Cyclopedia.CreateBestiaryCategoryItem(Data)
     UI.BackPageButton:setEnabled(false)
 
     local widget = g_ui.createWidget("BestiaryCategory", UI.ListBase.CategoryList)
-    widget:setText(Data.name)
+    widget.NameLabel:setText(Data.name)
     local key = Data.name:lower():gsub(" ", "_")
     local iconName = RACE_ICON_MAP[Data.name:lower()] or RACE_ICON_MAP[key] or key
     widget.ClassIcon:setImageSource("/game_cyclopedia/images/bestiary/creatures/" .. iconName)
     widget.Category = Data.name
     widget.TotalValue:setText("Total: " .. Data.amount)
-    local knownColor = Data.know > 0 and "#b8d090" or "#888888"
     widget.KnownValue:setText("Known: " .. Data.know)
-    widget.KnownValue:setColor(knownColor)
+    if Data.know > 0 then
+        widget.KnownValue:setColor("#b8d090")
+    end
 
     function widget.ClassBase:onClick()
         UI.BackPageButton:setEnabled(true)
@@ -529,17 +530,17 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
     if data.currentLevel >= 3 then
         widget.Finalized:setVisible(true)
         widget.KillsLabel:setVisible(false)
-        widget.Name:setColor("#e8c050")
+        widget.Name:setColor("#b8d090")  -- fully unlocked: soft green
     elseif data.currentLevel < 1 then
         widget.KillsLabel:setText("?")
-        widget.KillsLabel:setColor("#666666")
+        widget.KillsLabel:setColor("#555555")
         widget.Name:setText("?")
-        widget.Name:setColor("#666666")
+        widget.Name:setColor("#555555")
         widget.AnimusMastery:setVisible(false)
     else
         local sym = stageSymbols[data.currentLevel] or "?"
         widget.KillsLabel:setText(sym)
-        widget.KillsLabel:setColor("#c8a030")
+        widget.KillsLabel:setColor("#b8d090")  -- in progress: soft green
     end
 
     function widget.ClassBase:onClick()
@@ -711,17 +712,17 @@ function Cyclopedia.refreshCreatureListItem(raceId)
     if level >= 3 then
         widget.Finalized:setVisible(true)
         widget.KillsLabel:setVisible(false)
-        widget.Name:setColor("#e8c050")
+        widget.Name:setColor("#b8d090")
     elseif level < 1 then
         widget.KillsLabel:setText("?")
-        widget.KillsLabel:setColor("#666666")
-        widget.Name:setColor("#666666")
+        widget.KillsLabel:setColor("#555555")
+        widget.Name:setColor("#555555")
     else
         widget.Finalized:setVisible(false)
         widget.KillsLabel:setVisible(true)
         widget.KillsLabel:setText(stageSymbols[level] or "?")
-        widget.KillsLabel:setColor("#c8a030")
-        widget.Name:setColor("#e8d090")
+        widget.KillsLabel:setColor("#b8d090")
+        widget.Name:setColor("#d0d0d0")
     end
 end
 

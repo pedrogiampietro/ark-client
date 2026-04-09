@@ -22,20 +22,24 @@ SubPanel < UIWidget
 BestiaryCategory < UIWidget
   image-source: /images/ui/minipanel
   image-border: 8
-  image-border-top: 14
-  !text: tr('Name')
-  text-align: top center
-  text-offset: 0 3
-  font: verdana-11px-rounded
-  color: #c8c8c8
   $pressed:
     image-color: #bbbbbb
+  Label
+    id: NameLabel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 14
+    margin-top: 4
+    text-align: center
+    font: verdana-11px-rounded
+    color: #d0d0d0
   UIWidget
     id: ClassBase
-    anchors.top: parent.top
+    anchors.top: NameLabel.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 17
-    size: 62 62
+    margin-top: 4
+    size: 54 54
     phantom: false
     $hover:
       image-color: #dddddd
@@ -44,7 +48,7 @@ BestiaryCategory < UIWidget
   UIWidget
     id: ClassIcon
     anchors.centerIn: ClassBase
-    size: 54 54
+    size: 50 50
     phantom: true
   Label
     id: TotalValue
@@ -61,31 +65,27 @@ BestiaryCategory < UIWidget
     margin-bottom: 4
     font: verdana-11px-rounded
     !text: 'Known: 0'
-    color: #aaaaaa
+    color: #888888
 
 BestiaryCreature < UIWidget
-  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
-  image-border: 20
+  image-source: /images/ui/minipanel
+  image-border: 8
   Label
     id: Name
-    height: 18
+    height: 14
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-left: 2
-    margin-right: 2
+    margin-top: 4
     text-align: center
-    text-offset: 0 3
     font: verdana-11px-rounded
-    color: #e8d090
+    color: #d0d0d0
   UIWidget
     id: ClassBase
     anchors.top: Name.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 2
+    margin-top: 4
     size: 64 64
-    image-source: /images/ui/item
-    image-border: 10
     phantom: false
     $pressed:
       background-color: #333333
@@ -97,9 +97,9 @@ BestiaryCreature < UIWidget
   UIWidget
     id: AnimusMastery
     anchors.top: parent.top
-    anchors.left: parent.left
-    margin-top: 2
-    margin-left: 2
+    anchors.right: parent.right
+    margin-top: 3
+    margin-right: 3
     image-source: /game_cyclopedia/images/indicator_soulcore
     visible: false
   UIWidget
@@ -115,8 +115,8 @@ BestiaryCreature < UIWidget
     margin-bottom: 4
     font: verdana-11px-rounded
     text-auto-resize: true
-    !text: tr('?')
-    color: #aaaaaa
+    !text: '?'
+    color: #888888
 
 BestiaryResistProgress < UIWidget
   size: 90 14
