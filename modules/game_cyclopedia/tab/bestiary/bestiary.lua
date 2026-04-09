@@ -350,20 +350,15 @@ function Cyclopedia.updateBestiaryCharmSelection(raceId)
         charmSelector:setEnabled(assignedCharm == nil) -- disable picker if one is already assigned
     end
 
-    -- Update CharmBase icon: always keep charmBase as panel_flat background,
-    -- create/destroy a child icon widget so we never mutate charmBase's image state.
-    local existingIcon = charmBase:getChildById("charmIcon")
-    if existingIcon then existingIcon:destroy() end
+    -- Update CharmBase icon via the static CharmIcon child (defined in otui)
+    local charmIcon = charmBase:getChildById("CharmIcon")
 
     if assignedCharm then
-        -- Create charm icon child inside CharmBase
-        local icon = g_ui.createWidget("UIWidget", charmBase)
-        icon:setId("charmIcon")
-        icon:setSize("32 32")
-        icon:setMargin(6)
-        icon:setPhantom(true)
-        icon:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
-        icon:setImageClip(string.format("%d 0 32 32", assignedCharm.id * 32))
+        if charmIcon then
+            charmIcon:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
+            charmIcon:setImageClip(string.format("%d 0 32 32", assignedCharm.id * 32))
+            charmIcon:setVisible(true)
+        end
         charmBase:setTooltip(charmNames[assignedCharm.id] or ("Charm " .. assignedCharm.id))
 
         -- Show Remove button; label shows removal cost
@@ -384,6 +379,7 @@ function Cyclopedia.updateBestiaryCharmSelection(raceId)
             end
         end
     else
+        if charmIcon then charmIcon:setVisible(false) end
         charmBase:removeTooltip()
 
         -- Show Select button

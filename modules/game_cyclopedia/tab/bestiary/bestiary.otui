@@ -249,6 +249,12 @@ UIWidget
         image-source: /images/ui/panel_flat
         image-border: 10
         size: 45 45
+        UIWidget
+          id: CharmIcon
+          anchors.centerIn: parent
+          size: 32 32
+          visible: false
+          phantom: true
       Button
         id: SelectButton
         size: 70 20
