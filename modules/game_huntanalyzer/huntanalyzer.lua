@@ -391,6 +391,9 @@ function runeDrawCharmRow(charmId, data)
       dmgLabel:setText('')
     end
   end
+  -- Atualiza altura do container (OTClient não auto-redimensiona com filhos dinâmicos)
+  local rowCount = runeList:getChildCount()
+  runeList:setHeight(rowCount * 22)
   runeLog('linha desenhada com sucesso: ' .. data.name .. ' ' .. data.procs .. 'x')
 end
 
@@ -434,7 +437,7 @@ function resetRuneTracker()
   -- Clear the charm rows from the UI
   local runeList    = runeWindow and runeWindow:recursiveGetChildById('runeList')
   local noDataLabel = runeWindow and runeWindow:recursiveGetChildById('noDataLabel')
-  if runeList    then runeList:destroyChildren() end
+  if runeList    then runeList:destroyChildren(); runeList:setHeight(0) end
   if noDataLabel then noDataLabel:setVisible(true) end
   -- Also reset cyclopedia's own tracker if accessible
   if modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia then
