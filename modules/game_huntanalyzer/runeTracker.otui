@@ -6,23 +6,19 @@ RuneRow < UIWidget
   UIWidget
     id: runeIcon
     size: 20 20
-    anchors.verticalCenter: parent.verticalCenter
     phantom: true
   Label
     id: runeName
     color: #C0C0C0
     text-auto-resize: true
-    anchors.verticalCenter: parent.verticalCenter
   Label
     id: runeProcs
     color: #e0c060
     text-auto-resize: true
-    anchors.verticalCenter: parent.verticalCenter
   Label
     id: runeDmg
     color: #a0a0ff
     text-auto-resize: true
-    anchors.verticalCenter: parent.verticalCenter
 
 MiniWindow
   id: runeWindow
