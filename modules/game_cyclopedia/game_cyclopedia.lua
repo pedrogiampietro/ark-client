@@ -213,6 +213,7 @@ function onGameEnd()
     Cyclopedia.categoryCreatures = {}
     Cyclopedia.storedRaceCounts  = {}
     Cyclopedia.storedTrackerData = nil
+    Cyclopedia.storedCharmsData  = nil
     clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()
@@ -531,13 +532,15 @@ function parseCharms(protocol, msg)
         table.insert(finished, msg:getU16())
     end
 
-    Cyclopedia.loadCharms({
-        points           = 0,  -- updated via parseResourceBalance
+    local charmsData = {
+        points             = 0,  -- updated via parseResourceBalance
         resetAllCharmsCost = resetCost,
-        charms           = charmList,
-        finishedMonsters = finished,
-        slots            = slots,
-    })
+        charms             = charmList,
+        finishedMonsters   = finished,
+        slots              = slots,
+    }
+    Cyclopedia.storedCharmsData = charmsData
+    Cyclopedia.loadCharms(charmsData)
 end
 
 function parseEntryChanged(protocol, msg)

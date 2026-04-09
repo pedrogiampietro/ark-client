@@ -60,6 +60,13 @@ function showCharms()
     cyclopediaWindow.bottomBar.CharmsBase:setVisible(true)
     cyclopediaWindow.bottomBar.GoldBase:setVisible(false)
     cyclopediaWindow.bottomBar.BestiaryTrackerButton:setVisible(false)
+
+    -- Show cached data immediately if available (e.g. user already visited Bestiary)
+    if Cyclopedia.storedCharmsData then
+        Cyclopedia.loadCharms(Cyclopedia.storedCharmsData)
+    end
+    -- Always request fresh data; server responds to races request with charm data (0xD8)
+    g_game.requestBestiaryRaces()
 end
 
 function Cyclopedia.loadCharms(charmsData)
