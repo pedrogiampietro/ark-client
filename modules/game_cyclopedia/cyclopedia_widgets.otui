@@ -91,8 +91,12 @@ BestiaryCreature < UIWidget
     size: 64 64
     phantom: false
     focusable: false
+    $hover:
+      border-width: 1
+      border-color: #8a7a60
     $pressed:
-      background-color: #333333
+      border-width: 1
+      border-color: #c8a870
   UICreature
     id: Sprite
     anchors.centerIn: ClassBase
