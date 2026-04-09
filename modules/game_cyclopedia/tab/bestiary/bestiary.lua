@@ -330,9 +330,10 @@ function Cyclopedia.CreateBestiaryCategoryItem(Data)
     local iconName = RACE_ICON_MAP[Data.name:lower()] or RACE_ICON_MAP[key] or key
     widget.ClassIcon:setImageSource("/game_cyclopedia/images/bestiary/creatures/" .. iconName)
     widget.Category = Data.name
-    widget:setColor("#C0C0C0")
-    widget.TotalValue:setText(string.format("Total: %d", Data.amount))
-    widget.KnownValue:setText(string.format("Known: %d", Data.know))
+    widget.TotalValue:setText("Total: " .. Data.amount)
+    local knownColor = Data.know > 0 and "#b8d090" or "#888888"
+    widget.KnownValue:setText("Known: " .. Data.know)
+    widget.KnownValue:setColor(knownColor)
 
     function widget.ClassBase:onClick()
         UI.BackPageButton:setEnabled(true)

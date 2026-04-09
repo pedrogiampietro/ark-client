@@ -20,21 +20,22 @@ SubPanel < UIWidget
   text-align: top
 
 BestiaryCategory < UIWidget
-  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
-  image-border: 20
+  image-source: /images/ui/minipanel
+  image-border: 8
+  image-border-top: 14
   !text: tr('Name')
-  text-align: top
-  text-offset: 0 4
+  text-align: top center
+  text-offset: 0 3
   font: verdana-11px-rounded
-  color: #e8d090
+  color: #c8c8c8
   $pressed:
-    image-color: #cccccc
+    image-color: #bbbbbb
   UIWidget
     id: ClassBase
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 22
-    size: 72 72
+    margin-top: 17
+    size: 62 62
     phantom: false
     $hover:
       image-color: #dddddd
@@ -43,23 +44,23 @@ BestiaryCategory < UIWidget
   UIWidget
     id: ClassIcon
     anchors.centerIn: ClassBase
-    size: 64 64
+    size: 54 54
     phantom: true
+  Label
+    id: TotalValue
+    anchors.bottom: KnownValue.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 2
+    font: verdana-11px-rounded
+    !text: 'Total: 0'
+    color: #888888
   Label
     id: KnownValue
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     margin-bottom: 4
     font: verdana-11px-rounded
-    !text: tr('Known: ') .. '0'
-    color: #aaaaaa
-  Label
-    id: TotalValue
-    anchors.bottom: KnownValue.top
-    anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 1
-    font: verdana-11px-rounded
-    !text: tr('Total: ') .. '0'
+    !text: 'Known: 0'
     color: #aaaaaa
 
 BestiaryCreature < UIWidget
