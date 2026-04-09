@@ -94,6 +94,7 @@ function Cyclopedia.loadCharms(charmsData)
         end
     end
 
+    local prevSelectedId = selectedCharmId  -- preserve across rebuild
     selectedCharmId = nil
     CharmList:destroyChildren()
 
@@ -123,6 +124,12 @@ function Cyclopedia.loadCharms(charmsData)
         if not ok then
             g_logger.error("Cyclopedia: error creating charm " .. tostring(value.id) .. ": " .. tostring(err))
         end
+    end
+
+    -- Re-select the previously selected charm so the info panel updates in real-time
+    if prevSelectedId then
+        local widget = CharmList:getChildById(tostring(prevSelectedId))
+        if widget then widget:onClick() end
     end
 end
 
