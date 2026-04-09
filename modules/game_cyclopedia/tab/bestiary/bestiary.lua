@@ -796,17 +796,42 @@ function Cyclopedia.onTrackCheckChange(widget, checked)
     if Cyclopedia._trackCheckSuppressed then return end
     local raceId = widget.raceId
     if not raceId then return end
-    -- Optimistic local update: keeps storedRaceIDs in sync before the server replies
+
     if checked then
+        -- Optimistic add to storedRaceIDs
         if not table.find(storedRaceIDs, raceId) then
             table.insert(storedRaceIDs, raceId)
         end
+        -- Optimistic add to storedTrackerData (server will overwrite with real kill goals)
+        if Cyclopedia.storedTrackerData then
+            local found = false
+            for _, entry in ipairs(Cyclopedia.storedTrackerData) do
+                if entry.raceId == raceId then found = true; break end
+            end
+            if not found then
+                table.insert(Cyclopedia.storedTrackerData, {
+                    raceId = raceId, kills = 0,
+                    firstUnlock = 0, secondUnlock = 0, toUnlock = 0
+                })
+            end
+        end
     else
+        -- Optimistic remove from storedRaceIDs
         for i = #storedRaceIDs, 1, -1 do
             if storedRaceIDs[i] == raceId then table.remove(storedRaceIDs, i) end
         end
+        -- Optimistic remove from storedTrackerData
+        if Cyclopedia.storedTrackerData then
+            for i = #Cyclopedia.storedTrackerData, 1, -1 do
+                if Cyclopedia.storedTrackerData[i].raceId == raceId then
+                    table.remove(Cyclopedia.storedTrackerData, i)
+                end
+            end
+        end
     end
+
     g_game.requestBestiaryTrackerStatus(raceId, checked)
+    Cyclopedia.refreshBestiaryTracker()
 end
 
 function Cyclopedia.initializeTrackerData()
