@@ -373,8 +373,6 @@ BestiaryTracker < MiniWindow
     UIWidget
       id: trackerTabBar
       height: 20
-      anchors.left: parent.left
-      anchors.right: parent.right
       layout:
         type: horizontalBox
         spacing: 3
