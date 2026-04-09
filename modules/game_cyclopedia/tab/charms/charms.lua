@@ -177,8 +177,21 @@ function Cyclopedia.CreateCharmItem(data)
     end
 end
 
+local function clearPickerMode(btn)
+    btn.pickerMode      = nil
+    btn.pendingCharmId  = nil
+    btn.getSelectedRace = nil
+    Cyclopedia.onCharmPickerMonsterUpdate = nil
+end
+
 function Cyclopedia.showCharmInfo(data, charmData)
     if not UI or not UI.InformationBase then return end
+
+    -- Reset picker mode when switching charm selection
+    clearPickerMode(UI.InformationBase.UnlockButton)
+    if UI.InformationBase.CreaturesBase and UI.InformationBase.CreaturesBase.CreatureList then
+        UI.InformationBase.CreaturesBase.CreatureList:destroyChildren()
+    end
 
     -- Description
     UI.InformationBase.TextBase:setText(charmData and charmData.description or "")
@@ -243,12 +256,27 @@ function Cyclopedia.clearCharmInfo()
     if UI.InformationBase.InfoBase then
         UI.InformationBase.InfoBase.sprite:setOutfit({ type = 0 })
     end
-    UI.InformationBase.UnlockButton:setEnabled(false)
-    UI.InformationBase.UnlockButton:setText(tr("Select"))
-    UI.InformationBase.UnlockButton.data = nil
+    if UI.InformationBase.CreaturesBase and UI.InformationBase.CreaturesBase.CreatureList then
+        UI.InformationBase.CreaturesBase.CreatureList:destroyChildren()
+    end
+    local btn = UI.InformationBase.UnlockButton
+    clearPickerMode(btn)
+    btn:setEnabled(false)
+    btn:setText(tr("Select"))
+    btn.data = nil
 end
 
 function Cyclopedia.actionCharmButton(btn)
+    -- Phase 2: confirm assignment after creature has been selected in picker
+    if btn.pickerMode then
+        local raceId = btn.getSelectedRace and btn.getSelectedRace()
+        if raceId then
+            g_game.requestBestiaryBuyCharmRune(btn.pendingCharmId, 1, raceId)
+        end
+        clearPickerMode(btn)
+        return
+    end
+
     local data = btn.data
     if not data then return end
 
@@ -257,7 +285,7 @@ function Cyclopedia.actionCharmButton(btn)
     if isUnlocked and data.asignedStatus and data.raceId and data.raceId > 0 then
         g_game.requestBestiaryBuyCharmRune(data.id, 2, data.raceId)  -- action=2: remove from creature
     elseif isUnlocked then
-        Cyclopedia.showCreatureCharmPicker(data)  -- assign: picker shown, action=1 sent on creature select
+        Cyclopedia.showCreatureCharmPicker(data)  -- phase 1: open picker, button becomes "Confirm"
     else
         g_game.requestBestiaryBuyCharmRune(data.id, 0, 0)  -- action=0: unlock/upgrade tier
     end
@@ -268,26 +296,67 @@ function Cyclopedia.showCreatureCharmPicker(charmData)
     local creatureList = UI.InformationBase.CreaturesBase.CreatureList
     if not creatureList then return end
 
-    creatureList:destroyChildren()
-
-    local selectedWidget = nil
     local capturedCharmId = charmData.id
+    local selectedRaceId  = nil
+    local selectedWidget  = nil
 
-    for _, raceId in ipairs(Cyclopedia.Charms.Monsters or {}) do
-        local raceInfo = Cyclopedia.getMonsterCache(raceId)
-        local btn = g_ui.createWidget('CharmCreatureName', creatureList)
-        btn:setText(raceInfo.name)
+    local function buildCreatureList()
+        creatureList:destroyChildren()
+        selectedWidget = nil
 
-        local capturedRaceId = raceId
-        function btn:onClick()
-            if selectedWidget then
-                selectedWidget:setBackgroundColor("#484848")
+        local bg = true
+        for _, raceId in ipairs(Cyclopedia.Charms.Monsters or {}) do
+            local raceInfo = Cyclopedia.getMonsterCache(raceId)
+            -- Skip still-unknown entries; they'll be added when the name arrives
+            if raceInfo.name:sub(1, 7) ~= "Unknown" then
+                local btn = g_ui.createWidget('CharmCreatureName', creatureList)
+                btn:setText(raceInfo.name)
+                btn:setBackgroundColor(bg and "#484848" or "#414141")
+                bg = not bg
+
+                -- Restore selection highlight if this was previously selected
+                if raceId == selectedRaceId then
+                    btn:setBackgroundColor("#585858")
+                    selectedWidget = btn
+                end
+
+                local capturedRaceId = raceId
+                function btn:onClick()
+                    if selectedWidget then
+                        selectedWidget:setBackgroundColor(
+                            selectedWidget == btn and "#585858" or "#484848")
+                    end
+                    selectedRaceId = capturedRaceId
+                    selectedWidget = self
+                    self:setBackgroundColor("#585858")
+                end
             end
-            selectedWidget = self
-            self:setBackgroundColor("#585858")
-            g_game.requestBestiaryBuyCharmRune(capturedCharmId, 1, capturedRaceId)
         end
     end
+
+    buildCreatureList()
+
+    -- Live-rebuild as monster names arrive from the server
+    Cyclopedia.onCharmPickerMonsterUpdate = function(updatedRaceId)
+        if not UI then
+            Cyclopedia.onCharmPickerMonsterUpdate = nil
+            return
+        end
+        for _, id in ipairs(Cyclopedia.Charms.Monsters or {}) do
+            if id == updatedRaceId then
+                buildCreatureList()
+                return
+            end
+        end
+    end
+
+    -- Switch button to "Confirm" mode — action is sent only when Confirm is clicked
+    local btn = UI.InformationBase.UnlockButton
+    btn.pickerMode      = true
+    btn.pendingCharmId  = capturedCharmId
+    btn.getSelectedRace = function() return selectedRaceId end
+    btn:setText(tr("Confirm"))
+    btn:setEnabled(true)
 end
 
 -- Called by parseResourceBalance when charm points arrive (after cards are already created)

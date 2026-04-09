@@ -456,6 +456,10 @@ function parseMonsterData(protocol, msg)
         lookType = lookType,
         level    = level,
     }
+    -- Notify charm picker if it's waiting for this monster's name
+    if Cyclopedia.onCharmPickerMonsterUpdate then
+        Cyclopedia.onCharmPickerMonsterUpdate(raceId)
+    end
     for i = #monsterDataQueue, 1, -1 do
         if monsterDataQueue[i] == raceId then
             table.remove(monsterDataQueue, i)
