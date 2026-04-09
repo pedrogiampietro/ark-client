@@ -379,7 +379,7 @@ function Cyclopedia.updateBestiaryCharmSelection(raceId)
     else
         -- No charm assigned — show placeholder icon
         charmBase:setImageSource("/images/ui/panel_flat")
-        charmBase:setImageClip("")
+        charmBase:setImageRect({})
         charmBase:removeTooltip()
 
         -- Show Select button
