@@ -91,6 +91,7 @@ BestiaryCreature < UIWidget
     size: 64 64
     phantom: false
     focusable: false
+    border-width: 0
     $hover:
       border-width: 1
       border-color: #8a7a60
