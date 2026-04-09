@@ -98,6 +98,7 @@ function showBalanceWindow()
 end
 
 function resetSessionAll()
+	runeLog('resetSessionAll chamado! ' .. (debug and debug.traceback and debug.traceback() or ''))
 	 resetLootedItems()
 	 resetKilledMonsters()
 	 resetSupplyItems()
@@ -442,9 +443,21 @@ function resetRuneTracker()
 end
 
 -- Only ticks the session timer; never touches the charm rows
+local runeDebugTick = 0
 function updateRuneTracker()
   if runeUpdateEvent then removeEvent(runeUpdateEvent) end
   runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
+
+  -- Status log a cada 3 segundos para diagnóstico
+  runeDebugTick = runeDebugTick + 1
+  if runeDebugTick % 3 == 0 then
+    local dataCount = 0
+    for _ in pairs(runeTrackerData) do dataCount = dataCount + 1 end
+    local runeList = runeWindow and runeWindow:recursiveGetChildById('runeList')
+    local childCount = runeList and runeList:getChildCount() or -1
+    local visible = runeWindow and runeWindow:isVisible()
+    runeLog(string.format('STATUS: dados=%d widgets=%d janela_visivel=%s', dataCount, childCount, tostring(visible)))
+  end
 
   if not runeWindow or not runeWindow:isVisible() then return end
 
