@@ -326,8 +326,13 @@ local charmNames = {
   [24] = 'Overflux',
 }
 
+local function runeLog(msg)
+  print('[RuneTracker] ' .. tostring(msg))
+end
+
 -- Called by game_cyclopedia.parseCharmProc each time a charm fires
 function onCharmProc(charmId, damage)
+  runeLog('onCharmProc chamado: charmId=' .. tostring(charmId) .. ' damage=' .. tostring(damage))
   local entry = runeTrackerData[charmId]
   if not entry then
     runeTrackerData[charmId] = {
@@ -335,10 +340,13 @@ function onCharmProc(charmId, damage)
       totalDamage = damage,
       name        = charmNames[charmId] or ('Charm #' .. charmId),
     }
+    runeLog('novo charm criado: ' .. tostring(charmNames[charmId] or charmId))
   else
     entry.procs       = entry.procs + 1
     entry.totalDamage = entry.totalDamage + damage
+    runeLog('charm atualizado: procs=' .. entry.procs)
   end
+  runeLog('runeWindow visivel: ' .. tostring(runeWindow and runeWindow:isVisible()))
   -- Update (or create) only this charm's row directly in the UI
   if runeWindow and runeWindow:isVisible() then
     runeDrawCharmRow(charmId, runeTrackerData[charmId])
@@ -350,14 +358,23 @@ end
 -- Draw/update a single charm row without touching other rows
 function runeDrawCharmRow(charmId, data)
   local runeList = runeWindow:recursiveGetChildById('runeList')
-  if not runeList then return end
+  if not runeList then
+    runeLog('ERRO: runeList nao encontrado em runeDrawCharmRow')
+    return
+  end
 
   local rowId = 'charmRow_' .. charmId
   local row   = runeList:getChildById(rowId)
   if not row then
+    runeLog('criando nova linha: ' .. rowId)
     row = g_ui.createWidget('RuneRow', runeList)
-    if not row then return end
+    if not row then
+      runeLog('ERRO: falha ao criar RuneRow widget')
+      return
+    end
     row:setId(rowId)
+  else
+    runeLog('atualizando linha existente: ' .. rowId)
   end
 
   local nameLabel  = row:getChildById('runeName')
@@ -373,15 +390,18 @@ function runeDrawCharmRow(charmId, data)
       dmgLabel:setText('')
     end
   end
+  runeLog('linha desenhada com sucesso: ' .. data.name .. ' ' .. data.procs .. 'x')
 end
 
 -- Rebuild the full list from runeTrackerData (used when window is reopened)
 function runeRebuildList()
+  runeLog('runeRebuildList chamado')
   if not runeWindow then return end
   local runeList    = runeWindow:recursiveGetChildById('runeList')
   local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
   if runeList then runeList:destroyChildren() end
   local hasData = next(runeTrackerData) ~= nil
+  runeLog('runeRebuildList hasData=' .. tostring(hasData))
   if noDataLabel then noDataLabel:setVisible(not hasData) end
   if not runeList then return end
   for charmId, data in pairs(runeTrackerData) do
@@ -390,6 +410,7 @@ function runeRebuildList()
 end
 
 function showRuneWindow()
+  runeLog('showRuneWindow chamado, visivel=' .. tostring(runeWindow:isVisible()))
   if not runeWindow:isVisible() then
     if not runeSessionStart then
       runeSessionStart = os.time()
@@ -405,6 +426,8 @@ function showRuneWindow()
 end
 
 function resetRuneTracker()
+  runeLog('resetRuneTracker chamado!')
+  runeLog(debug and debug.traceback and debug.traceback() or '(sem traceback)')
   runeTrackerData  = {}
   runeSessionStart = os.time()
   -- Clear the charm rows from the UI

@@ -574,6 +574,7 @@ Cyclopedia.charmAnalyzerStart = nil  -- os.time() when analyzer session started
 function parseCharmProc(protocol, msg)
     local charmId = msg:getU8()
     local damage  = msg:getU32()
+    print('[RuneTracker][Cyclopedia] parseCharmProc: charmId=' .. tostring(charmId) .. ' damage=' .. tostring(damage))
 
     local entry = Cyclopedia.charmProcData[charmId]
     if not entry then
@@ -591,8 +592,12 @@ function parseCharmProc(protocol, msg)
     Cyclopedia.refreshCharmAnalyzer()
 
     -- Notify hunt analyzer if loaded
+    print('[RuneTracker][Cyclopedia] modulo hunteranalyzer existe: ' .. tostring(modules.game_hunteranalyzer ~= nil))
     if modules.game_hunteranalyzer and modules.game_hunteranalyzer.onCharmProc then
+        print('[RuneTracker][Cyclopedia] chamando onCharmProc no hunteranalyzer')
         modules.game_hunteranalyzer.onCharmProc(charmId, damage)
+    else
+        print('[RuneTracker][Cyclopedia] AVISO: onCharmProc nao encontrado no hunteranalyzer!')
     end
 end
 
