@@ -305,53 +305,36 @@ function Cyclopedia.showCreatureCharmPicker(charmData)
     local selectedRaceId  = nil
     local selectedWidget  = nil
 
-    local function buildCreatureList()
-        creatureList:destroyChildren()
-        selectedWidget = nil
+    -- Build the full list immediately, using placeholder names for uncached entries
+    creatureList:destroyChildren()
+    local bg = true
+    for _, raceId in ipairs(Cyclopedia.Charms.Monsters or {}) do
+        local raceInfo = Cyclopedia.getMonsterCache(raceId)
+        local btn = g_ui.createWidget('CharmCreatureName', creatureList)
+        btn:setText(raceInfo.name)
+        btn:setId("creature_" .. raceId)
+        btn:setBackgroundColor(bg and "#484848" or "#414141")
+        bg = not bg
 
-        local bg = true
-        for _, raceId in ipairs(Cyclopedia.Charms.Monsters or {}) do
-            local raceInfo = Cyclopedia.getMonsterCache(raceId)
-            -- Skip still-unknown entries; they'll be added when the name arrives
-            if raceInfo.name:sub(1, 7) ~= "Unknown" then
-                local btn = g_ui.createWidget('CharmCreatureName', creatureList)
-                btn:setText(raceInfo.name)
-                btn:setBackgroundColor(bg and "#484848" or "#414141")
-                bg = not bg
-
-                -- Restore selection highlight if this was previously selected
-                if raceId == selectedRaceId then
-                    btn:setBackgroundColor("#585858")
-                    selectedWidget = btn
-                end
-
-                local capturedRaceId = raceId
-                function btn:onClick()
-                    if selectedWidget then
-                        selectedWidget:setBackgroundColor(
-                            selectedWidget == btn and "#585858" or "#484848")
-                    end
-                    selectedRaceId = capturedRaceId
-                    selectedWidget = self
-                    self:setBackgroundColor("#585858")
-                end
-            end
+        local capturedRaceId = raceId
+        function btn:onClick()
+            if selectedWidget then selectedWidget:setBackgroundColor("#484848") end
+            selectedRaceId = capturedRaceId
+            selectedWidget = self
+            self:setBackgroundColor("#585858")
         end
     end
 
-    buildCreatureList()
-
-    -- Live-rebuild as monster names arrive from the server
+    -- Update individual widget names in-place as server responses arrive
     Cyclopedia.onCharmPickerMonsterUpdate = function(updatedRaceId)
         if not UI then
             Cyclopedia.onCharmPickerMonsterUpdate = nil
             return
         end
-        for _, id in ipairs(Cyclopedia.Charms.Monsters or {}) do
-            if id == updatedRaceId then
-                buildCreatureList()
-                return
-            end
+        local widget = creatureList:getChildById("creature_" .. updatedRaceId)
+        if widget then
+            local raceInfo = Cyclopedia.getMonsterCache(updatedRaceId)
+            widget:setText(raceInfo.name)
         end
     end
 
