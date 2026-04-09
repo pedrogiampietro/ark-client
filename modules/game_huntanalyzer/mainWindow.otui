@@ -8,7 +8,7 @@ MiniWindow
   !text: tr('Analyzer')
   color: #8F8F8F
   icon: /images/topbuttons/analyzers
-  height: 150
+  height: 175
   &save: true
 
   MiniWindowContents
@@ -38,8 +38,13 @@ MiniWindow
 
     Button
       margin-top: 5
+      text: Rune Tracker
+      &onClick: showRuneWindow
+
+    Button
+      margin-top: 5
       color: #00FF00
       text: Start new hunt
-      &onClick: resetSessionAll  
+      &onClick: resetSessionAll
 
 

@@ -6,6 +6,8 @@ creatureOutfit = nil
 supplyItems = {}
 totalLootValue = 0
 totalSupplyCost = 0
+runeWindow = nil
+runeUpdateEvent = nil
 
 local HUNT_ANALYZER_OPCODE = 55
 
@@ -23,17 +25,20 @@ function init()
   dropWindow.onClose = dropWindow:hide()
   trackWindow = g_ui.loadUI('killTracker', modules.game_interface.getRightPanel())
   balanceWindow = g_ui.loadUI('balanceTracker', modules.game_interface.getRightPanel())
+  runeWindow = g_ui.loadUI('runeTracker', modules.game_interface.getRightPanel())
   mainWindow:hide()
   dropWindow:hide()
   trackWindow:hide()
   expWindow:hide()
   balanceWindow:hide()
+  runeWindow:hide()
   g_keyboard.bindKeyDown('Ctrl+H', toggle)
 
   expWindow:setup()
   dropWindow:setup()
   trackWindow:setup()
   balanceWindow:setup()
+  runeWindow:setup()
   mainWindow:setup()
 
   lootedItemsLabel = dropWindow:recursiveGetChildById("lootedItemsLabel")
@@ -96,6 +101,7 @@ function resetSessionAll()
 	 resetLootedItems()
 	 resetKilledMonsters()
 	 resetSupplyItems()
+	 resetRuneTracker()
 	 updateanalyzerWindow()
 	 startFreshanalyzerWindow()
 	 killedCreatures = {}
@@ -304,6 +310,118 @@ function resetExpH()
 end
 --//########## REAL MAGIC ##########//--
 
+-- Rune Tracker (charm proc data from game_cyclopedia)
+local charmNames = {
+  [10] = 'Wound',    [11] = 'Enflame',  [12] = 'Poison',   [13] = 'Freeze',
+  [14] = 'Zap',      [15] = 'Curse',    [16] = 'Cripple',  [17] = 'Parry',
+  [18] = 'Dodge',    [19] = 'Adrenaline Burst', [20] = 'Numb', [21] = 'Cleanse',
+  [22] = 'Bless',    [23] = 'Scavenge', [24] = 'Gut',      [25] = 'Low Blow',
+  [26] = 'Divine Wrath', [27] = 'Vampiric Embrace', [28] = 'Void Call',
+  [29] = 'Rune Sling',
+}
+
+local charmIcons = {
+  [10] = '/game_cyclopedia/images/charms/wound',
+  [11] = '/game_cyclopedia/images/charms/enflame',
+  [12] = '/game_cyclopedia/images/charms/poison',
+  [13] = '/game_cyclopedia/images/charms/freeze',
+  [14] = '/game_cyclopedia/images/charms/zap',
+  [15] = '/game_cyclopedia/images/charms/curse',
+  [16] = '/game_cyclopedia/images/charms/cripple',
+  [17] = '/game_cyclopedia/images/charms/parry',
+  [18] = '/game_cyclopedia/images/charms/dodge',
+  [19] = '/game_cyclopedia/images/charms/adrenaline',
+  [20] = '/game_cyclopedia/images/charms/numb',
+  [21] = '/game_cyclopedia/images/charms/cleanse',
+  [22] = '/game_cyclopedia/images/charms/bless',
+  [23] = '/game_cyclopedia/images/charms/scavenge',
+  [24] = '/game_cyclopedia/images/charms/gut',
+  [25] = '/game_cyclopedia/images/charms/low_blow',
+  [26] = '/game_cyclopedia/images/charms/divine_wrath',
+  [27] = '/game_cyclopedia/images/charms/vampiric_embrace',
+  [28] = '/game_cyclopedia/images/charms/void_call',
+  [29] = '/game_cyclopedia/images/charms/rune_sling',
+}
+
+function showRuneWindow()
+  if not runeWindow:isVisible() then
+    runeWindow:show()
+    updateRuneTracker()
+  else
+    runeWindow:hide()
+  end
+end
+
+function resetRuneTracker()
+  if modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia then
+    modules.game_cyclopedia.Cyclopedia.resetCharmAnalyzer()
+  end
+  updateRuneTracker()
+end
+
+function updateRuneTracker()
+  if not runeWindow or not runeWindow:isVisible() then return end
+
+  local cyclopedia = modules.game_cyclopedia and modules.game_cyclopedia.Cyclopedia
+  local procData = (cyclopedia and cyclopedia.charmProcData) or {}
+  local startTime = cyclopedia and cyclopedia.charmAnalyzerStart
+
+  -- Update session timer
+  local sessionLabel = runeWindow:recursiveGetChildById('sessionLabel')
+  if sessionLabel then
+    local secs = 0
+    if startTime and startTime > 0 then
+      secs = math.floor(os.time() - startTime)
+    end
+    local h = math.floor(secs / 3600)
+    local m = math.floor((secs % 3600) / 60)
+    local s = secs % 60
+    sessionLabel:setText(string.format('Session: %02d:%02d:%02d', h, m, s))
+  end
+
+  local noDataLabel = runeWindow:recursiveGetChildById('noDataLabel')
+  local runeList = runeWindow:recursiveGetChildById('runeList')
+
+  local hasData = false
+  for _ in pairs(procData) do hasData = true; break end
+
+  if noDataLabel then noDataLabel:setVisible(not hasData) end
+
+  if not runeList then return end
+  runeList:destroyChildren()
+
+  for charmId, data in pairs(procData) do
+    local row = g_ui.createWidget('RuneRow', runeList)
+    local name = charmNames[charmId] or ('Charm #' .. charmId)
+    local procs = data.procs or 0
+    local totalDmg = data.totalDamage or 0
+
+    local iconWidget = row:getChildById('runeIcon')
+    if iconWidget and charmIcons[charmId] then
+      iconWidget:setImageSource(charmIcons[charmId])
+    end
+
+    local nameLabel = row:getChildById('runeName')
+    if nameLabel then nameLabel:setText(name .. ':') end
+
+    local procsLabel = row:getChildById('runeProcs')
+    if procsLabel then procsLabel:setText(procs .. 'x') end
+
+    local dmgLabel = row:getChildById('runeDmg')
+    if dmgLabel then
+      if totalDmg > 0 then
+        dmgLabel:setText('(' .. number_format(totalDmg) .. ' dmg)')
+      else
+        dmgLabel:setText('')
+      end
+    end
+  end
+
+  -- Schedule next update
+  if runeUpdateEvent then removeEvent(runeUpdateEvent) end
+  runeUpdateEvent = scheduleEvent(updateRuneTracker, 1000)
+end
+
 function terminate()
   ProtocolGame.unregisterExtendedOpcode(HUNT_ANALYZER_OPCODE)
   disconnect(g_game, {
@@ -312,11 +430,13 @@ function terminate()
   })
 
   g_keyboard.unbindKeyDown('Ctrl+J')
+  if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
   mainWindow:destroy()
   expWindow:destroy()
   dropWindow:destroy()
   trackWindow:destroy()
   balanceWindow:destroy()
+  runeWindow:destroy()
 end
 
 function expForLevel(level)
@@ -717,6 +837,7 @@ function offline()
 	resetLootedItems()
 	resetKilledMonsters()
 	resetSupplyItems()
+	if runeUpdateEvent then removeEvent(runeUpdateEvent); runeUpdateEvent = nil end
 end
 
 function toggle()

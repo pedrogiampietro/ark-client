@@ -1,0 +1,72 @@
+RuneRow < UIWidget
+  height: 20
+  layout:
+    type: horizontalBox
+    spacing: 4
+  UIWidget
+    id: runeIcon
+    size: 20 20
+    anchors.verticalCenter: parent.verticalCenter
+    phantom: true
+  Label
+    id: runeName
+    color: #C0C0C0
+    text-auto-resize: true
+    anchors.verticalCenter: parent.verticalCenter
+  Label
+    id: runeProcs
+    color: #e0c060
+    text-auto-resize: true
+    anchors.verticalCenter: parent.verticalCenter
+  Label
+    id: runeDmg
+    color: #a0a0ff
+    text-auto-resize: true
+    anchors.verticalCenter: parent.verticalCenter
+
+MiniWindow
+  id: runeWindow
+  !text: tr('Rune Tracker')
+  color: #8F8F8F
+  height: 200
+  &save: true
+
+  MiniWindowContents
+    padding-left: 5
+    padding-right: 5
+    padding-top: 3
+    padding-bottom: 3
+    vertical-scrollbar: miniwindowScrollBar
+    layout: verticalBox
+
+    UIWidget
+      id: sessionHeader
+      height: 18
+      layout:
+        type: horizontalBox
+        spacing: 4
+      Label
+        id: sessionLabel
+        color: #C0C0C0
+        text: 'Session: 00:00'
+        text-auto-resize: true
+      Button
+        id: resetButton
+        !text: tr('Reset')
+        height: 16
+        width: 40
+        margin-left: 4
+        &onClick: resetRuneTracker
+
+    Label
+      id: noDataLabel
+      !text: tr('No charm procs yet.')
+      color: #888888
+      text-auto-resize: true
+      margin-top: 4
+
+    UIWidget
+      id: runeList
+      layout: verticalBox
+      spacing: 2
+      margin-top: 4
