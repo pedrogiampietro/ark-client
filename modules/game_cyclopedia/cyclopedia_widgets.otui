@@ -218,8 +218,8 @@ CharmItem < UICheckBox
     id: charmBase
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 18
-    size: 64 64
+    margin-top: 16
+    size: 52 52
     image-source: /images/ui/panel_flat
     image-border: 10
     phantom: true
@@ -230,7 +230,7 @@ CharmItem < UICheckBox
       phantom: true
     UIWidget
       id: lockedMask
-      size: 62 62
+      size: 50 50
       anchors.centerIn: parent
       image-source: /images/options/ditherpattern
       phantom: true

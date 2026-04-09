@@ -180,7 +180,7 @@ UIWidget
     vertical-scrollbar: CharmListScrollbar
     anchors.fill: ListBase
     margin-right: 13
-
+    focusable: false
     padding-left: 3
     padding-right: 2
     padding-top: 5

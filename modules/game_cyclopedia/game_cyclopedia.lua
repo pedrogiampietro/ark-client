@@ -596,10 +596,15 @@ function parseResourceBalance(protocol, msg)
                 if lbl then lbl:setText(tostring(amount)) end
             end
         end
+        Cyclopedia.storedCharmPoints = amount
         if currentTab == 'charms' and contentContainer then
             local ui = contentContainer:getChildById('Cat3')
             if ui then
                 ui.CharmsPoints = amount
+                -- Refresh price colors on all charm cards now that we have the real points
+                if Cyclopedia.refreshCharmPrices then
+                    Cyclopedia.refreshCharmPrices(amount)
+                end
             end
         end
     end

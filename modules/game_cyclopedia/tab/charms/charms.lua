@@ -267,6 +267,22 @@ function Cyclopedia.selectCreatureCharm(widget, checked)
     end
 end
 
+-- Called by parseResourceBalance when charm points arrive (after cards are already created)
+function Cyclopedia.refreshCharmPrices(points)
+    if not UI or not UI.CharmList then return end
+    for _, widget in ipairs(UI.CharmList:getChildren()) do
+        local data = widget.data
+        if data then
+            local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
+            if not isUnlocked then
+                local charmData = charms[data.id]
+                local pts = charmData and charmData.points and charmData.points[1] or 0
+                widget.PriceBase.Value:setColor(points >= pts and "#C0C0C0" or "#D33C3C")
+            end
+        end
+    end
+end
+
 function Cyclopedia.searchCharmMonster(text)
     if not UI or not UI.InformationBase then return end
     local creatureList = UI.InformationBase.CreaturesBase.CreatureList
