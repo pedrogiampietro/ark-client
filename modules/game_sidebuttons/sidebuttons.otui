@@ -1,5 +1,5 @@
 NonClosableMiniWindow
-  height: 50
+  height: 80
   id: sideButtonsWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -74,11 +74,9 @@ NonClosableMiniWindow
     
     InventoryButton
       !text: tr('Logout')
-      anchors.left: prev.left
-      anchors.top: prev.top
       anchors.left: prev.right
-      margin-left: 9
+      anchors.top: prev.top
+      margin-left: 4
       width: 42
       height: 20
-      margin-top: 0
       @onClick: modules.game_interface.tryLogout()

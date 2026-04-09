@@ -856,11 +856,47 @@ function Cyclopedia.onParseCyclopediaTracker(trackerType, entries)
     Cyclopedia.refreshBestiaryTracker()
 end
 
+-- Active tab: 'bestiary' or 'charms'
+local trackerActiveTab = 'bestiary'
+
+function Cyclopedia.showTrackerTab(tab)
+    trackerActiveTab = tab
+    local tracker = trackerMiniWindow
+    if not tracker then return end
+
+    local tabBestiary = tracker:recursiveGetChildById('tabBestiary')
+    local tabCharms   = tracker:recursiveGetChildById('tabCharms')
+    local contents    = tracker:recursiveGetChildById('contentsPanel')
+    local analyzer    = tracker:recursiveGetChildById('charmAnalyzerPanel')
+
+    if tabBestiary then tabBestiary:setOn(tab == 'bestiary') end
+    if tabCharms   then tabCharms:setOn(tab == 'charms') end
+    if contents    then contents:setVisible(tab == 'bestiary') end
+    if analyzer    then analyzer:setVisible(tab == 'charms') end
+
+    if tab == 'bestiary' then
+        if analyzerTimer then analyzerTimer:cancel() analyzerTimer = nil end
+        Cyclopedia.refreshBestiaryTracker()
+    else
+        Cyclopedia.refreshCharmAnalyzer()
+    end
+end
+
 function Cyclopedia.refreshBestiaryTracker()
     local tracker = trackerMiniWindow
     if not tracker or not tracker:isVisible() then return end
+    if trackerActiveTab ~= 'bestiary' then return end
 
-    local contents = tracker:recursiveGetChildById('contentsPanel')
+    -- Activate bestiary tab visually
+    local tabBestiary = tracker:recursiveGetChildById('tabBestiary')
+    local tabCharms   = tracker:recursiveGetChildById('tabCharms')
+    local contents    = tracker:recursiveGetChildById('contentsPanel')
+    local analyzer    = tracker:recursiveGetChildById('charmAnalyzerPanel')
+    if tabBestiary then tabBestiary:setOn(true) end
+    if tabCharms   then tabCharms:setOn(false) end
+    if contents    then contents:setVisible(true) end
+    if analyzer    then analyzer:setVisible(false) end
+
     if not contents then return end
     contents:destroyChildren()
 
@@ -875,12 +911,70 @@ function Cyclopedia.refreshBestiaryTracker()
         btn.label:setText(raceData.name)
         btn.kills:setText(tostring(entry.kills))
 
-        -- Progress bars
         local kills = entry.kills or 0
         local g1 = entry.firstUnlock or 0
         local g2 = entry.secondUnlock or 0
         local g3 = entry.toUnlock or 0
-        local fit = 54
-        Cyclopedia.SetBestiaryProgress(fit, btn.killsBar2, btn.ProgressBack33, btn.ProgressBack55, kills, g1, g2, g3)
+        Cyclopedia.SetBestiaryProgress(54, btn.killsBar2, btn.ProgressBack33, btn.ProgressBack55, kills, g1, g2, g3)
+    end
+end
+
+local charmNames = {
+    [0]="Wound",[1]="Enflame",[2]="Poison",[3]="Freeze",[4]="Zap",
+    [5]="Curse",[6]="Cripple",[7]="Parry",[8]="Dodge",[9]="Adrenaline",
+    [10]="Numb",[11]="Cleanse",[12]="Bless",[13]="Scavenge",[14]="Gut",
+    [15]="Low Blow",[16]="Divine Wrath",[17]="Vampiric",[18]="Void",
+    [19]="Rune",[20]="Overpower",[21]="Absorb",[22]="Divine Caldera",
+    [23]="Spin",[24]="Overflux",
+}
+
+local analyzerTimer = nil
+
+local function formatTime(secs)
+    local m = math.floor(secs / 60)
+    local s = secs % 60
+    return string.format("%02d:%02d", m, s)
+end
+
+function Cyclopedia.refreshCharmAnalyzer()
+    local tracker = trackerMiniWindow
+    if not tracker or not tracker:isVisible() then return end
+
+    local analyzer    = tracker:recursiveGetChildById('charmAnalyzerPanel')
+    local sessionLbl  = tracker:recursiveGetChildById('sessionLabel')
+    local analyzerList = tracker:recursiveGetChildById('analyzerList')
+    if not analyzer then return end
+
+    -- Session time
+    local elapsed = Cyclopedia.charmAnalyzerStart and (os.time() - Cyclopedia.charmAnalyzerStart) or 0
+    if sessionLbl then
+        sessionLbl:setText('Session: ' .. formatTime(elapsed))
+    end
+
+    if not analyzerList then return end
+    analyzerList:destroyChildren()
+
+    local hasData = false
+    for charmId, data in pairs(Cyclopedia.charmProcData) do
+        hasData = true
+        local row = g_ui.createWidget('CharmProcRow', analyzerList)
+        -- Charm icon
+        row.icon:setImageSource('/game_cyclopedia/images/charms/monster-bonus-effects')
+        row.icon:setImageClip(string.format('%d 0 20 20', charmId * 32))
+        row.charmName:setText(charmNames[charmId] or ('Charm ' .. charmId))
+        row.procCount:setText('x' .. data.procs)
+        row.totalDmg:setText(tostring(data.totalDamage) .. ' dmg')
+    end
+
+    if not hasData then
+        local lbl = g_ui.createWidget('Label', analyzerList)
+        lbl:setText('No procs recorded yet.')
+        lbl:setColor('#808080')
+    end
+
+    -- Schedule next tick while visible and on charms tab
+    if analyzerTimer then analyzerTimer:cancel() analyzerTimer = nil end
+    if tracker:isVisible() and trackerActiveTab == 'charms' and Cyclopedia.charmAnalyzerStart then
+        analyzerTimer = scheduleEvent(Cyclopedia.refreshCharmAnalyzer, 1000)
     end
 end

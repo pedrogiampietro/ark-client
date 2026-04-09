@@ -137,13 +137,14 @@ function init()
     g_keyboard.bindKeyDown('Alt+B', toggle)
 
     -- Unregister first in case another module claimed these opcodes, then re-register
-    local opcodes = {0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xB9, 0x4B}
+    local opcodes = {0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xB9, 0x4B}
     for _, op in ipairs(opcodes) do ProtocolGame.unregisterOpcode(op) end
     ProtocolGame.registerOpcode(0xD5, parseRaces)
     ProtocolGame.registerOpcode(0xD6, parseOverview)
     ProtocolGame.registerOpcode(0xD7, parseMonsterData)
     ProtocolGame.registerOpcode(0xD8, parseCharms)
     ProtocolGame.registerOpcode(0xD9, parseEntryChanged)
+    ProtocolGame.registerOpcode(0xDA, parseCharmProc)
     ProtocolGame.registerOpcode(0xB9, parseTracker)
     ProtocolGame.registerOpcode(0x4B, parseResourceBalance)
 
@@ -213,7 +214,9 @@ function onGameEnd()
     Cyclopedia.categoryCreatures = {}
     Cyclopedia.storedRaceCounts  = {}
     Cyclopedia.storedTrackerData = nil
-    Cyclopedia.storedCharmsData  = nil
+    Cyclopedia.storedCharmsData   = nil
+    Cyclopedia.charmProcData      = {}
+    Cyclopedia.charmAnalyzerStart = nil
     clearMonsterDataQueue()
     if raceRefreshTimer and type(raceRefreshTimer) ~= "boolean" then
         raceRefreshTimer:cancel()
@@ -273,6 +276,7 @@ function toggleTracker()
     else
         trackerMiniWindow:open()
         Cyclopedia.refreshBestiaryTracker()
+        Cyclopedia.refreshCharmAnalyzer()
     end
 end
 
@@ -566,6 +570,37 @@ function parseEntryChanged(protocol, msg)
 
     -- Refresh monster data
     g_game.requestBestiaryMonsterData(raceId)
+end
+
+-- ── Charm Analyzer ───────────────────────────────────────────────────────────
+-- charmProcData[charmId] = { procs = N, totalDamage = N }
+Cyclopedia.charmProcData    = Cyclopedia.charmProcData or {}
+Cyclopedia.charmAnalyzerStart = nil  -- os.time() when analyzer session started
+
+function parseCharmProc(protocol, msg)
+    local charmId = msg:getU8()
+    local damage  = msg:getU32()
+
+    local entry = Cyclopedia.charmProcData[charmId]
+    if not entry then
+        Cyclopedia.charmProcData[charmId] = { procs = 1, totalDamage = damage }
+    else
+        entry.procs       = entry.procs + 1
+        entry.totalDamage = entry.totalDamage + damage
+    end
+
+    -- Start session timer on first proc if not running
+    if not Cyclopedia.charmAnalyzerStart then
+        Cyclopedia.charmAnalyzerStart = os.time()
+    end
+
+    Cyclopedia.refreshCharmAnalyzer()
+end
+
+function Cyclopedia.resetCharmAnalyzer()
+    Cyclopedia.charmProcData      = {}
+    Cyclopedia.charmAnalyzerStart = nil
+    Cyclopedia.refreshCharmAnalyzer()
 end
 
 function parseTracker(protocol, msg)

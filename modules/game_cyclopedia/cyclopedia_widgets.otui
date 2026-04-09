@@ -333,13 +333,101 @@ TrackerButton < Panel
     phantom: true
     margin-top: 3
 
+CharmProcRow < UIWidget
+  height: 22
+  layout:
+    type: horizontalBox
+    spacing: 4
+  UIWidget
+    id: icon
+    size: 20 20
+    anchors.verticalCenter: parent.verticalCenter
+    phantom: true
+  Label
+    id: charmName
+    color: #C0C0C0
+    anchors.verticalCenter: parent.verticalCenter
+    text-auto-resize: true
+  Label
+    id: procCount
+    color: #e0c060
+    anchors.verticalCenter: parent.verticalCenter
+    text-auto-resize: true
+  Label
+    id: totalDmg
+    color: #a0a0ff
+    anchors.verticalCenter: parent.verticalCenter
+    text-auto-resize: true
+
 BestiaryTracker < MiniWindow
   id: BestiaryTracker
   !text: tr('Bestiary Tracker')
   @onClose: modules.game_cyclopedia.onTrackerClose()
   MiniWindowContents
-    id: contentsPanel
     layout: verticalBox
     padding-left: 5
     padding-right: 5
+    padding-top: 3
     padding-bottom: 3
+
+    UIWidget
+      id: trackerTabBar
+      height: 20
+      anchors.left: parent.left
+      anchors.right: parent.right
+      layout:
+        type: horizontalBox
+        spacing: 3
+      UIButton
+        id: tabBestiary
+        !text: tr('Bestiary')
+        height: 20
+        flex: 1
+        color: #C0C0C0
+        $on:
+          color: #ffffff
+        @onClick: modules.game_cyclopedia.Cyclopedia.showTrackerTab('bestiary')
+      UIButton
+        id: tabCharms
+        !text: tr('Charms')
+        height: 20
+        flex: 1
+        color: #C0C0C0
+        $on:
+          color: #ffffff
+        @onClick: modules.game_cyclopedia.Cyclopedia.showTrackerTab('charms')
+
+    UIWidget
+      id: contentsPanel
+      layout: verticalBox
+      padding-top: 3
+
+    UIWidget
+      id: charmAnalyzerPanel
+      layout: verticalBox
+      padding-top: 3
+      visible: false
+
+      UIWidget
+        id: analyzerHeader
+        height: 18
+        layout:
+          type: horizontalBox
+          spacing: 4
+        Label
+          id: sessionLabel
+          color: #C0C0C0
+          text: 'Session: 00:00'
+          text-auto-resize: true
+        UIButton
+          id: resetButton
+          !text: tr('Reset')
+          height: 16
+          width: 40
+          margin-left: 4
+          @onClick: modules.game_cyclopedia.Cyclopedia.resetCharmAnalyzer()
+
+      UIWidget
+        id: analyzerList
+        layout: verticalBox
+        spacing: 2
