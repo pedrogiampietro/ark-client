@@ -484,7 +484,7 @@ function Cyclopedia.BestiarySearch()
     Cyclopedia.pendingSearchOverviews = 0   -- no overviews pending
     Cyclopedia.searchRequestedCategories = {}
     for _, raceId in ipairs(uncachedIds) do
-        queueMonsterDataRequest(raceId)
+        Cyclopedia.queueMonsterDataRequest(raceId)
     end
 
     if UI and UI.PageValue then

@@ -61,6 +61,9 @@ local function queueMonsterDataRequest(id)
     end
 end
 
+-- Exposed so bestiary.lua can queue IDs for search without importing internals.
+function Cyclopedia.queueMonsterDataRequest(id) queueMonsterDataRequest(id) end
+
 local function clearMonsterDataQueue()
     monsterDataQueue = {}
     if monsterQueueTimer and type(monsterQueueTimer) ~= "boolean" then
