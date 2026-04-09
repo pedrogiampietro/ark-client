@@ -39,7 +39,7 @@ BestiaryCategory < UIWidget
     anchors.top: NameLabel.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 4
-    size: 54 54
+    size: 52 52
     phantom: false
     $hover:
       image-color: #dddddd
@@ -48,21 +48,21 @@ BestiaryCategory < UIWidget
   UIWidget
     id: ClassIcon
     anchors.centerIn: ClassBase
-    size: 50 50
+    size: 48 48
     phantom: true
   Label
     id: TotalValue
-    anchors.bottom: KnownValue.top
+    anchors.top: ClassBase.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 2
+    margin-top: 6
     font: verdana-11px-rounded
     !text: 'Total: 0'
     color: #888888
   Label
     id: KnownValue
-    anchors.bottom: parent.bottom
+    anchors.top: TotalValue.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-bottom: 4
+    margin-top: 2
     font: verdana-11px-rounded
     !text: 'Known: 0'
     color: #888888

@@ -526,21 +526,19 @@ function Cyclopedia.CreateBestiaryCreaturesItem(data)
         widget.AnimusMastery:setVisible(false)
     end
 
-    local stageSymbols = { [0]="—", [1]="I", [2]="II", [3]="III" }
     if data.currentLevel >= 3 then
         widget.Finalized:setVisible(true)
         widget.KillsLabel:setVisible(false)
-        widget.Name:setColor("#b8d090")  -- fully unlocked: soft green
+        widget.Name:setColor("#b8d090")
     elseif data.currentLevel < 1 then
-        widget.KillsLabel:setText("?")
+        widget.KillsLabel:setText("0 / 3")
         widget.KillsLabel:setColor("#555555")
         widget.Name:setText("?")
         widget.Name:setColor("#555555")
         widget.AnimusMastery:setVisible(false)
     else
-        local sym = stageSymbols[data.currentLevel] or "?"
-        widget.KillsLabel:setText(sym)
-        widget.KillsLabel:setColor("#b8d090")  -- in progress: soft green
+        widget.KillsLabel:setText(data.currentLevel .. " / 3")
+        widget.KillsLabel:setColor("#b8d090")
     end
 
     function widget.ClassBase:onClick()
@@ -708,19 +706,18 @@ function Cyclopedia.refreshCreatureListItem(raceId)
     -- Refresh level indicators so the widget looks correct after a kill
     local cached = Cyclopedia.monsterCache[raceId]
     local level = cached and (cached.level or 0) or 0
-    local stageSymbols = { [0]="—", [1]="I", [2]="II", [3]="III" }
     if level >= 3 then
         widget.Finalized:setVisible(true)
         widget.KillsLabel:setVisible(false)
         widget.Name:setColor("#b8d090")
     elseif level < 1 then
-        widget.KillsLabel:setText("?")
+        widget.KillsLabel:setText("0 / 3")
         widget.KillsLabel:setColor("#555555")
         widget.Name:setColor("#555555")
     else
         widget.Finalized:setVisible(false)
         widget.KillsLabel:setVisible(true)
-        widget.KillsLabel:setText(stageSymbols[level] or "?")
+        widget.KillsLabel:setText(level .. " / 3")
         widget.KillsLabel:setColor("#b8d090")
         widget.Name:setColor("#d0d0d0")
     end
