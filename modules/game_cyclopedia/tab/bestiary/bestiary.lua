@@ -275,6 +275,118 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
         UI.ListBase.CreatureInfo.AnimusMastery:removeTooltip()
         UI.ListBase.CreatureInfo.AnimusMastery:setVisible(false)
     end
+
+    Cyclopedia.updateBestiaryCharmSelection(data.id)
+end
+
+-- ── Bestiary Charm Selection ──────────────────────────────────────────────────
+-- Populates CharmSelector, CharmBase icon, SelectButton, and GoldBalance
+-- for the creature currently shown in the bestiary detail view.
+function Cyclopedia.updateBestiaryCharmSelection(raceId)
+    if not UI then return end
+    local info = UI.ListBase.CreatureInfo
+    if not info then return end
+
+    local charmSelector = info.CharmSelector
+    local selectButton  = info.SelectButton
+    local charmBase     = info.CharmBase
+    local goldBalance   = info.BalanceBase and info.BalanceBase.GoldBalance
+
+    if not charmSelector or not selectButton or not charmBase then return end
+
+    local charmsData = Cyclopedia.storedCharmsData
+    if not charmsData then
+        -- No charm data yet — disable UI
+        charmSelector:clearOptions()
+        charmSelector:addOption("?")
+        charmSelector:setEnabled(false)
+        selectButton:setEnabled(false)
+        charmBase:setImageSource("/images/ui/panel_flat")
+        if goldBalance then goldBalance:setText("?") end
+        return
+    end
+
+    -- Find which charm (if any) is assigned to this raceId
+    local assignedCharm = nil
+    for _, charm in ipairs(charmsData.charms or {}) do
+        if charm.unlocked and charm.asignedStatus and charm.raceId == raceId then
+            assignedCharm = charm
+            break
+        end
+    end
+
+    -- Build list of unlocked charms available to assign:
+    -- unlocked charms that are either not assigned or assigned to THIS monster
+    local available = {}
+    for _, charm in ipairs(charmsData.charms or {}) do
+        if charm.unlocked then
+            -- Skip charms assigned to a different monster
+            if not charm.asignedStatus or charm.raceId == raceId then
+                table.insert(available, charm)
+            end
+        end
+    end
+
+    -- Populate ComboBox
+    charmSelector:clearOptions()
+    if #available == 0 then
+        charmSelector:addOption("No unlocked charms")
+        charmSelector:setEnabled(false)
+    else
+        charmSelector:addOption("-- Select charm --")
+        for _, charm in ipairs(available) do
+            local name = charmNames[charm.id] or ("Charm " .. charm.id)
+            charmSelector:addOption(name, charm.id)
+        end
+        charmSelector:setEnabled(assignedCharm == nil) -- disable picker if one is already assigned
+    end
+
+    -- Update CharmBase icon
+    if assignedCharm then
+        -- Show assigned charm icon
+        charmBase:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
+        local clipX = assignedCharm.id * 32
+        charmBase:setImageClip(string.format("%d 0 32 32", clipX))
+        charmBase:setTooltip(charmNames[assignedCharm.id] or ("Charm " .. assignedCharm.id))
+
+        -- Show Remove button; label shows removal cost
+        selectButton:setText(tr("Remove"))
+        selectButton:setEnabled(true)
+        selectButton:setColor("#D33C3C")
+        if goldBalance then goldBalance:setText(tostring(assignedCharm.removeCost or 0)) end
+
+        -- Wire Remove action
+        function selectButton:onClick()
+            local cd = Cyclopedia.storedCharmsData
+            if not cd then return end
+            -- Find assigned charm for this race again (data may have refreshed)
+            for _, c in ipairs(cd.charms or {}) do
+                if c.unlocked and c.asignedStatus and c.raceId == raceId then
+                    g_game.requestBestiaryBuyCharmRune(c.id, 2, raceId)
+                    return
+                end
+            end
+        end
+    else
+        -- No charm assigned — show placeholder icon
+        charmBase:setImageSource("/images/ui/panel_flat")
+        charmBase:setImageClip("")
+        charmBase:removeTooltip()
+
+        -- Show Select button
+        selectButton:setText(tr("Select"))
+        selectButton:setColor("#C0C0C0")
+        selectButton:setEnabled(#available > 0)
+        if goldBalance then goldBalance:setText("0") end
+
+        -- Wire Select action
+        function selectButton:onClick()
+            if not charmSelector then return end
+            local opt = charmSelector:getCurrentOption()
+            if not opt or type(opt.data) ~= "number" then return end
+            g_game.requestBestiaryBuyCharmRune(opt.data, 1, raceId)
+        end
+    end
 end
 
 function Cyclopedia.ShowBestiaryCreature()

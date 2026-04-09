@@ -546,6 +546,10 @@ function parseCharms(protocol, msg)
     }
     Cyclopedia.storedCharmsData = charmsData
     Cyclopedia.loadCharms(charmsData)
+    -- Refresh bestiary charm selection if a creature is currently being viewed
+    if Cyclopedia.currentViewingRaceId and Cyclopedia.updateBestiaryCharmSelection then
+        Cyclopedia.updateBestiaryCharmSelection(Cyclopedia.currentViewingRaceId)
+    end
 end
 
 function parseEntryChanged(protocol, msg)
