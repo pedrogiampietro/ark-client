@@ -239,6 +239,9 @@ function toggle()
 end
 
 function showTab(tabName)
+    -- Tear down tab-specific state before destroying widgets
+    if Cyclopedia.destroyBestiaryUI then Cyclopedia.destroyBestiaryUI() end
+    if Cyclopedia.destroyCharmsUI then Cyclopedia.destroyCharmsUI() end
     -- Unload current tab UI
     if contentContainer then
         contentContainer:destroyChildren()

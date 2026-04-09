@@ -684,9 +684,14 @@ function Cyclopedia.changeBestiaryPage(prev, next)
     Cyclopedia.verifyBestiaryButtons()
 end
 
+function Cyclopedia.destroyBestiaryUI()
+    UI = nil
+end
+
 -- Called by game_cyclopedia.lua after parseMonsterData updates the cache
 function Cyclopedia.refreshCreatureListItem(raceId)
-    if not UI or not UI.ListBase.CreatureList:isVisible() then return end
+    if not UI or not UI.ListBase or not UI.ListBase.CreatureList then return end
+    if not UI.ListBase.CreatureList:isVisible() then return end
     local widget = UI.ListBase.CreatureList:getChildById(raceId)
     if not widget then return end
     local raceData = Cyclopedia.getMonsterCache(raceId)

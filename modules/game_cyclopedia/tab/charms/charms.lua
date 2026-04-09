@@ -55,6 +55,11 @@ local charms = {
              description="Enhances magical spell damage dealt to this creature." },
 }
 
+function Cyclopedia.destroyCharmsUI()
+    Cyclopedia.onCharmPickerMonsterUpdate = nil
+    UI = nil
+end
+
 function showCharms()
     UI = g_ui.loadUI("charms", contentContainer)
     UI:show()
