@@ -95,13 +95,11 @@ local function onTextMessage(mode, text)
     Cyclopedia.seenCreatureNames[lower] = true
 
     if foundId then
-        print("[Bestiary] kill detected '" .. name .. "' raceId=" .. foundId .. " -> requesting update")
         g_game.requestBestiaryMonsterData(foundId)
     else
         -- Creature not in cache yet (hasn't reached stage 1) — debounced race refresh
         -- to detect when a new category becomes unlocked (unlockedCount 0→1).
         if raceRefreshTimer then return end
-        print("[Bestiary] kill detected '" .. name .. "' (not in cache) -> refreshing races (debounced)")
         local function doRefresh()
             raceRefreshTimer = nil
             g_game.requestBestiaryRaces()
@@ -284,7 +282,6 @@ end
 
 function parseRaces(protocol, msg)
     local count = msg:getU16()
-    print("[Bestiary] parseRaces: " .. count .. " races")
     local raceData = {}
     for i = 1, count do
         local name     = msg:getString()
@@ -328,7 +325,6 @@ end
 function parseOverview(protocol, msg)
     local raceName = msg:getString()
     local count    = msg:getU16()
-    print("[Bestiary] parseOverview: race='" .. raceName .. "' count=" .. count)
     Cyclopedia.knownCategories = Cyclopedia.knownCategories or {}
     Cyclopedia.knownCategories[raceName] = true
     Cyclopedia.categoryCreatures = Cyclopedia.categoryCreatures or {}
@@ -378,7 +374,6 @@ function parseMonsterData(protocol, msg)
     local raceId    = msg:getU16()
     local lookType  = msg:getU16()
     local name      = msg:getString()
-    print("[Bestiary] parseMonsterData: raceId=" .. raceId .. " name='" .. name .. "'")
     local className = msg:getString()
     local level     = msg:getU8()
     msg:getU16() -- animusMasteryBonus
@@ -547,26 +542,19 @@ end
 
 function parseEntryChanged(protocol, msg)
     local raceId = msg:getU16()
-    print("[Bestiary] parseEntryChanged fired! raceId=" .. tostring(raceId))
 
     -- Invalidate cache
     Cyclopedia.monsterCache[raceId] = nil
-    print("[Bestiary] cache cleared for raceId=" .. tostring(raceId))
 
     -- Refresh category counts
-    print("[Bestiary] requesting races...")
     g_game.requestBestiaryRaces()
 
     -- Refresh creature list if a category is open
     if Cyclopedia.currentCategory then
-        print("[Bestiary] currentCategory=" .. tostring(Cyclopedia.currentCategory) .. ", refreshing creature list")
         g_game.requestBestiaryCreatures(Cyclopedia.currentCategory)
-    else
-        print("[Bestiary] currentCategory is nil, no creature list refresh")
     end
 
     -- Refresh monster data
-    print("[Bestiary] requesting monster data for raceId=" .. tostring(raceId))
     g_game.requestBestiaryMonsterData(raceId)
 end
 

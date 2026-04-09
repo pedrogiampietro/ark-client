@@ -724,9 +724,6 @@ end
 -- or when the detail view is already showing this creature (live refresh after a kill).
 function Cyclopedia.onMonsterDataReceived(data)
     local id = data.id
-    print("[Bestiary] onMonsterDataReceived id=" .. tostring(id)
-        .. " pending=" .. tostring(Cyclopedia.pendingViewRaceId)
-        .. " viewing=" .. tostring(Cyclopedia.currentViewingRaceId))
 
     if id == Cyclopedia.pendingViewRaceId then
         -- User clicked this creature: show the detail view
@@ -734,7 +731,6 @@ function Cyclopedia.onMonsterDataReceived(data)
         Cyclopedia.loadBestiarySelectedCreature(data)
     elseif Cyclopedia.Bestiary.Stage == STAGES.CREATURE and Cyclopedia.currentViewingRaceId == id then
         -- Creature detail is already open for this id: refresh in-place (live update after kill)
-        print("[Bestiary] live-refreshing creature view for id=" .. tostring(id))
         Cyclopedia.loadBestiarySelectedCreature(data)
     else
         -- Background cache fill: only refresh the creature list row if visible

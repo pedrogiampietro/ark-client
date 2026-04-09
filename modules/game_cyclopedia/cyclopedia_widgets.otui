@@ -199,40 +199,52 @@ CharmCreatureName < UICheckBox
     background-color: #585858
 
 CharmItem < UICheckBox
-  !text: tr('Title')
-  image-source: /game_cyclopedia/images/bestiary/bestiaryContainer
+  image-source: /images/ui/minipanel
   image-border: 3
-  image-border-top: 22
-  color: #929292
-  text-offset: 0 3
-  text-align: top
-  border: 0 white
+  focusable: false
+  border-width: 0
   @onClick: modules.game_cyclopedia.Cyclopedia.selectCharm(self, self:isChecked())
   $checked:
-    border: 2 white
+    border-width: 1
+    border-color: white
   $!checked:
-    border: 0 white
-  BorderBox
-    id: InfoBase
-    anchors.bottom: parent.bottom
+    border-width: 0
+  Label
+    id: NameLabel
+    anchors.top: parent.top
+    anchors.left: parent.left
     anchors.right: parent.right
-    margin-bottom: 5
-    margin-right: 5
+    height: 14
+    margin-top: 4
+    text-align: center
+    font: verdana-11px-rounded
+    color: #d0d0d0
+  BorderBox
+    id: charmBase
+    anchors.top: NameLabel.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 5
+    size: 37 37
     image-source: /images/ui/panel_flat
     image-border: 10
-    size: 66 66
     phantom: true
-    UICreature
-      size: 64 64
-      id: Sprite
+    UIWidget
+      size: 32 32
+      id: image
       anchors.centerIn: parent
+      phantom: true
+    UIWidget
+      id: lockedMask
+      size: 35 35
+      anchors.centerIn: parent
+      image-source: /images/options/ditherpattern
       phantom: true
   UIWidget
     id: PriceBase
-    size: 73 20
-    anchors.left: parent.left
-    anchors.bottom: InfoBase.bottom
-    margin-left: 8
+    size: 80 20
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 5
     image-source: /images/ui/item
     image-border: 10
     phantom: true
@@ -254,31 +266,6 @@ CharmItem < UICheckBox
       anchors.verticalCenter: parent.verticalCenter
       margin-left: 2
       image-source: /game_cyclopedia/images/icon_gold
-      visible: false
-  BorderBox
-    id: charmBase
-    anchors.bottom: PriceBase.top
-    anchors.horizontalCenter: PriceBase.horizontalCenter
-    margin-bottom: 7
-    size: 37 37
-    image-source: /images/ui/panel_flat
-    image-border: 10
-    phantom: true
-    UIWidget
-      size: 32 32
-      id: image
-      anchors.centerIn: parent
-      phantom: true
-    UIWidget
-      id: lockedMask
-      size: 35 35
-      anchors.centerIn: parent
-      image-source: /images/options/ditherpattern
-      phantom: true
-    UIWidget
-      id: border
-      anchors.centerIn: parent
-      phantom: true
       visible: false
 
 TrackerButton < Panel

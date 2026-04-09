@@ -2,31 +2,56 @@ local UI = nil
 Cyclopedia.Charms = {}
 
 local charms = {
-    [0]  = { name="Wound",           category=1, type=1, points={240,360,1200} },
-    [1]  = { name="Enflame",         category=1, type=1, points={400,600,2000} },
-    [2]  = { name="Poison",          category=1, type=1, points={240,360,1200} },
-    [3]  = { name="Freeze",          category=1, type=1, points={320,480,1600} },
-    [4]  = { name="Zap",             category=1, type=1, points={320,480,1600} },
-    [5]  = { name="Curse",           category=1, type=1, points={360,540,1800} },
-    [6]  = { name="Cripple",         category=2, type=1, points={100,150,225}  },
-    [7]  = { name="Parry",           category=1, type=2, points={400,600,2000} },
-    [8]  = { name="Dodge",           category=1, type=2, points={240,360,1200} },
-    [9]  = { name="Adrenaline Burst",category=2, type=2, points={100,150,225}  },
-    [10] = { name="Numb",            category=2, type=2, points={100,150,225}  },
-    [11] = { name="Cleanse",         category=2, type=2, points={100,150,225}  },
-    [12] = { name="Bless",           category=2, type=3, points={100,150,225}  },
-    [13] = { name="Scavenge",        category=2, type=3, points={100,150,225}  },
-    [14] = { name="Gut",             category=2, type=3, points={100,150,225}  },
-    [15] = { name="Low Blow",        category=1, type=3, points={800,1200,4000}},
-    [16] = { name="Divine Wrath",    category=1, type=1, points={600,900,3000} },
-    [17] = { name="Vampiric Embrace",category=2, type=3, points={100,150,225}  },
-    [18] = { name="Void",            category=1, type=3, points={500,750,2500} },
-    [19] = { name="Rune",            category=1, type=1, points={500,750,2500} },
-    [20] = { name="Overpower",       category=1, type=1, points={600,900,3000} },
-    [21] = { name="Absorb",          category=1, type=2, points={600,900,3000} },
-    [22] = { name="Divine Caldera",  category=1, type=1, points={600,900,3000} },
-    [23] = { name="Spin",            category=1, type=1, points={600,900,3000} },
-    [24] = { name="Overflux",        category=1, type=1, points={600,900,3000} },
+    [0]  = { name="Wound",            category=1, type=1, points={240,360,1200},
+             description="Adds a chance to inflict a wound on the target, dealing physical damage over time." },
+    [1]  = { name="Enflame",          category=1, type=1, points={400,600,2000},
+             description="Adds a chance to set the target ablaze, dealing fire damage over time." },
+    [2]  = { name="Poison",           category=1, type=1, points={240,360,1200},
+             description="Adds a chance to poison the target, dealing earth damage over time." },
+    [3]  = { name="Freeze",           category=1, type=1, points={320,480,1600},
+             description="Adds a chance to freeze the target, dealing ice damage." },
+    [4]  = { name="Zap",              category=1, type=1, points={320,480,1600},
+             description="Adds a chance to zap the target with energy, dealing energy damage." },
+    [5]  = { name="Curse",            category=1, type=1, points={360,540,1800},
+             description="Adds a chance to curse the target, dealing death damage over time." },
+    [6]  = { name="Cripple",          category=2, type=1, points={100,150,225},
+             description="Adds a chance to cripple the target, reducing its movement speed." },
+    [7]  = { name="Parry",            category=1, type=2, points={400,600,2000},
+             description="Any damage taken is reflected to the aggressor with a certain chance." },
+    [8]  = { name="Dodge",            category=1, type=2, points={240,360,1200},
+             description="Adds a chance to dodge an incoming attack completely." },
+    [9]  = { name="Adrenaline Burst", category=2, type=2, points={100,150,225},
+             description="Adds a chance to gain a speed boost when taking damage from this creature." },
+    [10] = { name="Numb",             category=2, type=2, points={100,150,225},
+             description="Adds a chance to numb the target, reducing its attack speed." },
+    [11] = { name="Cleanse",          category=2, type=2, points={100,150,225},
+             description="Adds a chance to remove a negative condition when taking damage." },
+    [12] = { name="Bless",            category=2, type=3, points={100,150,225},
+             description="Reduces skill and experience loss upon death caused by this creature." },
+    [13] = { name="Scavenge",         category=2, type=3, points={100,150,225},
+             description="Increases the chance of obtaining loot from this creature." },
+    [14] = { name="Gut",              category=2, type=3, points={100,150,225},
+             description="Adds a chance to obtain extra loot when killing this creature." },
+    [15] = { name="Low Blow",         category=1, type=3, points={800,1200,4000},
+             description="Adds a chance for physical attacks to deal critical damage to this creature." },
+    [16] = { name="Divine Wrath",     category=1, type=1, points={600,900,3000},
+             description="Adds a chance to smite the target with holy energy." },
+    [17] = { name="Vampiric Embrace", category=2, type=3, points={100,150,225},
+             description="Adds a chance to drain life from the target when dealing damage." },
+    [18] = { name="Void",             category=1, type=3, points={500,750,2500},
+             description="Reduces mana consumption for spells cast against this creature." },
+    [19] = { name="Rune",             category=1, type=1, points={500,750,2500},
+             description="Increases the power of rune spells cast against this creature." },
+    [20] = { name="Overpower",        category=1, type=1, points={600,900,3000},
+             description="Increases physical attack damage dealt to this creature." },
+    [21] = { name="Absorb",           category=1, type=2, points={600,900,3000},
+             description="Adds a chance to absorb a portion of incoming damage from this creature." },
+    [22] = { name="Divine Caldera",   category=1, type=1, points={600,900,3000},
+             description="Deals holy area damage around the target when striking this creature." },
+    [23] = { name="Spin",             category=1, type=1, points={600,900,3000},
+             description="Performs a spinning attack hitting all nearby creatures on strike." },
+    [24] = { name="Overflux",         category=1, type=1, points={600,900,3000},
+             description="Enhances magical spell damage dealt to this creature." },
 }
 
 function showCharms()
@@ -45,7 +70,6 @@ function Cyclopedia.loadCharms(charmsData)
 
     -- Update charm points display
     cyclopediaWindow.bottomBar.CharmsBase.Value:setText(tostring(charmsData.points or 0))
-
     UI.CharmsPoints = charmsData.points or 0
 
     -- Build finished monsters list
@@ -56,16 +80,16 @@ function Cyclopedia.loadCharms(charmsData)
 
     CharmList:destroyChildren()
 
-    -- Sort charms: unlocked first, then by name
+    -- Sort: unlocked first, then alphabetically
     local formattedData = {}
     for _, charmData in pairs(charmsData.charms or {}) do
         local id = charmData.id
         if id ~= nil and charms[id] then
             local c = charms[id]
-            charmData.name = c.name
-            charmData.internalId = id
+            charmData.name         = c.name
+            charmData.internalId   = id
             charmData.typePriority = c.type
-            charmData.category = c.category
+            charmData.category     = c.category
             table.insert(formattedData, charmData)
         end
     end
@@ -90,33 +114,25 @@ function Cyclopedia.CreateCharmItem(data)
 
     local widget = g_ui.createWidget("CharmItem", UI.CharmList)
     widget:setId(data.id)
-
-    widget.charmBase.image:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
-    widget.charmBase.image:setImageClip(string.format("%d 0 32 32", (data.id or 0) * 32))
-
-    local charmData = charms[data.id]
-    widget:setText(charmData and charmData.name or ("Charm " .. (data.id or "?")))
     widget.data = data
 
-    -- If assigned, show creature sprite
-    if data.asignedStatus and data.raceId and data.raceId > 0 then
-        local raceData = Cyclopedia.getMonsterCache(data.raceId)
-        if raceData.outfit.type > 0 then
-            widget.InfoBase.Sprite:setOutfit(raceData.outfit)
-            local sc = widget.InfoBase.Sprite:getCreature()
-            if sc and sc.setStaticWalking then sc:setStaticWalking(1000) end
-        end
-    end
+    local charmData = charms[data.id]
+    widget.NameLabel:setText(charmData and charmData.name or ("Charm " .. (data.id or "?")))
+
+    -- Charm icon from sprite sheet (800x32, 25 charms × 32px)
+    widget.charmBase.image:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
+    widget.charmBase.image:setImageClip(string.format("%d 0 32 32", (data.id or 0) * 32))
 
     local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
     widget.charmBase.lockedMask:setVisible(not isUnlocked)
 
-    -- Price display
+    -- Price: show charm-points cost when locked, gold removal cost when unlocked
     widget.PriceBase.Charm:setVisible(not isUnlocked)
     widget.PriceBase.Gold:setVisible(isUnlocked)
 
     if isUnlocked then
         widget.PriceBase.Value:setText(tostring(data.removeCost or 0))
+        widget.PriceBase.Value:setColor("#C0C0C0")
     else
         local pts = charmData and charmData.points and charmData.points[1] or 0
         widget.PriceBase.Value:setText(tostring(pts))
@@ -128,7 +144,7 @@ end
 function Cyclopedia.selectCharm(widget, checked)
     if not UI then return end
 
-    -- Uncheck all others
+    -- Uncheck all other charms
     local CharmList = UI.CharmList
     if CharmList then
         for _, child in ipairs(CharmList:getChildren()) do
@@ -139,7 +155,6 @@ function Cyclopedia.selectCharm(widget, checked)
     end
 
     if not checked then
-        -- Clear info panel
         Cyclopedia.clearCharmInfo()
         return
     end
@@ -154,11 +169,33 @@ end
 function Cyclopedia.showCharmInfo(data, charmData)
     if not UI or not UI.InformationBase then return end
 
-    UI.InformationBase.TextBase:setText(charmData and charmData.description or "No description.")
+    -- Description
+    UI.InformationBase.TextBase:setText(charmData and charmData.description or "")
 
+    -- Charm icon in the left panel's ItemBase
+    local itemBase = UI.InformationBase.ItemBase
+    if itemBase then
+        itemBase.image:setImageSource("/game_cyclopedia/images/charms/monster-bonus-effects")
+        itemBase.image:setImageClip(string.format("%d 0 32 32", (data.id or 0) * 32))
+    end
+
+    -- Assigned creature sprite in the left panel's InfoBase
+    local infoBase = UI.InformationBase.InfoBase
+    if infoBase then
+        local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
+        if isUnlocked and data.asignedStatus and data.raceId and data.raceId > 0 then
+            local raceData = Cyclopedia.getMonsterCache(data.raceId)
+            infoBase.sprite:setOutfit(raceData.outfit)
+            local sc = infoBase.sprite:getCreature()
+            if sc and sc.setStaticWalking then sc:setStaticWalking(1000) end
+        else
+            infoBase.sprite:setOutfit({ type = 0 })
+        end
+    end
+
+    -- Unlock/Assign/Remove button
     local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
     UI.InformationBase.UnlockButton:setEnabled(true)
-
     if isUnlocked and data.asignedStatus then
         UI.InformationBase.UnlockButton:setText(tr("Remove"))
     elseif isUnlocked then
@@ -166,15 +203,21 @@ function Cyclopedia.showCharmInfo(data, charmData)
     else
         UI.InformationBase.UnlockButton:setText(tr("Unlock"))
     end
-
     UI.InformationBase.UnlockButton.data = data
 end
 
 function Cyclopedia.clearCharmInfo()
     if not UI or not UI.InformationBase then return end
     UI.InformationBase.TextBase:setText("")
+    if UI.InformationBase.ItemBase then
+        UI.InformationBase.ItemBase.image:setImageSource("")
+    end
+    if UI.InformationBase.InfoBase then
+        UI.InformationBase.InfoBase.sprite:setOutfit({ type = 0 })
+    end
     UI.InformationBase.UnlockButton:setEnabled(false)
     UI.InformationBase.UnlockButton:setText(tr("Select"))
+    UI.InformationBase.UnlockButton.data = nil
 end
 
 function Cyclopedia.actionCharmButton(btn)
@@ -184,13 +227,10 @@ function Cyclopedia.actionCharmButton(btn)
     local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
 
     if isUnlocked and data.asignedStatus and data.raceId and data.raceId > 0 then
-        -- Remove charm from creature
         g_game.requestBestiaryBuyCharmRune(data.id, 1, data.raceId)
     elseif isUnlocked then
-        -- Assign: show creature picker
         Cyclopedia.showCreatureCharmPicker(data)
     else
-        -- Unlock charm
         g_game.requestBestiaryBuyCharmRune(data.id, 2, 0)
     end
 end
@@ -206,16 +246,32 @@ function Cyclopedia.showCreatureCharmPicker(charmData)
         local raceInfo = Cyclopedia.getMonsterCache(raceId)
         local btn = g_ui.createWidget('CharmCreatureName', creatureList)
         btn:setText(raceInfo.name)
-        btn.raceId = raceId
+        btn.raceId  = raceId
         btn.charmId = charmData.id
     end
 end
 
 function Cyclopedia.selectCreatureCharm(widget, checked)
     if not checked then return end
-    local raceId = widget.raceId
+    local raceId  = widget.raceId
     local charmId = widget.charmId
     if raceId and charmId then
         g_game.requestBestiaryBuyCharmRune(charmId, 0, raceId)
+    end
+end
+
+function Cyclopedia.searchCharmMonster(text)
+    if not UI or not UI.InformationBase then return end
+    local creatureList = UI.InformationBase.CreaturesBase.CreatureList
+    if not creatureList then return end
+
+    local lower = text:lower()
+    for _, child in ipairs(creatureList:getChildren()) do
+        if text == "" then
+            child:setVisible(true)
+        else
+            local name = child:getText():lower()
+            child:setVisible(name:find(lower, 1, true) ~= nil)
+        end
     end
 end
