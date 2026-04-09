@@ -279,6 +279,15 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
     Cyclopedia.updateBestiaryCharmSelection(data.id)
 end
 
+local charmNames = {
+    [0]="Wound",[1]="Enflame",[2]="Poison",[3]="Freeze",[4]="Zap",
+    [5]="Curse",[6]="Cripple",[7]="Parry",[8]="Dodge",[9]="Adrenaline",
+    [10]="Numb",[11]="Cleanse",[12]="Bless",[13]="Scavenge",[14]="Gut",
+    [15]="Low Blow",[16]="Divine Wrath",[17]="Vampiric",[18]="Void",
+    [19]="Rune",[20]="Overpower",[21]="Absorb",[22]="Divine Caldera",
+    [23]="Spin",[24]="Overflux",
+}
+
 -- ── Bestiary Charm Selection ──────────────────────────────────────────────────
 -- Populates CharmSelector, CharmBase icon, SelectButton, and GoldBalance
 -- for the creature currently shown in the bestiary detail view.
@@ -1030,15 +1039,6 @@ function Cyclopedia.refreshBestiaryTracker()
         Cyclopedia.SetBestiaryProgress(54, btn.killsBar2, btn.ProgressBack33, btn.ProgressBack55, kills, g1, g2, g3)
     end
 end
-
-local charmNames = {
-    [0]="Wound",[1]="Enflame",[2]="Poison",[3]="Freeze",[4]="Zap",
-    [5]="Curse",[6]="Cripple",[7]="Parry",[8]="Dodge",[9]="Adrenaline",
-    [10]="Numb",[11]="Cleanse",[12]="Bless",[13]="Scavenge",[14]="Gut",
-    [15]="Low Blow",[16]="Divine Wrath",[17]="Vampiric",[18]="Void",
-    [19]="Rune",[20]="Overpower",[21]="Absorb",[22]="Divine Caldera",
-    [23]="Spin",[24]="Overflux",
-}
 
 local analyzerTimer = nil
 
