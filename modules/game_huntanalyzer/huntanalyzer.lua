@@ -456,7 +456,18 @@ function updateRuneTracker()
     local runeList = runeWindow and runeWindow:recursiveGetChildById('runeList')
     local childCount = runeList and runeList:getChildCount() or -1
     local visible = runeWindow and runeWindow:isVisible()
-    runeLog(string.format('STATUS: dados=%d widgets=%d janela_visivel=%s', dataCount, childCount, tostring(visible)))
+    local runeList2 = runeWindow and runeWindow:recursiveGetChildById('runeList')
+  local listW = runeList2 and runeList2:getWidth() or -1
+  local listH = runeList2 and runeList2:getHeight() or -1
+  local listVis = runeList2 and runeList2:isVisible() or false
+  local firstChild = (runeList2 and runeList2:getChildCount() > 0) and runeList2:getFirstChild() or nil
+  local childW = firstChild and firstChild:getWidth() or -1
+  local childH = firstChild and firstChild:getHeight() or -1
+  local childVis = firstChild and firstChild:isVisible() or false
+  runeLog(string.format('STATUS: dados=%d widgets=%d janela_visivel=%s | runeList: %dx%d vis=%s | row[0]: %dx%d vis=%s',
+    dataCount, childCount, tostring(visible),
+    listW, listH, tostring(listVis),
+    childW, childH, tostring(childVis)))
   end
 
   if not runeWindow or not runeWindow:isVisible() then return end
