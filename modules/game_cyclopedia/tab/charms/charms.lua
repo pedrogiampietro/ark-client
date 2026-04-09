@@ -237,11 +237,11 @@ function Cyclopedia.actionCharmButton(btn)
     local isUnlocked = (data.tier and data.tier > 0) or data.unlocked
 
     if isUnlocked and data.asignedStatus and data.raceId and data.raceId > 0 then
-        g_game.requestBestiaryBuyCharmRune(data.id, 1, data.raceId)
+        g_game.requestBestiaryBuyCharmRune(data.id, 2, data.raceId)  -- action=2: remove from creature
     elseif isUnlocked then
-        Cyclopedia.showCreatureCharmPicker(data)
+        Cyclopedia.showCreatureCharmPicker(data)  -- assign: picker shown, action=1 sent on creature select
     else
-        g_game.requestBestiaryBuyCharmRune(data.id, 2, 0)
+        g_game.requestBestiaryBuyCharmRune(data.id, 0, 0)  -- action=0: unlock/upgrade tier
     end
 end
 
@@ -266,7 +266,7 @@ function Cyclopedia.selectCreatureCharm(widget, checked)
     local raceId  = widget.raceId
     local charmId = widget.charmId
     if raceId and charmId then
-        g_game.requestBestiaryBuyCharmRune(charmId, 0, raceId)
+        g_game.requestBestiaryBuyCharmRune(charmId, 1, raceId)  -- action=1: assign to creature
     end
 end
 
