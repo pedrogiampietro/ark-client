@@ -84,6 +84,7 @@ UIWidget
       anchors.fill: parent
       padding-left: 5
       padding-top: 5
+      focusable: false
       layout:
         type: grid
         cell-size: 127 103
@@ -95,6 +96,7 @@ UIWidget
       padding-left: 5
       padding-top: 5
       visible: false
+      focusable: false
       layout:
         type: grid
         cell-size: 127 103

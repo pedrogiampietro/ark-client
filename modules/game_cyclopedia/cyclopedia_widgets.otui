@@ -21,7 +21,8 @@ SubPanel < UIWidget
 
 BestiaryCategory < UIWidget
   image-source: /images/ui/minipanel
-  image-border: 8
+  image-border: 3
+  focusable: false
   $pressed:
     image-color: #bbbbbb
   Label
@@ -41,6 +42,7 @@ BestiaryCategory < UIWidget
     margin-top: 4
     size: 52 52
     phantom: false
+    focusable: false
     $hover:
       image-color: #dddddd
     $pressed:
@@ -69,7 +71,8 @@ BestiaryCategory < UIWidget
 
 BestiaryCreature < UIWidget
   image-source: /images/ui/minipanel
-  image-border: 8
+  image-border: 3
+  focusable: false
   Label
     id: Name
     height: 14
@@ -87,6 +90,7 @@ BestiaryCreature < UIWidget
     margin-top: 4
     size: 64 64
     phantom: false
+    focusable: false
     $pressed:
       background-color: #333333
   UICreature
