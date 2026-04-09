@@ -81,14 +81,10 @@ function Cyclopedia.SetBestiaryProgress(fit, firstBar, secondBar, thirdBar, kill
         isVisible = isVisible and width > 0
         bar:setVisible(isVisible)
         if isVisible then
-            if isCompleted then
-                bar:setImageRect({ height = 12, x = 0, y = 0, width = width })
-                bar:setImageSource("/game_cyclopedia/images/bestiary/fill")
-            else
-                bar:setWidth(width)
-                bar:setImageSource("/game_cyclopedia/images/bestiary/progressbar-orange-small")
-                bar:setImageRect({})
-            end
+            bar:setImageSource("")
+            bar:setImageRect({})
+            bar:setWidth(width)
+            bar:setBackgroundColor(isCompleted and "#4a8c3a" or "#2d6b2d")
         end
     end
 
@@ -203,11 +199,11 @@ function Cyclopedia.loadBestiarySelectedCreature(data)
 
     UI.ListBase.CreatureInfo.LeftBase.TrackCheck.raceId = data.id
 
-    if table.find(storedRaceIDs, data.id) then
-        UI.ListBase.CreatureInfo.LeftBase.TrackCheck:setChecked(true)
-    else
-        UI.ListBase.CreatureInfo.LeftBase.TrackCheck:setChecked(false)
-    end
+    -- Suppress the onCheckChange callback while we set the initial state,
+    -- otherwise it would fire and send a spurious tracker request to the server.
+    Cyclopedia._trackCheckSuppressed = true
+    UI.ListBase.CreatureInfo.LeftBase.TrackCheck:setChecked(table.find(storedRaceIDs, data.id) ~= nil)
+    Cyclopedia._trackCheckSuppressed = false
 
     if data.currentLevel > 1 then
         UI.ListBase.CreatureInfo.Value1:setText(data.maxHealth)
@@ -792,6 +788,27 @@ function Cyclopedia.calculateCombatValues(value)
 end
 
 -- Tracker functions
+
+-- Called by the TrackCheck checkbox. Uses a suppression flag so programmatic
+-- setChecked() calls (from loadBestiarySelectedCreature) don't send requests.
+-- Also does an optimistic local update so subsequent UI refreshes read the new state.
+function Cyclopedia.onTrackCheckChange(widget, checked)
+    if Cyclopedia._trackCheckSuppressed then return end
+    local raceId = widget.raceId
+    if not raceId then return end
+    -- Optimistic local update: keeps storedRaceIDs in sync before the server replies
+    if checked then
+        if not table.find(storedRaceIDs, raceId) then
+            table.insert(storedRaceIDs, raceId)
+        end
+    else
+        for i = #storedRaceIDs, 1, -1 do
+            if storedRaceIDs[i] == raceId then table.remove(storedRaceIDs, i) end
+        end
+    end
+    g_game.requestBestiaryTrackerStatus(raceId, checked)
+end
+
 function Cyclopedia.initializeTrackerData()
     storedRaceIDs = {}
     if Cyclopedia.storedTrackerData then
