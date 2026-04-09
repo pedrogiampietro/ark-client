@@ -86,7 +86,7 @@ UIWidget
       padding-top: 5
       layout:
         type: grid
-        cell-size: 127 110
+        cell-size: 127 104
         cell-spacing: 5
         flow: true
     UIScrollArea

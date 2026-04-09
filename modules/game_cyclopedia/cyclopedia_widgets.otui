@@ -54,7 +54,7 @@ BestiaryCategory < UIWidget
     id: TotalValue
     anchors.top: ClassBase.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 6
+    margin-top: 3
     font: verdana-11px-rounded
     !text: 'Total: 0'
     color: #888888
@@ -62,7 +62,7 @@ BestiaryCategory < UIWidget
     id: KnownValue
     anchors.top: TotalValue.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    margin-top: 2
+    margin-top: 1
     font: verdana-11px-rounded
     !text: 'Known: 0'
     color: #888888
