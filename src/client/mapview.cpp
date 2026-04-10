@@ -477,6 +477,7 @@ void MapView::followCreature(const CreaturePtr& creature)
 {
     m_follow = true;
     m_followingCreature = creature;
+    m_followCameraPosition = Position();
     requestVisibleTilesCacheUpdate();
 }
 
@@ -484,6 +485,7 @@ void MapView::setCameraPosition(const Position& pos)
 {
     m_follow = false;
     m_customCameraPosition = pos;
+    m_followCameraPosition = Position();
     requestVisibleTilesCacheUpdate();
 }
 
@@ -666,10 +668,24 @@ Point MapView::transformPositionTo2D(const Position& position, const Position& r
 Position MapView::getCameraPosition()
 {
     if (isFollowingCreature()) {
-        // Keep camera anchored on confirmed server position and let walkOffset
-        // provide smooth movement. This prevents camera reference oscillation
-        // (server/prewalk toggling), the main source of walk flicker.
-        return m_followingCreature->getPosition();
+        const Position serverPos = m_followingCreature->getPosition();
+
+        if (!m_followCameraPosition.isValid()) {
+            m_followCameraPosition = serverPos;
+            return m_followCameraPosition;
+        }
+
+        // Keep camera anchor stable while the creature is in the middle of a step.
+        // Offset animation already provides smooth movement, so this avoids
+        // intra-step camera snaps/flicker caused by packet timing races.
+        if (!m_followingCreature->isWalking()) {
+            m_followCameraPosition = serverPos;
+        } else if (!m_followCameraPosition.isInRange(serverPos, 1, 1)) {
+            // Teleports/floor jumps should update immediately.
+            m_followCameraPosition = serverPos;
+        }
+
+        return m_followCameraPosition;
     }
 
     return m_customCameraPosition;
