@@ -46,10 +46,10 @@ local defaultOptions = {
     
   wsadWalking = false,
   walkFirstStepDelay = 200,
-  walkTurnDelay = 0,
+  walkTurnDelay = 100,
   walkStairsDelay = 50,
   walkTeleportDelay = 200,
-  walkCtrlTurnDelay = 0,
+  walkCtrlTurnDelay = 150,
 
   topBar = false,
 
