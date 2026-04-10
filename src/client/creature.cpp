@@ -971,9 +971,9 @@ uint16 Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
     if (g_game.getClientVersion() >= 900 && !g_game.getFeature(Otc::GameNewWalking))
         interval = std::ceil((float)interval / (float)g_game.getServerBeat()) * g_game.getServerBeat();
 
-    float factor = 3;
-    if (g_game.getClientVersion() <= 810)
-        factor = 2;
+    // Diagonal factor: must match server's lastStepCost.
+    // Server changed lastStepCost from 3 to 2 (OTLand fix), so client matches here.
+    float factor = 2;
 
     interval = std::max<int>(interval, g_game.getServerBeat());
 
