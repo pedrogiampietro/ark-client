@@ -92,9 +92,25 @@ bool LocalPlayer::canWalk(Otc::Direction direction, bool ignoreLock)
     if ((m_walking && !isAutoWalking() && !isServerWalking()) && (!isPreWalking() || !m_lastPrewalkDone))
         return false;
 
-    // Without GameNewWalking allow 1 buffered prewalk once animation completes
-    if (!m_preWalking.empty() && !g_game.getFeature(Otc::GameNewWalking) && !m_lastPrewalkDone)
-        return false;
+    // Without GameNewWalking allow 1 buffered prewalk once animation completes,
+    // but avoid chaining same-direction prewalks because they can cause visible
+    // camera/offset oscillation on straight movement.
+    if (!m_preWalking.empty() && !g_game.getFeature(Otc::GameNewWalking)) {
+        if (!m_lastPrewalkDone)
+            return false;
+
+        Position lastFrom = m_position;
+        if (m_preWalking.size() > 1) {
+            auto it = m_preWalking.end();
+            --it;
+            --it;
+            lastFrom = *it;
+        }
+
+        Otc::Direction lastPredictedDir = lastFrom.getDirectionFromPosition(m_preWalking.back());
+        if (lastPredictedDir == direction)
+            return false;
+    }
 
     // Limit pre walking steps: with GameNewWalking use configured max, otherwise cap at 2
     int maxPrewalks = g_game.getFeature(Otc::GameNewWalking) ? (int)g_game.getMaxPreWalkingSteps() : 2;
