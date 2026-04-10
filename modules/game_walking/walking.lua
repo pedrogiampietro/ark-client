@@ -62,10 +62,6 @@ function init()
     g_settings.set('walkCtrlTurnDelay', 0)
   end
 
-  -- Keep a single predicted step to avoid visual oscillation/flicker when
-  -- walk packets and camera updates race under fast movement.
-  g_game.setMaxPreWalkingSteps(1)
-
   modules.game_interface.getRootPanel().onFocusChange = stopSmartWalk
   bindKeys()
 end
