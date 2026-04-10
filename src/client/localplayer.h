@@ -168,7 +168,6 @@ private:
     std::list<Position> m_preWalking;
     bool m_serverWalking = false;
     bool m_lastPrewalkDone = false;
-    bool m_stepUsesPrewalkOffset = false;
     WalkMatrix m_walkMatrix;
 
     bool m_premium = false;

@@ -666,8 +666,47 @@ Point MapView::transformPositionTo2D(const Position& position, const Position& r
 Position MapView::getCameraPosition()
 {
     if (isFollowingCreature()) {
-        if (!g_game.getFeature(Otc::GameNewWalking))
-            return m_followingCreature->getPosition();
+        if (!g_game.getFeature(Otc::GameNewWalking)) {
+            // Without GameNewWalking, only advance camera to prewalk position when the
+            // newly exposed strips are already known. Otherwise keep server position to
+            // avoid black-tile flashes while moving quickly.
+            const Position serverPos = m_followingCreature->getPosition();
+            const Position prewalkPos = m_followingCreature->getPrewalkingPosition();
+            if (prewalkPos == serverPos)
+                return serverPos;
+
+            const int dx = prewalkPos.x - serverPos.x;
+            const int dy = prewalkPos.y - serverPos.y;
+            if (dx > 1 || dx < -1 || dy > 1 || dy < -1)
+                return serverPos;
+
+            const int left = -m_virtualCenterOffset.x;
+            const int top = -m_virtualCenterOffset.y;
+            const int right = m_drawDimension.width() - 1 - m_virtualCenterOffset.x;
+            const int bottom = m_drawDimension.height() - 1 - m_virtualCenterOffset.y;
+
+            auto isKnownStrip = [&](int fromX, int toX, int fromY, int toY) {
+                for (int x = fromX; x <= toX; ++x) {
+                    for (int y = fromY; y <= toY; ++y) {
+                        const TilePtr& tile = g_map.getTile(prewalkPos.translated(x, y, 0));
+                        if (!tile || !tile->getGround())
+                            return false;
+                    }
+                }
+                return true;
+            };
+
+            if (dx > 0 && !isKnownStrip(right, right, top, bottom))
+                return serverPos;
+            if (dx < 0 && !isKnownStrip(left, left, top, bottom))
+                return serverPos;
+            if (dy > 0 && !isKnownStrip(left, right, bottom, bottom))
+                return serverPos;
+            if (dy < 0 && !isKnownStrip(left, right, top, top))
+                return serverPos;
+
+            return prewalkPos;
+        }
         return m_followingCreature->getPrewalkingPosition();
     }
 

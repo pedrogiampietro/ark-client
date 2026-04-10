@@ -139,7 +139,6 @@ void LocalPlayer::walk(const Position& oldPos, const Position& newPos)
 
         // invalid pre walk
         m_preWalking.clear();
-        m_stepUsesPrewalkOffset = false;
         m_serverWalking = true;
         if (m_serverWalkEndEvent)
             m_serverWalkEndEvent->cancel();
@@ -151,7 +150,6 @@ void LocalPlayer::walk(const Position& oldPos, const Position& newPos)
         }
 
         m_serverWalking = true;
-        m_stepUsesPrewalkOffset = false;
         if (m_serverWalkEndEvent)
             m_serverWalkEndEvent->cancel();
         m_lastAutoWalkRetries = 0;
@@ -171,7 +169,6 @@ void LocalPlayer::preWalk(Otc::Direction direction)
         m_serverWalkEndEvent->cancel();
 
     m_lastPrewalkDone = false;
-    m_stepUsesPrewalkOffset = true;
     m_preWalking.push_back(newPos);
     if (m_preWalking.size() > 1)
         g_map.requestVisibleTilesCacheUpdate();
@@ -350,7 +347,7 @@ void LocalPlayer::stopWalk() {
 void LocalPlayer::updateWalkOffset(uint8 totalPixelsWalked, bool inNextFrame)
 {
     // pre walks offsets are calculated in the oposite direction
-    if(m_stepUsesPrewalkOffset) {
+    if(isPreWalking()) {
         Point& walkOffset = inNextFrame ? m_walkOffsetInNextFrame : m_walkOffset;
         walkOffset = Point(0,0);
         if(m_walkDirection == Otc::North || m_walkDirection == Otc::NorthEast || m_walkDirection == Otc::NorthWest)
@@ -391,7 +388,6 @@ void LocalPlayer::terminateWalk()
     Creature::terminateWalk();
     m_idleTimer.restart();
     m_preWalking.clear();
-    m_stepUsesPrewalkOffset = false;
     m_walking = false;
 
     if(m_serverWalking) {
