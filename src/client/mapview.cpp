@@ -666,13 +666,17 @@ Point MapView::transformPositionTo2D(const Position& position, const Position& r
 Position MapView::getCameraPosition()
 {
     if (isFollowingCreature()) {
-        // Without GameNewWalking the server does not prefetch tiles beyond the current
-        // aware range, so advancing the camera to the prewalk tile exposes a row/column
-        // that has not been received yet (= black tiles).  The walk animation already
-        // handles smooth visual movement via walkOffset, so keeping the camera at the
-        // server-confirmed position avoids the black while still looking smooth.
-        if (!g_game.getFeature(Otc::GameNewWalking))
-            return m_followingCreature->getPosition();
+        if (!g_game.getFeature(Otc::GameNewWalking)) {
+            // Keep camera on confirmed server position for single prewalk steps to
+            // avoid exposing unloaded tiles as black. When chained prewalking is active
+            // (2+ queued steps), follow the prewalk position to prevent visible
+            // camera snap-back at the start of each buffered step.
+            const Position serverPos = m_followingCreature->getPosition();
+            const Position prewalkPos = m_followingCreature->getPrewalkingPosition();
+            if (prewalkPos == serverPos)
+                return serverPos;
+            return prewalkPos;
+        }
         return m_followingCreature->getPrewalkingPosition();
     }
 
