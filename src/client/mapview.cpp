@@ -666,10 +666,24 @@ Point MapView::transformPositionTo2D(const Position& position, const Position& r
 Position MapView::getCameraPosition()
 {
     if (isFollowingCreature()) {
-        // Keep camera anchored on confirmed server position and let walkOffset
-        // provide smooth movement. This prevents camera reference oscillation
-        // (server/prewalk toggling), the main source of walk flicker.
-        return m_followingCreature->getPosition();
+        const Position serverPos = m_followingCreature->getPosition();
+
+        // New walking supports predictive prewalk camera smoothly.
+        if (g_game.getFeature(Otc::GameNewWalking))
+            return m_followingCreature->getPrewalkingPosition();
+
+        // Legacy walking: follow prewalk when it is a normal 1-step prediction,
+        // otherwise fall back to confirmed server position to avoid large jumps.
+        const Position prewalkPos = m_followingCreature->getPrewalkingPosition();
+        if (prewalkPos == serverPos)
+            return serverPos;
+
+        const int dx = prewalkPos.x - serverPos.x;
+        const int dy = prewalkPos.y - serverPos.y;
+        if (dx > 1 || dx < -1 || dy > 1 || dy < -1)
+            return serverPos;
+
+        return prewalkPos;
     }
 
     return m_customCameraPosition;

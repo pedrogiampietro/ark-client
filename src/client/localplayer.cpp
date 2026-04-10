@@ -112,9 +112,8 @@ bool LocalPlayer::canWalk(Otc::Direction direction, bool ignoreLock)
             return false;
     }
 
-    // Limit pre walking steps: legacy mode is intentionally conservative to
-    // avoid camera/offset oscillation from chained predictions.
-    int maxPrewalks = g_game.getFeature(Otc::GameNewWalking) ? (int)g_game.getMaxPreWalkingSteps() : 1;
+    // Limit pre walking steps: with GameNewWalking use configured max, otherwise cap at 2
+    int maxPrewalks = g_game.getFeature(Otc::GameNewWalking) ? (int)g_game.getMaxPreWalkingSteps() : 2;
     if ((int)m_preWalking.size() >= maxPrewalks) {
         if (m_walkTimer.ticksElapsed() >= getStepDuration() + 300)
             return true;
