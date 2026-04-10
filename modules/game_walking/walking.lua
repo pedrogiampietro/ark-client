@@ -165,7 +165,7 @@ function bindTurnKey(key, dir)
   local gameRootPanel = modules.game_interface.getRootPanel()
   g_keyboard.bindKeyDown(key, function() turn(dir, false) end, gameRootPanel)
   g_keyboard.bindKeyPress(key, function() turn(dir, true) end, gameRootPanel)
-  g_keyboard.bindKeyUp(key, function() local player = g_game.getLocalPlayer() if player then player:lockWalk(200) end end, gameRootPanel)
+  g_keyboard.bindKeyUp(key, function() local player = g_game.getLocalPlayer() if player then player:lockWalk(50) end end, gameRootPanel)
 end
 
 function unbindTurnKey(key)
