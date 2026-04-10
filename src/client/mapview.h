@@ -147,6 +147,7 @@ private:
     Point m_visibleCenterOffset;
     Point m_moveOffset;
     Position m_customCameraPosition;
+    Position m_followCameraPosition;
     Position m_lastCameraPosition;
     stdext::boolean<true> m_mustUpdateVisibleTilesCache;
     stdext::boolean<true> m_multifloor;

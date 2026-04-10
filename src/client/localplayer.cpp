@@ -112,8 +112,9 @@ bool LocalPlayer::canWalk(Otc::Direction direction, bool ignoreLock)
             return false;
     }
 
-    // Limit pre walking steps: with GameNewWalking use configured max, otherwise cap at 2
-    int maxPrewalks = g_game.getFeature(Otc::GameNewWalking) ? (int)g_game.getMaxPreWalkingSteps() : 2;
+    // Keep prediction queue to a single step to avoid chained prewalk
+    // oscillation and map cache churn that can manifest as camera flicker.
+    int maxPrewalks = 1;
     if ((int)m_preWalking.size() >= maxPrewalks) {
         if (m_walkTimer.ticksElapsed() >= getStepDuration() + 300)
             return true;
@@ -189,6 +190,8 @@ void LocalPlayer::preWalk(Otc::Direction direction)
     m_lastPrewalkDone = false;
     m_stepUsesPrewalkOffset = true;
     m_preWalking.push_back(newPos);
+    if (m_preWalking.size() > 1)
+        g_map.requestVisibleTilesCacheUpdate();
 
     Creature::walk(startPos, newPos);
 }

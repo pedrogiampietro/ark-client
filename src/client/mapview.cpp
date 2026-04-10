@@ -477,6 +477,7 @@ void MapView::followCreature(const CreaturePtr& creature)
 {
     m_follow = true;
     m_followingCreature = creature;
+    m_followCameraPosition = Position();
     requestVisibleTilesCacheUpdate();
 }
 
@@ -484,6 +485,7 @@ void MapView::setCameraPosition(const Position& pos)
 {
     m_follow = false;
     m_customCameraPosition = pos;
+    m_followCameraPosition = Position();
     requestVisibleTilesCacheUpdate();
 }
 
@@ -666,44 +668,24 @@ Point MapView::transformPositionTo2D(const Position& position, const Position& r
 Position MapView::getCameraPosition()
 {
     if (isFollowingCreature()) {
-        // Keep smooth prewalk camera follow, but only when the newly exposed tiles
-        // are already known to avoid visible flicker/black-strip flashes.
         const Position serverPos = m_followingCreature->getPosition();
-        const Position prewalkPos = m_followingCreature->getPrewalkingPosition();
-        if (prewalkPos == serverPos)
-            return serverPos;
 
-        const int dx = prewalkPos.x - serverPos.x;
-        const int dy = prewalkPos.y - serverPos.y;
-        if (dx > 1 || dx < -1 || dy > 1 || dy < -1)
-            return serverPos;
+        if (!m_followCameraPosition.isValid()) {
+            m_followCameraPosition = serverPos;
+            return m_followCameraPosition;
+        }
 
-        const int left = -m_virtualCenterOffset.x;
-        const int top = -m_virtualCenterOffset.y;
-        const int right = m_drawDimension.width() - 1 - m_virtualCenterOffset.x;
-        const int bottom = m_drawDimension.height() - 1 - m_virtualCenterOffset.y;
+        // Keep camera anchor stable while the creature is in the middle of a step.
+        // Offset animation already provides smooth movement, so this avoids
+        // intra-step camera snaps/flicker caused by packet timing races.
+        if (!m_followingCreature->isWalking()) {
+            m_followCameraPosition = serverPos;
+        } else if (!m_followCameraPosition.isInRange(serverPos, 1, 1)) {
+            // Teleports/floor jumps should update immediately.
+            m_followCameraPosition = serverPos;
+        }
 
-        auto isKnownStrip = [&](int fromX, int toX, int fromY, int toY) {
-            for (int x = fromX; x <= toX; ++x) {
-                for (int y = fromY; y <= toY; ++y) {
-                    const TilePtr& tile = g_map.getTile(prewalkPos.translated(x, y, 0));
-                    if (!tile || !tile->getGround())
-                        return false;
-                }
-            }
-            return true;
-        };
-
-        if (dx > 0 && !isKnownStrip(right, right, top, bottom))
-            return serverPos;
-        if (dx < 0 && !isKnownStrip(left, left, top, bottom))
-            return serverPos;
-        if (dy > 0 && !isKnownStrip(left, right, bottom, bottom))
-            return serverPos;
-        if (dy < 0 && !isKnownStrip(left, right, top, top))
-            return serverPos;
-
-        return prewalkPos;
+        return m_followCameraPosition;
     }
 
     return m_customCameraPosition;
