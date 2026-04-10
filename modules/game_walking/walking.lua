@@ -18,6 +18,29 @@ waitingForCancelAck = false  -- true after g_game.stop() for autoWalk cancel; bl
 turnKeys = {}
 mousePriorityUntil = 0  -- while > g_clock.millis(), ignore keyboard walk (mouse has priority)
 
+-- Walk debug logging. Toggle with: walkDebug = true  (in the console or here)
+walkDebug = false
+local _dirName = {[0]="N",[1]="NE",[2]="E",[3]="SE",[4]="S",[5]="SW",[6]="W",[7]="NW"}
+local _t0 = 0
+function walkDebugEnable()
+  walkDebug = true
+  _t0 = g_clock.millis()
+  print("[WALK] debug enabled")
+end
+function walkDebugDisable()
+  walkDebug = false
+  print("[WALK] debug disabled")
+end
+local function wlog(fmt, ...)
+  if not walkDebug then return end
+  local dt = g_clock.millis() - _t0
+  print(string.format("[WALK +%dms] " .. fmt, dt, ...))
+end
+local function dname(d)
+  if d == nil then return "nil" end
+  return _dirName[d] or tostring(d)
+end
+
 function init()
   connect(g_game, { onTeleport = onTeleport })
   
@@ -276,16 +299,22 @@ end
 
 function onWalkFinish(player)
   lastFinishedStep = g_clock.millis()
+  wlog("onWalkFinish nextWalkDir=%s lastWalkDir=%s", dname(nextWalkDir), dname(lastWalkDir))
   if waitingForCancelAck then
     return  -- don't retry yet; onCancelWalk will handle it once server confirms stop
   end
   if nextWalkDir ~= nil then
+    local queued = nextWalkDir
     removeEvent(autoWalkEvent)
-    autoWalkEvent = addEvent(function() if nextWalkDir ~= nil then walk(nextWalkDir, 0) end end, false)
+    autoWalkEvent = addEvent(function()
+      wlog("onWalkFinish:retry dir=%s", dname(queued))
+      if nextWalkDir ~= nil then walk(nextWalkDir, 0) end
+    end, false)
   end
 end
 
 function onCancelWalk(player)
+  wlog("onCancelWalk nextWalkDir=%s", dname(nextWalkDir))
   if waitingForCancelAck then
     -- The server re-set isServerWalking=true via walk packet while we were waiting.
     -- Clear it now so the retry walk doesn't hit the isServerWalking→g_game.stop() path,
@@ -297,6 +326,7 @@ function onCancelWalk(player)
   if nextWalkDir ~= nil then
     removeEvent(autoWalkEvent)
     autoWalkEvent = scheduleEvent(function()
+      wlog("onCancelWalk:retry dir=%s", dname(nextWalkDir))
       if nextWalkDir ~= nil then walk(nextWalkDir, 0) end
     end, 60)
   end
@@ -348,6 +378,7 @@ function walk(dir, ticks)
   lastManualWalk = g_clock.millis()
 
   if player:isWalkLocked() then
+    wlog("BLOCKED:walkLocked dir=%s lastDir=%s", dname(dir), dname(lastWalkDir))
     return  -- keep nextWalkDir so it retries after lock expires
   end
 
@@ -374,7 +405,7 @@ function walk(dir, ticks)
     end
     return
   end
-     
+
   local dash = false
   local ignoredCanWalk = false
   if not g_game.getFeature(GameNewWalking) then
@@ -392,6 +423,9 @@ function walk(dir, ticks)
       -- diagonal step are silently discarded, causing the frozen/laggy feel.
       if lastWalkDir ~= dir or ticks == 0 or ticksToNextWalk < 500 then
         nextWalkDir = dir
+        wlog("BLOCKED:canWalk dir=%s lastDir=%s ticksLeft=%d ticks=%d -> buffered", dname(dir), dname(lastWalkDir), ticksToNextWalk, ticks)
+      else
+        wlog("BLOCKED:canWalk dir=%s lastDir=%s ticksLeft=%d ticks=%d -> NOT buffered (same dir, ticksLeft>500)", dname(dir), dname(lastWalkDir), ticksToNextWalk, ticks)
       end
       if ticksToNextWalk < 30 and lastFinishedStep + 400 > g_clock.millis() and nextWalkDir == nil then -- clicked walk 20 ms too early, try to execute again as soon possible to keep smooth walking
         nextWalkDir = dir
@@ -399,15 +433,12 @@ function walk(dir, ticks)
       return
     end
   end
-  
-  --if nextWalkDir ~= nil and lastFinishedStep + 200 < g_clock.millis() then
-  --  print("Cancel " .. nextWalkDir)
-  --  nextWalkDir = nil
-  --end
+
   -- Only apply the buffered direction when no key is actively pressed.
   -- If the user is pressing a direction (smartWalkDir ~= nil), their current
   -- input must win over a stale nextWalkDir queued from an earlier key press.
   if nextWalkDir ~= nil and nextWalkDir ~= lastWalkDir and smartWalkDir == nil then
+    wlog("OVERRIDE dir=%s -> nextWalkDir=%s (smartWalkDir=nil)", dname(dir), dname(nextWalkDir))
     dir = nextWalkDir
   end
 
@@ -436,28 +467,32 @@ function walk(dir, ticks)
   local toTile = g_map.getTile(toPos)
 
   if walkLock >= g_clock.millis() and lastWalkDir == dir then
+    wlog("BLOCKED:walkLock dir=%s lockRemaining=%dms", dname(dir), walkLock - g_clock.millis())
     nextWalkDir = nil
     return
   end
 
   if firstStep and lastWalkDir == dir and lastWalk + g_settings.getNumber('walkFirstStepDelay') > g_clock.millis() then
+    wlog("BLOCKED:firstStepDelay dir=%s", dname(dir))
     firstStep = false
     walkLock = lastWalk + g_settings.getNumber('walkFirstStepDelay')
     return
   end
-  
+
   if dash and lastWalkDir == dir and lastWalk + 50 > g_clock.millis() then
     return
-  end  
-  
+  end
+
   firstStep = false
   if player:isServerWalking() and not dash and lastWalkDir == dir then
     -- Only penalise same-direction walking to prevent packet flooding.
     -- Direction changes already cancel via g_game.stop(); the extra lockout
     -- only causes stutter (most noticeable after diagonal steps).
-    walkLock = walkLock + math.max(g_settings.getNumber('walkFirstStepDelay'), 100)
+    local penalty = math.max(g_settings.getNumber('walkFirstStepDelay'), 100)
+    wlog("SERVER_WALK_PENALTY dir=%s penalty=%dms", dname(dir), penalty)
+    walkLock = walkLock + penalty
   end
-  
+
   nextWalkDir = nil
   removeEvent(autoWalkEvent)
   autoWalkEvent = nil
@@ -477,7 +512,7 @@ function walk(dir, ticks)
     elseif not toTile then
       player:lockWalk(100) -- bug fix for missing stairs down on map
     else
-      if g_app.isMobile() and dir <= Directions.West then 
+      if g_app.isMobile() and dir <= Directions.West then
         turn(dir, ticks > 0)
       end
       return -- not walkable tile
@@ -485,14 +520,25 @@ function walk(dir, ticks)
   end
 
   if player:isServerWalking() and not dash then
+    wlog("STOP_SERVER_WALK before dir=%s", dname(dir))
     g_game.stop()
     player:finishServerWalking()
     autoFinishNextServerWalk = g_clock.millis() + 200
   end
+
+  local isTurn = (lastWalkDir ~= dir)
+  local isDiagTrans = isDiagonalTransition(lastWalkDir, dir)
+  wlog("STEP dir=%s lastDir=%s preWalked=%s serverWalking=%s turn=%s diagTrans=%s",
+    dname(dir), dname(lastWalkDir), tostring(preWalked),
+    tostring(player:isServerWalking()), tostring(isTurn), tostring(isDiagTrans))
   g_game.walk(dir, preWalked)
 
   if not firstStep and lastWalkDir ~= dir and not isDiagonalTransition(lastWalkDir, dir) then
-    walkLock = g_clock.millis() + g_settings.getNumber('walkTurnDelay')
+    local delay = g_settings.getNumber('walkTurnDelay')
+    if delay > 0 then
+      wlog("TURN_LOCK dir=%s lastDir=%s delay=%dms", dname(dir), dname(lastWalkDir), delay)
+      walkLock = g_clock.millis() + delay
+    end
   end
 
   lastWalkDir = dir
