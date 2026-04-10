@@ -92,19 +92,18 @@ bool LocalPlayer::canWalk(Otc::Direction direction, bool ignoreLock)
     if ((m_walking && !isAutoWalking() && !isServerWalking()) && (!isPreWalking() || !m_lastPrewalkDone))
         return false;
 
-    // Without GameNewWalking allow 1 buffered prewalk once animation completes
-    if (!m_preWalking.empty() && !g_game.getFeature(Otc::GameNewWalking) && !m_lastPrewalkDone)
+    // Without new walking limit only to 1 prewalk
+    if (!m_preWalking.empty() && !g_game.getFeature(Otc::GameNewWalking))
         return false;
 
-    // Limit pre walking steps: with GameNewWalking use configured max, otherwise cap at 2
-    int maxPrewalks = g_game.getFeature(Otc::GameNewWalking) ? (int)g_game.getMaxPreWalkingSteps() : 2;
-    if ((int)m_preWalking.size() >= maxPrewalks) {
+    // Limit pre walking steps
+    if (m_preWalking.size() >= g_game.getMaxPreWalkingSteps()) { // max 3 extra steps
         if (m_walkTimer.ticksElapsed() >= getStepDuration() + 300)
             return true;
         return false;
     }
 
-    if (!m_preWalking.empty() && g_game.getFeature(Otc::GameNewWalking)) { // disallow diagonal extended prewalking
+    if (!m_preWalking.empty()) { // disallow diagonal extented prewalking walking
         auto dir = m_position.getDirectionFromPosition(m_preWalking.back());
         if ((dir == Otc::NorthWest || dir == Otc::NorthEast || dir == Otc::SouthWest || dir == Otc::SouthEast)) {
             return false;
