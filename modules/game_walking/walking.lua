@@ -20,8 +20,7 @@ mousePriorityUntil = 0  -- while > g_clock.millis(), ignore keyboard walk (mouse
 
 -- Walk debug logging. Toggle with: walkDebug = true  (in the console or here)
 walkDebug = false
--- Direction enum: North=0,East=1,South=2,West=3,NorthEast=4,SouthEast=5,SouthWest=6,NorthWest=7
-local _dirName = {[0]="N",[1]="E",[2]="S",[3]="W",[4]="NE",[5]="SE",[6]="SW",[7]="NW"}
+local _dirName = {[0]="N",[1]="NE",[2]="E",[3]="SE",[4]="S",[5]="SW",[6]="W",[7]="NW"}
 local _t0 = 0
 function walkDebugEnable()
   walkDebug = true
@@ -44,23 +43,13 @@ end
 
 function init()
   connect(g_game, { onTeleport = onTeleport })
-
+  
   connect(LocalPlayer, {
     onPositionChange = onPositionChange,
     onWalk = onWalk,
     onWalkFinish = onWalkFinish,
     onCancelWalk = onCancelWalk
   })
-
-  -- Force smooth walk settings: override any saved values that pre-date the smooth defaults.
-  -- walkTurnDelay=0 and walkCtrlTurnDelay=0 are now the intended defaults; old saved values of
-  -- 100/150ms caused a hard lock on every direction change and were the main source of lag.
-  if g_settings.getNumber('walkTurnDelay') > 0 then
-    g_settings.set('walkTurnDelay', 0)
-  end
-  if g_settings.getNumber('walkCtrlTurnDelay') > 0 then
-    g_settings.set('walkCtrlTurnDelay', 0)
-  end
 
   modules.game_interface.getRootPanel().onFocusChange = stopSmartWalk
   bindKeys()
