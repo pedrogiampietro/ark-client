@@ -386,11 +386,7 @@ function walk(dir, ticks)
     if dash then
       ignoredCanWalk = true
     else
-      -- Always buffer direction changes regardless of ticksToNextWalk.
-      -- Diagonal steps take 3x the base step duration (~900ms), so gating on
-      -- ticksToNextWalk < 500 means inputs pressed during the first ~400ms of a
-      -- diagonal step are silently discarded, causing the frozen/laggy feel.
-      if lastWalkDir ~= dir or ticks == 0 or ticksToNextWalk < 500 then
+      if ticksToNextWalk < 500 and (lastWalkDir ~= dir or ticks == 0) then
         nextWalkDir = dir
       end
       if ticksToNextWalk < 30 and lastFinishedStep + 400 > g_clock.millis() and nextWalkDir == nil then -- clicked walk 20 ms too early, try to execute again as soon possible to keep smooth walking
@@ -404,10 +400,7 @@ function walk(dir, ticks)
   --  print("Cancel " .. nextWalkDir)
   --  nextWalkDir = nil
   --end
-  -- Only apply the buffered direction when no key is actively pressed.
-  -- If the user is pressing a direction (smartWalkDir ~= nil), their current
-  -- input must win over a stale nextWalkDir queued from an earlier key press.
-  if nextWalkDir ~= nil and nextWalkDir ~= lastWalkDir and smartWalkDir == nil then
+  if nextWalkDir ~= nil and nextWalkDir ~= lastWalkDir then 
     dir = nextWalkDir
   end
 
