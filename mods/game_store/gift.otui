@@ -1,24 +1,43 @@
+// ══════════════════════════════════════════════
+//  Gift Dialog — Send item to another player
+// ══════════════════════════════════════════════
 MainWindow
-  size: 200 110
-  !text: 'Enter player name'
+  size: 270 138
+  !text: 'Send as Gift'
   @onEnter: modules.game_store.confirmGift()
 
-  TextEdit
-    id: targetName
+  Label
+    text: 'Enter the recipient player name:'
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
+    height: 18
+    text-align: center
+    color: #8888b8
+    margin-top: 8
+
+  TextEdit
+    id: targetName
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 20
+    margin-top: 6
+    margin-left: 10
+    margin-right: 10
 
   Button
     anchors.bottom: parent.bottom
     anchors.right: parent.right
     !text: 'Confirm'
-    width: 64
+    width: 84
+    margin-right: 10
     @onClick: modules.game_store.confirmGift()
 
   Button
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     !text: 'Cancel'
-    width: 64
+    width: 84
+    margin-left: 10
     @onClick: modules.game_store.cancelGift()

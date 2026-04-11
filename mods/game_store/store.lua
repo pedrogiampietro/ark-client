@@ -539,15 +539,19 @@ function addOffers(offerData)
   for i = 1, #offerData do
     local offer = offerData[i]
     local panel = g_ui.createWidget("OfferWidget")
-	panel:setTooltip(offer.description)
+    panel:setTooltip(offer.description)
     local nameHidden = panel:recursiveGetChildById("offerNameHidden")
-    if offer.title:len() > 20 then
-      local shorter = offer.title:sub(1, 20) .. "..."
-      panel:setText(shorter)
-    else
-      panel:setText(offer.title)
-    end
     nameHidden:setText(offer.title)
+
+    -- set visible name label (truncated for card display)
+    local nameLabel = panel:getChildById("offerName")
+    if nameLabel then
+      local displayTitle = offer.title
+      if displayTitle:len() > 18 then
+        displayTitle = displayTitle:sub(1, 17) .. "…"
+      end
+      nameLabel:setText(displayTitle)
+    end
 
     local priceLabel = panel:recursiveGetChildById("offerPrice")
     local price = comma_value(offer.price)
