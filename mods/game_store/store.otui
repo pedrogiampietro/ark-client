@@ -239,12 +239,13 @@ MainWindow
     anchors.left: infoPanel.right
     anchors.right: parent.right
     anchors.top: parent.top
-    height: 58
+    height: 62
     margin-top: 4
     margin-left: 8
     padding: 5
-    image-source: /images/ui/store_large
-    image-border: 1
+    background-color: #151515aa
+    border-width: 1
+    border-color: #3a3a3a
 
     Panel
       id: categoryItemBg
@@ -260,6 +261,7 @@ MainWindow
       anchors.left: prev.right
       anchors.right: parent.right
       margin-left: 5
+      margin-right: 8
       height: 16
       !text: 'Potions'
       font: terminus-14px-bold
@@ -271,7 +273,8 @@ MainWindow
       anchors.left: prev.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
-      text-auto-resize: true
+      margin-right: 8
+      text-auto-resize: false
       text-wrap: true
       color: #ffffff
 
