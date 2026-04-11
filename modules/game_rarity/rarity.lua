@@ -92,10 +92,14 @@ end
 
 function applyRarityFrame(itemWidget, tier)
   if not itemWidget then return end
+  local imageSource = '/images/ui/item'
   if tier and tier > 0 and rarityImages[tier] then
-    itemWidget:setImageSource(rarityImages[tier])
-  else
-    itemWidget:setImageSource('/images/ui/item')
+    imageSource = rarityImages[tier]
+  end
+
+  -- Avoid forcing recache when source is unchanged.
+  if itemWidget:getImageSource() ~= imageSource then
+    itemWidget:setImageSource(imageSource)
   end
 end
 
@@ -201,17 +205,34 @@ function applyContainerRarities(containerId)
   end
 end
 
-function resetContainerRarityFrames(containerId)
-  local panel = findContainerPanel(containerId)
-  if not panel then return end
+function shiftContainerTiersOnAdd(container, slot)
+  local containerId = container:getId()
+  local tiers = containerRarities[containerId]
+  if not tiers then return end
 
-  local children = panel:getChildren()
-  for i = 1, #children do
-    local itemWidget = children[i]
-    if itemWidget then
-      applyRarityFrame(itemWidget, 0)
-    end
+  local capacity = container:getCapacity()
+  local maxSlot = math.max(capacity - 1, 0)
+  local insertSlot = math.max(0, math.min(slot or 0, maxSlot))
+
+  for s = maxSlot, insertSlot + 1, -1 do
+    tiers[s] = tiers[s - 1] or 0
   end
+  tiers[insertSlot] = 0
+end
+
+function shiftContainerTiersOnRemove(container, slot)
+  local containerId = container:getId()
+  local tiers = containerRarities[containerId]
+  if not tiers then return end
+
+  local capacity = container:getCapacity()
+  local maxSlot = math.max(capacity - 1, 0)
+  local removeSlot = math.max(0, math.min(slot or 0, maxSlot))
+
+  for s = removeSlot, maxSlot - 1 do
+    tiers[s] = tiers[s + 1] or 0
+  end
+  tiers[maxSlot] = 0
 end
 
 function requestContainerRarityDebounced(containerId, delay)
@@ -339,9 +360,9 @@ function onContainerItemUpdated(container)
     containerPanels[id] = container.itemsPanel
   end
 
-  -- Do not re-apply stale slot cache after reorder; clear and wait for fresh server data.
-  resetContainerRarityFrames(id)
-  requestContainerRarityDebounced(id, 80)
+  -- Keep current frame stable and only refresh from server in the background.
+  applyContainerRarities(id)
+  requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerClose(container)
@@ -355,21 +376,28 @@ function onRarityContainerClose(container)
 end
 
 function onRarityContainerAdd(container, slot, item)
-  onContainerItemUpdated(container)
+  shiftContainerTiersOnAdd(container, slot)
+  requestContainerRarityDebounced(container:getId(), 120)
 end
 
 function onRarityContainerRemove(container, slot, item)
-  onContainerItemUpdated(container)
+  shiftContainerTiersOnRemove(container, slot)
+  requestContainerRarityDebounced(container:getId(), 120)
 end
 
 function onRarityContainerUpdate(container, slot, item, oldItem)
-  -- Backup in case other modules bypass containers.lua helpers.
-  onContainerItemUpdated(container)
+  local id = container:getId()
+  local tiers = containerRarities[id]
+  if tiers and slot ~= nil then
+    if not oldItem or not item or oldItem:getId() ~= item:getId() then
+      tiers[slot] = 0
+    end
+  end
+  requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerSizeChange(container, size)
-  -- Backup in case other modules bypass containers.lua helpers.
-  onContainerItemUpdated(container)
+  requestContainerRarityDebounced(container:getId(), 120)
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
