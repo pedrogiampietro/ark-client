@@ -169,6 +169,7 @@ MainWindow
       text: GAME STORE
       anchors.left: parent.left
       anchors.top: parent.top
+      width: 160
       height: 20
       margin-left: 12
       margin-top: 9
@@ -179,6 +180,7 @@ MainWindow
       text: Exclusive offers for your account
       anchors.left: parent.left
       anchors.top: prev.bottom
+      width: 340
       height: 16
       margin-left: 12
       margin-top: 2
@@ -344,7 +346,7 @@ MainWindow
     text: Search
     anchors.verticalCenter: filterBar.verticalCenter
     anchors.left: filterBar.left
-    width: 45
+    width: 54
     height: 16
     margin-left: 10
     color: #b2b2b2

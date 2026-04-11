@@ -130,7 +130,14 @@ local function getSortMode()
   if not combo then
     return SORT_RECOMMENDED
   end
-  return combo:getCurrentOption() or SORT_RECOMMENDED
+  local option = combo:getCurrentOption()
+  if type(option) == "table" then
+    return option.text or SORT_RECOMMENDED
+  end
+  if type(option) == "string" then
+    return option
+  end
+  return SORT_RECOMMENDED
 end
 
 local function getSearchText()
