@@ -338,10 +338,17 @@ function destroy()
 end
 
 function onGameStoreFetchBase(data)
+  if not gameStoreWindow then
+    return
+  end
+
   categories = data.categories
   offers = {}
 
   local categoriesList = gameStoreWindow:getChildById("categories")
+  if not categoriesList then
+    return
+  end
   categoriesList:destroyChildren()
 
   for i = 1, #categories do
@@ -351,9 +358,16 @@ function onGameStoreFetchBase(data)
 end
 
 function onGameStoreFetchOffers(data)
+  if not gameStoreWindow then
+    return
+  end
+
   offers[data.category] = data.offers
   if not offersGrid then
     offersGrid = gameStoreWindow:recursiveGetChildById("offers")
+  end
+  if not offersGrid then
+    return
   end
 
   if not getFocusedCategoryId() then
@@ -369,19 +383,46 @@ function onGameStoreFetchOffers(data)
 end
 
 function onGameStoreUpdatePoints(data)
+  if not gameStoreWindow then
+    return
+  end
+
   local pointsWidget = gameStoreWindow:recursiveGetChildById("points")
-  local points = comma_value(tonumber(data))
+  if not pointsWidget then
+    return
+  end
+
+  local points = comma_value(tonumber(data) or 0)
   pointsWidget:setText(string.format(pointsWidget.baseText, points))
 end
 
 function onGameStoreUpdateHistory(history)
+  if not gameStoreWindow then
+    return
+  end
+
   local historyPanel = gameStoreWindow:getChildById("history")
+  if not historyPanel then
+    return
+  end
+
   historyPanel:destroyChildren()
+  local historyEntries = history or {}
   scheduleEvent(
     function()
-      for i = 1, #history do
-        local category = g_ui.createWidget("HistoryLabel", historyPanel)
-        category:setText(history[i])
+      if not gameStoreWindow then
+        return
+      end
+
+      local panel = gameStoreWindow:getChildById("history")
+      if not panel then
+        return
+      end
+
+      panel:destroyChildren()
+      for i = 1, #historyEntries do
+        local category = g_ui.createWidget("HistoryLabel", panel)
+        category:setText(historyEntries[i])
       end
     end,
     250
