@@ -977,11 +977,13 @@ uint16 Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
 
     interval = std::max<int>(interval, g_game.getServerBeat());
 
-    if (!ignoreDiagonal && (m_lastStepDirection == Otc::NorthWest || m_lastStepDirection == Otc::NorthEast ||
-                            m_lastStepDirection == Otc::SouthWest || m_lastStepDirection == Otc::SouthEast))
+    const bool diagonalStep = m_lastStepDirection == Otc::NorthWest || m_lastStepDirection == Otc::NorthEast ||
+                              m_lastStepDirection == Otc::SouthWest || m_lastStepDirection == Otc::SouthEast;
+    const bool localLegacyWalking = isLocalPlayer() && !g_game.getFeature(Otc::GameNewWalking);
+    if (!ignoreDiagonal && diagonalStep && !localLegacyWalking)
         interval *= factor;
 
-    if (!isServerWalking() && g_game.getFeature(Otc::GameSlowerManualWalking)) {
+    if (!isServerWalking() && !isLocalPlayer() && g_game.getFeature(Otc::GameSlowerManualWalking)) {
         interval += 25;
     }
     if (isServerWalking() && g_game.getFeature(Otc::GameNewWalking) && m_stepDuration > 0) // just use server value

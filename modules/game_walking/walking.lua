@@ -377,6 +377,8 @@ function walk(dir, ticks)
      
   local dash = false
   local ignoredCanWalk = false
+  local firstStepDelay = math.min(g_settings.getNumber('walkFirstStepDelay'), 45)
+  local turnDelay = math.min(g_settings.getNumber('walkTurnDelay'), 45)
   if not g_game.getFeature(GameNewWalking) then
     dash = g_settings.getBoolean("dash", false)
   end
@@ -433,9 +435,9 @@ function walk(dir, ticks)
     return
   end
 
-  if firstStep and lastWalkDir == dir and lastWalk + g_settings.getNumber('walkFirstStepDelay') > g_clock.millis() then
+  if firstStep and lastWalkDir == dir and lastWalk + firstStepDelay > g_clock.millis() then
     firstStep = false
-    walkLock = lastWalk + g_settings.getNumber('walkFirstStepDelay')
+    walkLock = lastWalk + firstStepDelay
     return
   end
   
@@ -448,7 +450,7 @@ function walk(dir, ticks)
     -- Only penalise same-direction walking to prevent packet flooding.
     -- Direction changes already cancel via g_game.stop(); the extra lockout
     -- only causes stutter (most noticeable after diagonal steps).
-    walkLock = walkLock + math.max(g_settings.getNumber('walkFirstStepDelay'), 100)
+    walkLock = walkLock + math.max(firstStepDelay, 20)
   end
   
   nextWalkDir = nil
@@ -485,7 +487,7 @@ function walk(dir, ticks)
   g_game.walk(dir, preWalked)
 
   if not firstStep and lastWalkDir ~= dir and not isDiagonalTransition(lastWalkDir, dir) then
-    walkLock = g_clock.millis() + g_settings.getNumber('walkTurnDelay')
+    walkLock = g_clock.millis() + turnDelay
   end
 
   lastWalkDir = dir
@@ -510,7 +512,7 @@ function turn(dir, repeated)
     end
     lastTurnDirection = dir
     nextWalkDir = nil
-    player:lockWalk(g_settings.getNumber('walkCtrlTurnDelay'))
+    player:lockWalk(math.min(g_settings.getNumber('walkCtrlTurnDelay'), 80))
   end
 end
 
