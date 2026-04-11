@@ -201,13 +201,14 @@ function onRarityData(protocol, opcode, buffer)
     containerDirty[containerId] = false
     rarityDebug('apply from C response -> ' .. rarityState(containerId))
     applyContainerRarities(containerId)
-    -- Retry in case panel wasn't ready yet
-    local retryDelays = {50, 150, 300}
-    for _, d in ipairs(retryDelays) do
+
+    -- Retry only when the panel is still missing.
+    if not findContainerPanel(containerId) then
+      local retryDelay = 80
       scheduleEvent(function()
-        rarityDebug(string.format('retry apply C cid=%d delay=%dms state={%s}', containerId, d, rarityState(containerId)))
+        rarityDebug(string.format('retry apply C (panel missing) cid=%d delay=%dms state={%s}', containerId, retryDelay, rarityState(containerId)))
         applyContainerRarities(containerId)
-      end, d)
+      end, retryDelay)
     end
 
   elseif prefix == "I:" then
@@ -342,22 +343,16 @@ function requestAllRarities()
 end
 
 function requestAndApplyAll()
+  rarityDebug('requestAndApplyAll -> request ALL')
   requestAllRarities()
-  -- Re-apply cached data at multiple short intervals
-  local applyDelays = {10, 50, 150}
-  for _, d in ipairs(applyDelays) do
-    scheduleEvent(function()
-      applyAllRarities()
-    end, d)
-  end
 end
 
 -- Event handlers
 
 function onRarityGameStart()
   rarityDebug('game start -> scheduling initial sync')
-  -- Aggressive sync on login: request + reapply at multiple intervals
-  local delays = {50, 100, 200, 500, 1000}
+  -- Keep startup sync lightweight to avoid visual churn.
+  local delays = {80, 350}
   for _, delay in ipairs(delays) do
     scheduleEvent(requestAndApplyAll, delay)
   end
