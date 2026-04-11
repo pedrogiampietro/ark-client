@@ -21,6 +21,7 @@ local containerPanels = {}
 -- Debounce
 local inventoryRequestEvent = nil
 local containerRequestEvents = {}
+local containerDirty = {}
 
 function init()
   ProtocolGame.registerExtendedOpcode(RARITY_OPCODE, onRarityData)
@@ -78,6 +79,7 @@ function terminate()
   containerRarities = {}
   inventoryRarities = {}
   containerPanels = {}
+  containerDirty = {}
 end
 
 function onRarityGameEnd()
@@ -88,6 +90,7 @@ function onRarityGameEnd()
   containerRarities = {}
   inventoryRarities = {}
   containerPanels = {}
+  containerDirty = {}
 end
 
 function applyRarityFrame(itemWidget, tier)
@@ -157,6 +160,7 @@ function onRarityData(protocol, opcode, buffer)
     end
 
     containerRarities[containerId] = tiers
+    containerDirty[containerId] = false
     applyContainerRarities(containerId)
     -- Retry in case panel wasn't ready yet
     local retryDelays = {50, 150, 300}
@@ -188,6 +192,8 @@ function onRarityData(protocol, opcode, buffer)
 end
 
 function applyContainerRarities(containerId)
+  if containerDirty[containerId] then return end
+
   local tiers = containerRarities[containerId]
   if not tiers then return end
 
@@ -203,36 +209,6 @@ function applyContainerRarities(containerId)
       applyRarityFrame(itemWidget, tier)
     end
   end
-end
-
-function shiftContainerTiersOnAdd(container, slot)
-  local containerId = container:getId()
-  local tiers = containerRarities[containerId]
-  if not tiers then return end
-
-  local capacity = container:getCapacity()
-  local maxSlot = math.max(capacity - 1, 0)
-  local insertSlot = math.max(0, math.min(slot or 0, maxSlot))
-
-  for s = maxSlot, insertSlot + 1, -1 do
-    tiers[s] = tiers[s - 1] or 0
-  end
-  tiers[insertSlot] = 0
-end
-
-function shiftContainerTiersOnRemove(container, slot)
-  local containerId = container:getId()
-  local tiers = containerRarities[containerId]
-  if not tiers then return end
-
-  local capacity = container:getCapacity()
-  local maxSlot = math.max(capacity - 1, 0)
-  local removeSlot = math.max(0, math.min(slot or 0, maxSlot))
-
-  for s = removeSlot, maxSlot - 1 do
-    tiers[s] = tiers[s + 1] or 0
-  end
-  tiers[maxSlot] = 0
 end
 
 function requestContainerRarityDebounced(containerId, delay)
@@ -337,18 +313,8 @@ function onContainerReady(container)
   end
 
   -- Request fresh data from server
+  containerDirty[id] = true
   requestContainerRarity(id)
-
-  -- Apply cached data immediately if available
-  applyContainerRarities(id)
-
-  -- Retry after server response arrives
-  scheduleEvent(function()
-    applyContainerRarities(id)
-  end, 100)
-  scheduleEvent(function()
-    applyContainerRarities(id)
-  end, 300)
 end
 
 -- Called directly by containers.lua after setItem() resets frames
@@ -360,8 +326,8 @@ function onContainerItemUpdated(container)
     containerPanels[id] = container.itemsPanel
   end
 
-  -- Keep current frame stable and only refresh from server in the background.
-  applyContainerRarities(id)
+  -- Container slots changed: wait for fresh server mapping to avoid frame jumps.
+  containerDirty[id] = true
   requestContainerRarityDebounced(id, 120)
 end
 
@@ -373,30 +339,27 @@ function onRarityContainerClose(container)
   end
   containerRarities[id] = nil
   containerPanels[id] = nil
+  containerDirty[id] = nil
 end
 
 function onRarityContainerAdd(container, slot, item)
-  shiftContainerTiersOnAdd(container, slot)
+  containerDirty[container:getId()] = true
   requestContainerRarityDebounced(container:getId(), 120)
 end
 
 function onRarityContainerRemove(container, slot, item)
-  shiftContainerTiersOnRemove(container, slot)
+  containerDirty[container:getId()] = true
   requestContainerRarityDebounced(container:getId(), 120)
 end
 
 function onRarityContainerUpdate(container, slot, item, oldItem)
   local id = container:getId()
-  local tiers = containerRarities[id]
-  if tiers and slot ~= nil then
-    if not oldItem or not item or oldItem:getId() ~= item:getId() then
-      tiers[slot] = 0
-    end
-  end
+  containerDirty[id] = true
   requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerSizeChange(container, size)
+  containerDirty[container:getId()] = true
   requestContainerRarityDebounced(container:getId(), 120)
 end
 
