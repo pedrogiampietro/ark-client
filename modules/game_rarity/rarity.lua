@@ -22,8 +22,37 @@ local containerPanels = {}
 local inventoryRequestEvent = nil
 local containerRequestEvents = {}
 local containerDirty = {}
+local containerRequestToken = {}
+local containerLastRequestMs = {}
+
+local RARITY_DEBUG = true
+local rarityDebugSeq = 0
+
+local function rarityDebug(msg)
+  if not RARITY_DEBUG then return end
+  rarityDebugSeq = rarityDebugSeq + 1
+  g_logger.info(string.format('[RARITY][%05d][%d] %s', rarityDebugSeq, g_clock.millis(), msg))
+end
+
+local function safeItemInfo(item)
+  if not item then return 'nil' end
+  local okId, id = pcall(function() return item:getId() end)
+  local okCount, count = pcall(function() return item:getCount() end)
+  local idText = okId and tostring(id) or '?'
+  local countText = okCount and tostring(count) or '?'
+  return idText .. 'x' .. countText
+end
+
+local function rarityState(containerId)
+  local dirty = containerDirty[containerId] and 1 or 0
+  local hasPanel = containerPanels[containerId] and 1 or 0
+  local pending = containerRequestEvents[containerId] and 1 or 0
+  local token = containerRequestToken[containerId] or 0
+  return string.format('cid=%d dirty=%d panel=%d pendingReq=%d token=%d', containerId, dirty, hasPanel, pending, token)
+end
 
 function init()
+  rarityDebug('init module')
   ProtocolGame.registerExtendedOpcode(RARITY_OPCODE, onRarityData)
 
   connect(Container, {
@@ -46,6 +75,7 @@ function init()
 end
 
 function terminate()
+  rarityDebug('terminate module')
   ProtocolGame.unregisterExtendedOpcode(RARITY_OPCODE)
 
   disconnect(Container, {
@@ -83,6 +113,7 @@ function terminate()
 end
 
 function onRarityGameEnd()
+  rarityDebug('game end -> clearing rarity state')
   for containerId, event in pairs(containerRequestEvents) do
     removeEvent(event)
     containerRequestEvents[containerId] = nil
@@ -159,13 +190,22 @@ function onRarityData(protocol, opcode, buffer)
       slot = slot + 1
     end
 
+    local now = g_clock.millis()
+    local dt = -1
+    if containerLastRequestMs[containerId] then
+      dt = now - containerLastRequestMs[containerId]
+    end
+    rarityDebug(string.format('recv C response cid=%d slots=%d dt=%dms stateBefore={%s}', containerId, slot, dt, rarityState(containerId)))
+
     containerRarities[containerId] = tiers
     containerDirty[containerId] = false
+    rarityDebug('apply from C response -> ' .. rarityState(containerId))
     applyContainerRarities(containerId)
     -- Retry in case panel wasn't ready yet
     local retryDelays = {50, 150, 300}
     for _, d in ipairs(retryDelays) do
       scheduleEvent(function()
+        rarityDebug(string.format('retry apply C cid=%d delay=%dms state={%s}', containerId, d, rarityState(containerId)))
         applyContainerRarities(containerId)
       end, d)
     end
@@ -187,40 +227,63 @@ function onRarityData(protocol, opcode, buffer)
       end
     end
 
+    local count = 0
+    for _ in pairs(inventoryRarities) do
+      count = count + 1
+    end
+    rarityDebug(string.format('recv I response entries=%d', count))
+
     applyInventoryRarities()
   end
 end
 
 function applyContainerRarities(containerId)
-  if containerDirty[containerId] then return end
+  if containerDirty[containerId] then
+    rarityDebug('skip apply (container dirty) -> ' .. rarityState(containerId))
+    return
+  end
 
   local tiers = containerRarities[containerId]
-  if not tiers then return end
+  if not tiers then
+    rarityDebug('skip apply (no tiers) -> ' .. rarityState(containerId))
+    return
+  end
 
   local panel = findContainerPanel(containerId)
-  if not panel then return end
+  if not panel then
+    rarityDebug('skip apply (panel not found) -> ' .. rarityState(containerId))
+    return
+  end
 
   local children = panel:getChildren()
+  local applied = 0
   for i = 1, #children do
     local itemWidget = children[i]
     if itemWidget then
       local slot = i - 1
       local tier = tiers[slot] or 0
       applyRarityFrame(itemWidget, tier)
+      applied = applied + 1
     end
   end
+  rarityDebug(string.format('applied container frames cid=%d widgets=%d state={%s}', containerId, applied, rarityState(containerId)))
 end
 
 function requestContainerRarityDebounced(containerId, delay)
+  local useDelay = delay or 100
   if containerRequestEvents[containerId] then
     removeEvent(containerRequestEvents[containerId])
     containerRequestEvents[containerId] = nil
+    rarityDebug(string.format('debounce replace cid=%d delay=%dms state={%s}', containerId, useDelay, rarityState(containerId)))
+  else
+    rarityDebug(string.format('debounce schedule cid=%d delay=%dms state={%s}', containerId, useDelay, rarityState(containerId)))
   end
 
   containerRequestEvents[containerId] = scheduleEvent(function()
     containerRequestEvents[containerId] = nil
+    rarityDebug('debounce fire -> request C ' .. rarityState(containerId))
     requestContainerRarity(containerId)
-  end, delay or 100)
+  end, useDelay)
 end
 
 function applyAllContainerRarities()
@@ -261,7 +324,13 @@ end
 function requestContainerRarity(containerId)
   local protocol = g_game.getProtocolGame()
   if protocol then
+    local token = (containerRequestToken[containerId] or 0) + 1
+    containerRequestToken[containerId] = token
+    containerLastRequestMs[containerId] = g_clock.millis()
+    rarityDebug(string.format('send C request cid=%d token=%d state={%s}', containerId, token, rarityState(containerId)))
     protocol:sendExtendedOpcode(RARITY_OPCODE, "C:" .. containerId)
+  else
+    rarityDebug('skip C request (no protocol) -> ' .. rarityState(containerId))
   end
 end
 
@@ -286,6 +355,7 @@ end
 -- Event handlers
 
 function onRarityGameStart()
+  rarityDebug('game start -> scheduling initial sync')
   -- Aggressive sync on login: request + reapply at multiple intervals
   local delays = {50, 100, 200, 500, 1000}
   for _, delay in ipairs(delays) do
@@ -300,6 +370,8 @@ function onRarityContainerOpen(container, previousContainer)
   if container.itemsPanel then
     containerPanels[id] = container.itemsPanel
   end
+
+  rarityDebug('container open -> ' .. rarityState(id))
 end
 
 -- Called directly by containers.lua AFTER container is fully set up
@@ -314,11 +386,12 @@ function onContainerReady(container)
 
   -- Request fresh data from server
   containerDirty[id] = true
+  rarityDebug('container ready -> mark dirty and request C ' .. rarityState(id))
   requestContainerRarity(id)
 end
 
 -- Called directly by containers.lua after setItem() resets frames
-function onContainerItemUpdated(container)
+function onContainerItemUpdated(container, reason)
   local id = container:getId()
 
   -- Cache panel
@@ -328,11 +401,13 @@ function onContainerItemUpdated(container)
 
   -- Container slots changed: wait for fresh server mapping to avoid frame jumps.
   containerDirty[id] = true
+  rarityDebug(string.format('container ui refreshed reason=%s -> mark dirty %s', tostring(reason or 'unknown'), rarityState(id)))
   requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerClose(container)
   local id = container:getId()
+  rarityDebug('container close -> ' .. rarityState(id))
   if containerRequestEvents[id] then
     removeEvent(containerRequestEvents[id])
     containerRequestEvents[id] = nil
@@ -340,27 +415,36 @@ function onRarityContainerClose(container)
   containerRarities[id] = nil
   containerPanels[id] = nil
   containerDirty[id] = nil
+  containerRequestToken[id] = nil
+  containerLastRequestMs[id] = nil
 end
 
 function onRarityContainerAdd(container, slot, item)
-  containerDirty[container:getId()] = true
-  requestContainerRarityDebounced(container:getId(), 120)
+  local id = container:getId()
+  containerDirty[id] = true
+  rarityDebug(string.format('event onAddItem cid=%d slot=%s item=%s -> mark dirty', id, tostring(slot), safeItemInfo(item)))
+  requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerRemove(container, slot, item)
-  containerDirty[container:getId()] = true
-  requestContainerRarityDebounced(container:getId(), 120)
+  local id = container:getId()
+  containerDirty[id] = true
+  rarityDebug(string.format('event onRemoveItem cid=%d slot=%s item=%s -> mark dirty', id, tostring(slot), safeItemInfo(item)))
+  requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerUpdate(container, slot, item, oldItem)
   local id = container:getId()
   containerDirty[id] = true
+  rarityDebug(string.format('event onUpdateItem cid=%d slot=%s old=%s new=%s -> mark dirty', id, tostring(slot), safeItemInfo(oldItem), safeItemInfo(item)))
   requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityContainerSizeChange(container, size)
-  containerDirty[container:getId()] = true
-  requestContainerRarityDebounced(container:getId(), 120)
+  local id = container:getId()
+  containerDirty[id] = true
+  rarityDebug(string.format('event onSizeChange cid=%d size=%s -> mark dirty', id, tostring(size)))
+  requestContainerRarityDebounced(id, 120)
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
