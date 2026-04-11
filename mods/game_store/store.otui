@@ -18,15 +18,6 @@ ShopCategory < Panel
     margin-left: 8
     margin-top: 2
 
-StoreTopTab < Button
-  height: 22
-  width: 90
-  checkable: true
-  text-align: center
-
-  $checked:
-    color: #f1f1f1
-
 CategoryIconSprite < UISprite
   id: categoryItem
   anchors.fill: parent
@@ -244,24 +235,13 @@ MainWindow
     margin-left: 4
 
   FlatPanel
-    id: categoryTabs
+    id: topPanel
     anchors.left: infoPanel.right
     anchors.right: parent.right
     anchors.top: parent.top
-    height: 26
-    margin-left: 8
-    margin-top: 4
-    layout:
-      type: horizontalBox
-      spacing: 4
-
-  FlatPanel
-    id: topPanel
-    anchors.left: categoryTabs.left
-    anchors.right: categoryTabs.right
-    anchors.top: categoryTabs.bottom
     height: 58
-    margin-top: 6
+    margin-top: 4
+    margin-left: 8
     padding: 5
     image-source: /images/ui/store_large
     image-border: 1
