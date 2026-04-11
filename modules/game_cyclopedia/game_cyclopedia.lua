@@ -441,14 +441,21 @@ function parseMonsterData(protocol, msg)
         locations = msg:getString()
     end
 
-    -- Map our element IDs to cyclopedia's combat[1..8]:
-    -- 1=Physical, 2=Fire, 3=Earth, 4=Energy, 5=Ice, 6=Holy, 7=Death, 8=Healing
-    local ourToCyclopedia = { [0]=1, [1]=2, [2]=3, [3]=4 }
+    -- Map protocol element IDs to cyclopedia's combat[1..8]:
+    -- protocol: 0=physical 1=fire 2=earth 3=energy 4=ice 5=holy 6=death 7=healing
+    -- cyclopedia: 1=Physical, 2=Fire, 3=Earth, 4=Energy, 5=Ice, 6=Holy, 7=Death, 8=Healing
+    local ourToCyclopedia = {
+        [0]=1, [1]=2, [2]=3, [3]=4,
+        [4]=5, [5]=6, [6]=7, [7]=8,
+    }
     local combat = {}
-    for i = 1, 8 do combat[i] = 0 end
+    -- Default to neutral (100%) for elements that are not explicitly provided.
+    for i = 1, 8 do combat[i] = 100 end
     for ourId, val in pairs(elementsRaw) do
         local idx = ourToCyclopedia[ourId]
-        if idx then combat[idx] = val end
+        if idx then
+            combat[idx] = val
+        end
     end
 
     -- Update monster cache and remove from queue (prevents duplicate sends)

@@ -881,31 +881,39 @@ function Cyclopedia.loadBestiaryCreature(page, search)
 end
 
 function Cyclopedia.calculateCombatValues(value)
+    local v = tonumber(value) or 100
+    if v < 0 then v = 0 end
+    if v > 999 then v = 999 end
+
     -- inner bar width = 90 - 2 margins = 88px
-    local fillWidth = math.max(2, math.floor((value / 100) * 88))
-    local marginRight = 88 - fillWidth
-    local color, label
-    if value >= 100 then
-        color = "#5555dd"  -- immune (blue)
+    local color, label, tooltip, fillWidth
+    if v == 0 then
+        -- Tibia semantics: 0% means immune
+        color = "#5555dd"
         label = "Immune"
-    elseif value >= 75 then
-        color = "#44bb44"  -- resistant (green)
-        label = tostring(value) .. "%"
-    elseif value >= 25 then
-        color = "#bbaa22"  -- neutral (yellow)
-        label = tostring(value) .. "%"
-    elseif value > 0 then
-        color = "#cc4444"  -- weak (red)
-        label = tostring(value) .. "%"
+        tooltip = "Immune (0%)"
+        fillWidth = 88
     else
-        color = "#882222"  -- very weak/0 (dark red)
-        label = "0%"
+        if v < 100 then
+            color = "#44bb44"  -- resistant
+        elseif v == 100 then
+            color = "#bbaa22"  -- neutral
+        else
+            color = "#cc4444"  -- weak
+        end
+
+        label = tostring(v) .. "%"
+        tooltip = string.format("%d%%", v)
+        local clamped = math.min(v, 100)
+        fillWidth = math.max(2, math.floor((clamped / 100) * 88))
     end
+
+    local marginRight = 88 - fillWidth
     return {
         margin  = marginRight,
         color   = color,
         label   = label,
-        tooltip = string.format("%d%%", value)
+        tooltip = tooltip
     }
 end
 
