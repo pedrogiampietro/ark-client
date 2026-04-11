@@ -980,8 +980,12 @@ uint16 Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
     const bool diagonalStep = m_lastStepDirection == Otc::NorthWest || m_lastStepDirection == Otc::NorthEast ||
                               m_lastStepDirection == Otc::SouthWest || m_lastStepDirection == Otc::SouthEast;
     const bool localLegacyWalking = isLocalPlayer() && !g_game.getFeature(Otc::GameNewWalking);
-    if (!ignoreDiagonal && diagonalStep && !localLegacyWalking)
-        interval *= factor;
+    if (!ignoreDiagonal && diagonalStep) {
+        if (localLegacyWalking)
+            interval = (interval * 3) / 2;
+        else
+            interval *= factor;
+    }
 
     if (!isServerWalking() && !isLocalPlayer() && g_game.getFeature(Otc::GameSlowerManualWalking)) {
         interval += 25;
