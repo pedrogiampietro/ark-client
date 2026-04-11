@@ -23,6 +23,24 @@ local SORT_PRICE_ASC = "Price: Low to High"
 local SORT_PRICE_DESC = "Price: High to Low"
 local SORT_NAME_ASC = "Name: A-Z"
 
+local function parseOfferPrice(offer)
+  if not offer then
+    return 0
+  end
+
+  local raw = offer.price or offer.cost or 0
+  if type(raw) == "number" then
+    return raw
+  end
+
+  if type(raw) == "string" then
+    local clean = raw:gsub("[^%d]", "")
+    return tonumber(clean) or 0
+  end
+
+  return tonumber(raw) or 0
+end
+
 local function trimText(text)
   if not text then
     return ""
@@ -88,8 +106,17 @@ local function getFocusedCategoryId()
   if not gameStoreWindow then
     return nil
   end
-  local focused = gameStoreWindow:getChildById("categories"):getFocusedChild()
+  local categoriesWidget = gameStoreWindow:getChildById("categories")
+  if not categoriesWidget then
+    return nil
+  end
+
+  local focused = categoriesWidget:getFocusedChild()
   if not focused then
+    local first = categoriesWidget:getChildByIndex(1)
+    if first then
+      return first:getId()
+    end
     return nil
   end
   return focused:getId()
@@ -125,8 +152,9 @@ local function filterAndSortOffers(categoryId)
   local onSaleOnly = onSaleCheck and onSaleCheck:isChecked() or false
   for _, offer in ipairs(source) do
     local title = (offer.title or ""):lower()
+    local description = (offer.description or ""):lower()
     local salePass = (not onSaleOnly) or isOfferOnSale(offer)
-    if salePass and (searchText == "" or title:find(searchText, 1, true)) then
+    if salePass and (searchText == "" or title:find(searchText, 1, true) or description:find(searchText, 1, true)) then
       table.insert(result, offer)
     end
   end
@@ -135,15 +163,15 @@ local function filterAndSortOffers(categoryId)
   if sortMode ~= SORT_RECOMMENDED then
     table.sort(result, function(a, b)
       if sortMode == SORT_PRICE_ASC then
-        local ap = tonumber(a.price) or 0
-        local bp = tonumber(b.price) or 0
+        local ap = parseOfferPrice(a)
+        local bp = parseOfferPrice(b)
         if ap == bp then
           return (a.title or ""):lower() < (b.title or ""):lower()
         end
         return ap < bp
       elseif sortMode == SORT_PRICE_DESC then
-        local ap = tonumber(a.price) or 0
-        local bp = tonumber(b.price) or 0
+        local ap = parseOfferPrice(a)
+        local bp = parseOfferPrice(b)
         if ap == bp then
           return (a.title or ""):lower() < (b.title or ""):lower()
         end
