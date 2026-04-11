@@ -272,6 +272,10 @@ function create()
     return
   end
   gameStoreWindow = g_ui.displayUI("store")
+  if not gameStoreWindow then
+    g_logger.error("Failed to load store UI: store.otui")
+    return
+  end
   gameStoreWindow:hide()
 
   gameStoreButton = modules.client_topmenu.addRightGameToggleButton("gameStoreButton", tr("Store"), "/images/topbuttons/particles", toggle, true)
