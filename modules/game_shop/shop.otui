@@ -1,22 +1,26 @@
 ShopCategory < Panel
-  height: 36
+  height: 28
   focusable: true
-  background: alpha
+  background-color: #1b1b1bcc
+  border-width: 1
+  border-color: #3a3a3a
 
   $focus:
-    background: #99999999
-  
+    background-color: #2f2f2fcc
+    border-color: #9b7b2f
+
   Label
     id: name
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    margin-left: 40
+    margin-left: 34
+    margin-right: 6
     text-align: left
-    color: white
-    font: verdana-11px-rounded    
-    
+    color: #dfdfdf
+    font: verdana-11px-rounded
+
 ShopCategoryItem < ShopCategory
   UIItem
     id: item
@@ -25,10 +29,10 @@ ShopCategoryItem < ShopCategory
     anchors.bottom: parent.bottom
     margin-top: 2
     margin-bottom: 2
-    margin-left: 2
+    margin-left: 3
     virtual: true
-    size: 32 32
-    
+    size: 24 24
+
 ShopCategoryCreature < ShopCategory
   UICreature
     id: creature
@@ -37,9 +41,9 @@ ShopCategoryCreature < ShopCategory
     anchors.bottom: parent.bottom
     margin-top: 2
     margin-bottom: 2
-    margin-left: 2
-    size: 32 32
-    
+    margin-left: 3
+    size: 24 24
+
 ShopCategoryImage < ShopCategory
   Label
     id: image
@@ -48,147 +52,184 @@ ShopCategoryImage < ShopCategory
     anchors.bottom: parent.bottom
     margin-top: 2
     margin-bottom: 2
-    margin-left: 2
-    size: 32 32    
-    
-    
-    
+    margin-left: 3
+    size: 24 24
+
 ShopOffer < Panel
-  height: 56
-  background: alpha
-  
+  width: 118
+  height: 124
+  background-color: #171717d8
+  border-width: 1
+  border-color: #4a4a4a
+  focusable: true
+
   $focus:
-    background: #99999999
+    background-color: #2a2a2ad8
+    border-color: #b58a31
 
   Label
     id: title
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    margin-top: 4
-    margin-left: 55
-    text-align: topleft
-    color: white
+    margin-top: 3
+    margin-left: 4
+    margin-right: 4
+    height: 24
+    text-align: center
+    color: #f0f0f0
+    text-wrap: true
     font: verdana-11px-rounded
 
   Label
     id: description
-    anchors.top: prev.bottom
+    anchors.top: title.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    margin-left: 55
-    margin-right: 55
-    text-align: topleft
-    text-auto-resize: true
+    anchors.bottom: buyButton.top
+    margin-top: 2
+    margin-left: 4
+    margin-right: 4
+    margin-bottom: 2
+    text-align: center
     text-wrap: true
-    color: white
+    color: #c7c7c7
     font: verdana-11px-rounded
-    
+    visible: false
+
+  Label
+    id: price
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-left: 6
+    margin-bottom: 6
+    width: 62
+    height: 18
+    background-color: #113311
+    border-width: 1
+    border-color: #2f7a2f
+    text-align: center
+    color: #66ff66
+    font: verdana-11px-rounded
+
   Button
     id: buyButton
-    text: BUY
-    height: 25
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.left: prev.right
-    anchors.right: parent.right    
-    margin-right: 15
+    text: Buy
+    width: 44
+    height: 18
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-right: 6
+    margin-bottom: 6
     text-align: center
-    
+
 ShopOfferItem < ShopOffer
   UIItem
     id: item
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: title.bottom
+    margin-top: 5
     virtual: true
-    size: 48 48
-    
+    size: 40 40
+
 ShopOfferCreature < ShopOffer
   UICreature
     id: creature
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
-    size: 48 48
-    
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: title.bottom
+    margin-top: 5
+    size: 40 40
+
 ShopOfferImage < ShopOffer
   Label
     id: image
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
-    size: 48 48    
-  
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: title.bottom
+    margin-top: 5
+    size: 40 40
+
 MainWindow
   id: shopWindow
-  !text: tr('Shop')
-  size: 750 500
+  !text: tr('Game Store')
+  size: 700 470
   @onEscape: modules.game_shop.hide()
   $mobile:
-    size: 500 360
+    size: 520 360
+
+  Panel
+    id: topBand
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 58
+    background-color: #11111166
+    border-width: 1
+    border-color: #3b3b3b
 
   Panel
     id: infoPanel
-    anchors.top: parent.top
+    anchors.top: topBand.top
     anchors.left: parent.left
-    width: 230
-    height: 60
+    width: 190
+    height: 58
+    margin-left: 3
 
     Label
       id: points
-      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.left: parent.left
+      anchors.right: parent.right
       anchors.top: parent.top
-      margin-top: 10
+      margin-top: 8
       text: -
-      text-auto-resize: true
-    
+      text-align: center
+      color: #f1f1f1
+      font: verdana-11px-rounded
+
     Button
       id: buy
       anchors.horizontalCenter: parent.horizontalCenter
-      width: 150
+      width: 124
+      height: 18
       anchors.top: prev.bottom
-      margin-top: 10
+      margin-top: 5
       visible: false
-      !text: tr("Buy points")
+      !text: tr('Buy points')
 
   Panel
     id: adPanel
-    anchors.top: parent.top
+    anchors.top: topBand.top
     anchors.left: infoPanel.right
     anchors.right: parent.right
-    margin-left: 10
-    height: 0
-    
+    margin-left: 8
+    margin-right: 3
+    height: 58
+    background-color: #0f0f0f66
+    border-width: 1
+    border-color: #3b3b3b
+
     Label
       id: ad
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.top
-      anchors.bottom: parent.bottom
+      anchors.fill: parent
+      margin-left: 8
+      margin-right: 8
       text-auto-resize: true
       text-wrap: true
-      text-align: center
+      text-align: left
       font: sans-bold-16px
-  
-  TextList    
+
+  TextList
     id: categories
     vertical-scrollbar: categoriesScrollBar
-    anchors.top: infoPanel.bottom
+    anchors.top: topBand.bottom
     anchors.left: infoPanel.left
     anchors.right: infoPanel.right
-    anchors.bottom: transactionHistory.top
-    margin-top: 10
-    margin-bottom: 10
-    padding: 1
+    anchors.bottom: bottomBar.top
+    margin-top: 8
+    margin-bottom: 8
+    padding: 2
+    background-color: #11111166
+    border-width: 1
+    border-color: #3b3b3b
     focusable: false
 
   VerticalScrollBar
@@ -196,50 +237,123 @@ MainWindow
     anchors.top: categories.top
     anchors.bottom: categories.bottom
     anchors.right: categories.right
-    step: 50
+    step: 28
     pixels-scroll: true
 
-  TextList
-    id: offers
-    vertical-scrollbar: offersScrollBar
-    anchors.top: adPanel.bottom
+  Panel
+    id: filtersPanel
+    anchors.top: topBand.bottom
     anchors.left: adPanel.left
     anchors.right: adPanel.right
-    anchors.bottom: transactionHistory.top
-    margin-top: 10
-    margin-bottom: 10
-    padding: 1
-    focusable: false
+    height: 28
+    margin-top: 8
+    background-color: #11111166
+    border-width: 1
+    border-color: #3b3b3b
+
+    Label
+      !text: tr('Search')
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 8
+      color: #cecece
+      font: verdana-11px-rounded
+
+    TextEdit
+      id: searchEdit
+      anchors.left: prev.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 6
+      width: 180
+      height: 18
+
+    Label
+      !text: tr('Sort')
+      anchors.left: searchEdit.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 10
+      color: #cecece
+      font: verdana-11px-rounded
+
+    ComboBox
+      id: sortCombo
+      anchors.left: prev.right
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      margin-left: 6
+      margin-right: 8
+      height: 18
+
+  Panel
+    id: offersPanel
+    anchors.top: filtersPanel.bottom
+    anchors.left: adPanel.left
+    anchors.right: adPanel.right
+    anchors.bottom: bottomBar.top
+    margin-top: 8
+    margin-bottom: 8
+    background-color: #11111166
+    border-width: 1
+    border-color: #3b3b3b
+
+    UIScrollArea
+      id: offers
+      anchors.fill: parent
+      margin: 4
+      margin-right: 16
+      auto-focus: none
+      vertical-scrollbar: offersScrollBar
+      layout:
+        type: grid
+        cell-size: 118 124
+        cell-spacing: 7
+        num-columns: 4
+        num-lines: 1
+      focusable: false
 
   VerticalScrollBar
     id: offersScrollBar
-    anchors.top: offers.top
-    anchors.bottom: offers.bottom
-    anchors.right: offers.right
-    step: 50
+    anchors.top: offersPanel.top
+    anchors.bottom: offersPanel.bottom
+    anchors.right: offersPanel.right
+    margin-top: 2
+    margin-bottom: 2
+    step: 80
     pixels-scroll: true
+
+  Panel
+    id: bottomBar
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: 28
+    background-color: #11111166
+    border-width: 1
+    border-color: #3b3b3b
 
   Button
     id: transactionHistory
     !text: tr('Transaction history')
     width: 128
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
+    anchors.left: bottomBar.left
+    anchors.verticalCenter: bottomBar.verticalCenter
+    margin-left: 4
     @onClick: modules.game_shop.showHistory()
 
   Button
     id: transferOpen
     !text: tr('Transfer Coins')
-    width: 128
-    anchors.left: prev. right
+    width: 118
+    anchors.left: transactionHistory.right
     margin-left: 10
-    anchors.verticalCenter: prev.verticalCenter
+    anchors.verticalCenter: transactionHistory.verticalCenter
     @onClick: modules.game_shop.showTransfer()
 
   Button
     id: buttonCancel
     !text: tr('Close')
-    width: 64
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
+    width: 76
+    anchors.right: bottomBar.right
+    anchors.verticalCenter: bottomBar.verticalCenter
+    margin-right: 4
     @onClick: modules.game_shop.hide()

@@ -19,6 +19,12 @@ local STATUS = {}
 local AD = {}
 
 local selectedOffer = {}
+local currentCategoryId = nil
+
+local SORT_RECOMMENDED = "Recommended"
+local SORT_PRICE_ASC = "Price: Low to High"
+local SORT_PRICE_DESC = "Price: High to Low"
+local SORT_NAME_ASC = "Name: A-Z"
 
 local function sendAction(action, data)
   if not g_game.getFeature(GameExtendedOpcode) then
@@ -32,6 +38,83 @@ local function sendAction(action, data)
   if protocolGame then
     protocolGame:sendExtendedJSONOpcode(SHOP_EXTENTED_OPCODE, {action = action, data = data})
   end  
+end
+
+local function normalizeText(text)
+  if not text then
+    return ""
+  end
+  return text:lower()
+end
+
+local function getSortMode()
+  if not shop or not shop.sortCombo then
+    return SORT_RECOMMENDED
+  end
+  return shop.sortCombo:getCurrentOption() or SORT_RECOMMENDED
+end
+
+local function compareOffers(a, b, sortMode)
+  local aCost = tonumber(a.offer.cost) or 0
+  local bCost = tonumber(b.offer.cost) or 0
+  if sortMode == SORT_PRICE_ASC then
+    if aCost == bCost then
+      return a.offer.title:lower() < b.offer.title:lower()
+    end
+    return aCost < bCost
+  elseif sortMode == SORT_PRICE_DESC then
+    if aCost == bCost then
+      return a.offer.title:lower() < b.offer.title:lower()
+    end
+    return aCost > bCost
+  elseif sortMode == SORT_NAME_ASC then
+    return a.offer.title:lower() < b.offer.title:lower()
+  end
+
+  return a.index < b.index
+end
+
+local function buildOfferEntries(sourceOffers)
+  local entries = {}
+  local searchText = normalizeText(shop.searchEdit:getText())
+  for index, offer in ipairs(sourceOffers) do
+    local title = normalizeText(offer.title)
+    local desc = normalizeText(offer.description)
+    if searchText == "" or title:find(searchText, 1, true) or desc:find(searchText, 1, true) then
+      table.insert(entries, {index = index, offer = offer})
+    end
+  end
+
+  table.sort(entries, function(a, b)
+    return compareOffers(a, b, getSortMode())
+  end)
+
+  return entries
+end
+
+local function renderOffers(categoryId, sourceOffers)
+  clearOffers()
+  local entries = buildOfferEntries(sourceOffers)
+  for _, entry in ipairs(entries) do
+    addOffer(categoryId, entry.offer, entry.index)
+  end
+end
+
+local function refreshCurrentView()
+  if not shop then
+    return
+  end
+
+  if browsingHistory then
+    renderOffers(0, HISTORY)
+    return
+  end
+
+  if not currentCategoryId or not CATEGORIES[currentCategoryId] then
+    return
+  end
+
+  renderOffers(currentCategoryId, CATEGORIES[currentCategoryId].offers)
 end
 
 -- public functions
@@ -151,6 +234,20 @@ function createShop()
   shop:hide()
   shopButton = modules.client_topmenu.addRightGameToggleButton('shopButton', tr('Shop'), '/images/topbuttons/shop', toggle, false, 8)
   connect(shop.categories, { onChildFocusChange = changeCategory })
+
+  shop.sortCombo:clearOptions()
+  shop.sortCombo:addOption(SORT_RECOMMENDED)
+  shop.sortCombo:addOption(SORT_PRICE_ASC)
+  shop.sortCombo:addOption(SORT_PRICE_DESC)
+  shop.sortCombo:addOption(SORT_NAME_ASC)
+  shop.sortCombo:setCurrentOption(SORT_RECOMMENDED, true)
+
+  shop.searchEdit.onTextChange = function()
+    refreshCurrentView()
+  end
+  shop.sortCombo.onOptionChange = function()
+    refreshCurrentView()
+  end
 end
 
 function createTransferWindow()
@@ -203,7 +300,7 @@ function onStoreOffers(categoryName, offers)
       if #category.offers ~= #offers then
         updated = true
       end
-      for i=1,#category.offers do
+      for i = 1, math.min(#category.offers, #offers) do
         if category.offers[i].title ~= offers[i].name or category.offers[i].id ~= offers[i].id or category.offers[i].cost ~= offers[i].price then
           updated = true
         end
@@ -232,9 +329,8 @@ function onStoreOffers(categoryName, offers)
   if not updated then
     return
   end
-  
-  local activeCategory = shop.categories:getFocusedChild()
-  changeCategory(activeCategory, activeCategory)
+
+  refreshCurrentView()
 end
 
 function onStoreTransactionHistory(currentPage, hasNextPage, offers)
@@ -251,12 +347,9 @@ function onStoreTransactionHistory(currentPage, hasNextPage, offers)
     })
   end
   
-  if not browsingHistory then return end  
-  clearOffers()
+  if not browsingHistory then return end
   shop.categories:focusChild(nil)
-  for i, transaction in ipairs(HISTORY) do
-    addOffer(0, transaction)
-  end
+  renderOffers(0, HISTORY)
 end
 
 function onStorePurchase(message)
@@ -284,7 +377,6 @@ function onCoinBalance(coins, transferableCoins)
   transferWindow.coinsBalance:setText(tr('Transferable Tibia Coins: ') .. coins)
   transferWindow.coinsAmount:setMaximum(coins)
   shop.infoPanel.buy:hide()
-  shop.infoPanel:setHeight(20)
 end
 
 function transferCoins()
@@ -324,19 +416,17 @@ function onExtendedJSONOpcode(protocol, code, json_data)
 end
 
 function clearOffers()
-  while shop.offers:getChildCount() > 0 do
-    local child = shop.offers:getLastChild()
-    shop.offers:destroyChildren(child)
+  if not shop or not shop.offers then
+    return
   end
+  shop.offers:destroyChildren()
 end
 
 function clearCategories()
   CATEGORIES = {}
+  currentCategoryId = nil
   clearOffers()
-  while shop.categories:getChildCount() > 0 do
-    local child = shop.categories:getLastChild()
-    shop.categories:destroyChildren(child)
-  end
+  shop.categories:destroyChildren()
 end
 
 function clearHistory()
@@ -352,6 +442,7 @@ function processCategories(data)
   end
   clearCategories()
   CATEGORIES = data
+  browsingHistory = false
   for i, category in ipairs(data) do
     addCategory(category)
   end
@@ -410,7 +501,6 @@ function processStatus(data)
     end
   else
     shop.infoPanel.buy:hide()
-    shop.infoPanel:setHeight(20)
   end
 end
 
@@ -423,19 +513,16 @@ function processAd(data)
   if data['image'] and data['image']:sub(1, 4):lower() == "http" then
     HTTP.downloadImage(data['image'], function(path, err) 
       if err then g_logger.warning("HTTP error: " .. err .. " - " .. data['image']) return end
-      shop.adPanel:setHeight(shop.infoPanel:getHeight())
       shop.adPanel.ad:setText("")
       shop.adPanel.ad:setImageSource(path)
       shop.adPanel.ad:setImageFixedRatio(true)
       shop.adPanel.ad:setImageAutoResize(true)
-      shop.adPanel.ad:setHeight(shop.infoPanel:getHeight())
     end)
   elseif data['text'] and data['text']:len() > 0 then
-      shop.adPanel:setHeight(shop.infoPanel:getHeight())
       shop.adPanel.ad:setText(data['text'])
-      shop.adPanel.ad:setHeight(shop.infoPanel:getHeight())
   else
-      shop.adPanel:setHeight(0)
+      shop.adPanel.ad:setText("")
+      shop.adPanel.ad:setImageSource("")
   end
   if data['url'] and data['url']:sub(1, 4):lower() == "http" then
     shop.adPanel.ad.onMouseRelease = function() 
@@ -488,14 +575,13 @@ function showHistory(force)
   sendAction("history")
 
   browsingHistory = true
+  currentCategoryId = nil
   clearOffers()
   shop.categories:focusChild(nil)
-  for i, transaction in ipairs(HISTORY) do
-    addOffer(0, transaction)
-  end
+  renderOffers(0, HISTORY)
 end
 
-function addOffer(category, data)
+function addOffer(category, data, sourceIndex)
   local offer
   if data["type"] == "item" then
     offer = g_ui.createWidget('ShopOfferItem', shop.offers)  
@@ -524,8 +610,13 @@ function addOffer(category, data)
     return
   end
   offer:setId("offer_" .. category .. "_" .. shop.offers:getChildCount())
-  offer.title:setText(data["title"] .. " (" .. data["cost"] .. " points)")
-  offer.description:setText(data["description"])  
+  offer.title:setText(data["title"])
+  offer.description:setText(data["description"] or "")
+  offer.price:setText(data["cost"] .. " points")
+  offer:setTooltip(data["description"] or "")
+  offer.categoryId = category
+  offer.offerIndex = sourceIndex
+  offer.offerData = data
   offer.offerId = data["id"]
   if category ~= 0 then
     offer.onDoubleClick = buyOffer
@@ -551,23 +642,23 @@ function changeCategory(widget, newCategory)
   
   browsingHistory = false
   local id = tonumber(newCategory:getId():split("_")[2])
-  clearOffers()
-  for i, offer in ipairs(CATEGORIES[id]["offers"]) do
-    addOffer(id, offer)
+  if not id or not CATEGORIES[id] then
+    return
   end
+  currentCategoryId = id
+  renderOffers(id, CATEGORIES[id]["offers"])
 end
 
 function buyOffer(widget)
   if not widget then
     return
   end
-  local split = widget:getId():split("_")
-  if #split ~= 3 then
-    return
+  local category = widget.categoryId
+  local offer = widget.offerIndex
+  local item = widget.offerData
+  if not item and category and category ~= 0 and CATEGORIES[category] then
+    item = CATEGORIES[category]["offers"][offer]
   end
-  local category = tonumber(split[2])  
-  local offer = tonumber(split[3])  
-  local item = CATEGORIES[category]["offers"][offer]
   if not item then
     return
   end
