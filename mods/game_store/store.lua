@@ -502,9 +502,9 @@ function changeCategory(widget, newCategory)
       local nameLabel = child:getChildById("name")
       if nameLabel then
         if child == newCategory then
-          nameLabel:setColor("#d9eef9")
+          nameLabel:setColor("#e7dbc6")
         else
-          nameLabel:setColor("#90a8b4")
+          nameLabel:setColor("#a8a8a8")
         end
       end
     end

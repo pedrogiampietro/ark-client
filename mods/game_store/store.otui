@@ -1,4 +1,523 @@
 ShopCategory < Panel
+  height: 30
+  focusable: true
+  background-color: #1a1a1a88
+  border-width: 0 0 1 0
+  border-color: #3f3f3f
+
+  $focus:
+    background-color: #2b2b2bcc
+    border-color: #8f7645
+
+  $hover !focus:
+    background-color: #242424aa
+
+  Label
+    id: name
+    anchors.fill: parent
+    margin-left: 12
+    margin-top: 8
+    color: #b4b4b4
+    text-align: left
+
+CategoryIconSprite < UISprite
+  id: categoryItem
+  anchors.fill: parent
+
+CategoryIconItem < UIItem
+  id: categoryItem
+  anchors.fill: parent
+  virtual: true
+
+CategoryIconCreature < UICreature
+  id: categoryItem
+  anchors.fill: parent
+
+OfferWidget < Panel
+  focusable: true
+  size: 128 140
+  background-color: #1d1d1d
+  border-width: 1
+  border-color: #474747
+  margin-left: 5
+  margin-top: 5
+  phantom: false
+  @onDoubleClick: modules.game_store.purchaseDouble(self)
+
+  $focus:
+    background-color: #282828
+    border-color: #9b7a44
+
+  $hover !focus:
+    background-color: #242424
+    border-color: #696969
+
+  Label
+    id: offerNameHidden
+    visible: false
+
+  Label
+    id: offerSale
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: 4
+    margin-right: 4
+    width: 38
+    height: 13
+    background-color: #3a2222
+    border-width: 1
+    border-color: #9f4f4f
+    color: #f2d3d3
+    text-align: center
+    text: SALE
+    visible: false
+
+  Panel
+    id: offerTypePanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 78
+    background-color: #171717
+    border-width: 0 0 1 0
+    border-color: #3d3d3d
+    margin-top: 2
+    margin-left: 2
+    margin-right: 2
+
+  Label
+    id: offerName
+    anchors.top: offerTypePanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 16
+    text-align: center
+    color: #ddd7ca
+    margin-top: 4
+    margin-left: 3
+    margin-right: 3
+
+  Label
+    id: offerMeta
+    anchors.top: offerName.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 13
+    text-align: center
+    color: #9d9d9d
+    margin-top: 0
+
+  Label
+    id: offerPrice
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 17
+    &baseText: '%s points'
+    color: #8fd37a
+    text-align: center
+    font: terminus-14px-bold
+    margin-bottom: 4
+
+OfferIconItem < UIItem
+  id: offerIcon
+  size: 34 34
+  padding: 1
+  anchors.centerIn: parent
+  virtual: true
+  phantom: true
+
+OfferIconCreature < UICreature
+  id: offerIcon
+  size: 62 62
+  anchors.centerIn: parent
+  phantom: true
+
+HistoryLabel < Label
+  height: 22
+  focusable: true
+  background: alpha
+  color: #b0b0b0
+  margin-left: 8
+
+  $focus:
+    background: #303030
+    color: #efdfc2
+
+MainWindow
+  id: storeWindow
+  !text: 'Game Store'
+  size: 900 550
+  @onEscape: modules.game_store.hide()
+
+  Panel
+    id: backdrop
+    anchors.fill: parent
+    background-color: #1b1b1b
+
+  Panel
+    id: headerBar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 54
+    background-color: #232323
+    border-width: 0 0 1 0
+    border-color: #494949
+
+    Label
+      text: GAME STORE
+      anchors.left: parent.left
+      anchors.top: parent.top
+      height: 18
+      margin-left: 12
+      margin-top: 8
+      color: #d3a55a
+      font: terminus-14px-bold
+
+    Label
+      text: Exclusive offers for your account
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      height: 13
+      margin-left: 12
+      margin-top: 2
+      color: #9e9e9e
+
+    Panel
+      id: infoPanel
+      anchors.top: parent.top
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      width: 214
+      background-color: #1f1f1f
+      border-width: 0 0 0 1
+      border-color: #494949
+
+      Label
+        text: WALLET
+        anchors.top: parent.top
+        anchors.right: parent.right
+        height: 13
+        margin-top: 7
+        margin-right: 10
+        color: #9f9f9f
+
+      Label
+        id: points
+        anchors.top: prev.bottom
+        anchors.right: parent.right
+        &baseText: 'Balance: %s'
+        text-auto-resize: false
+        text-align: right
+        font: terminus-14px-bold
+        color: #e6e2d8
+        width: 170
+        height: 16
+        margin-top: 1
+        margin-right: 10
+
+      Button
+        id: buyPoints
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        width: 106
+        height: 20
+        margin-right: 10
+        margin-bottom: 6
+        !text: '+ Buy Coins'
+        color: #8fd37a
+        @onClick: modules.game_store.buyPoints()
+
+  Panel
+    id: filtersPanel
+    anchors.top: headerBar.bottom
+    anchors.left: parent.left
+    anchors.bottom: actionBar.top
+    width: 172
+    background-color: #212121
+    border-width: 0 1 0 0
+    border-color: #444444
+
+  Label
+    id: categoriesLabel
+    text: CATEGORIES
+    anchors.top: filtersPanel.top
+    anchors.left: filtersPanel.left
+    width: 156
+    height: 16
+    margin-top: 10
+    margin-left: 8
+    color: #c9a06b
+    font: terminus-14px-bold
+
+  TextList
+    id: categories
+    anchors.top: categoriesLabel.bottom
+    anchors.left: filtersPanel.left
+    anchors.right: filtersPanel.right
+    anchors.bottom: historyButton.top
+    margin-top: 6
+    margin-left: 6
+    margin-right: 6
+    margin-bottom: 8
+    padding: 1
+    focusable: false
+    background-color: #1b1b1b
+    border-width: 1
+    border-color: #4a4a4a
+
+  Panel
+    id: topPanel
+    anchors.top: headerBar.bottom
+    anchors.left: filtersPanel.right
+    anchors.right: parent.right
+    height: 66
+    background-color: #252525
+    border-width: 0 0 1 0
+    border-color: #4a4a4a
+
+    Panel
+      id: categoryItemBg
+      anchors.left: parent.left
+      anchors.top: parent.top
+      width: 52
+      height: 52
+      margin-left: 10
+      margin-top: 7
+      background-color: #171717
+      border-width: 1
+      border-color: #585858
+
+    Label
+      id: selectedCategory
+      anchors.left: categoryItemBg.right
+      anchors.top: parent.top
+      margin-left: 10
+      margin-top: 11
+      width: 290
+      height: 16
+      color: #e4ded2
+      font: terminus-14px-bold
+
+    Label
+      id: categoryDescription
+      anchors.top: selectedCategory.bottom
+      anchors.left: selectedCategory.left
+      anchors.right: parent.right
+      margin-top: 2
+      margin-right: 12
+      height: 13
+      color: #a4a4a4
+
+    Label
+      id: resultsInfo
+      anchors.right: parent.right
+      anchors.top: parent.top
+      width: 160
+      height: 16
+      margin-top: 11
+      margin-right: 12
+      text-align: right
+      color: #8fd37a
+      font: terminus-14px-bold
+
+  Panel
+    id: filterBar
+    anchors.top: topPanel.bottom
+    anchors.left: filtersPanel.right
+    anchors.right: parent.right
+    height: 33
+    background-color: #222222
+    border-width: 0 0 1 0
+    border-color: #474747
+
+  Label
+    id: searchLabel
+    text: Search
+    anchors.verticalCenter: filterBar.verticalCenter
+    anchors.left: filterBar.left
+    width: 45
+    height: 14
+    margin-left: 10
+    color: #b2b2b2
+    font: terminus-14px-bold
+    text-auto-resize: false
+
+  TextEdit
+    id: search
+    anchors.verticalCenter: filterBar.verticalCenter
+    anchors.left: searchLabel.right
+    width: 190
+    height: 20
+    margin-left: 6
+    background-color: #1a1a1a
+    border-width: 1
+    border-color: #5a5a5a
+    color: #e2e2e2
+    @onKeyPress: modules.game_store.onSearch()
+
+  Label
+    id: sortLabel
+    text: Sort
+    anchors.verticalCenter: filterBar.verticalCenter
+    anchors.left: search.right
+    width: 30
+    height: 14
+    margin-left: 10
+    color: #b2b2b2
+    font: terminus-14px-bold
+    text-auto-resize: false
+
+  ComboBox
+    id: sortCombo
+    anchors.verticalCenter: filterBar.verticalCenter
+    anchors.left: sortLabel.right
+    width: 162
+    height: 20
+    margin-left: 6
+
+  CheckBox
+    id: onSaleCheck
+    !text: 'On Sale'
+    anchors.verticalCenter: filterBar.verticalCenter
+    anchors.left: sortCombo.right
+    margin-left: 12
+    color: #b2b2b2
+
+  ScrollablePanel
+    id: offers
+    layout:
+      type: grid
+      cell-size: 128 140
+      flow: true
+      cell-spacing: 6
+    vertical-scrollbar: offersScrollBar
+    anchors.top: filterBar.bottom
+    anchors.left: filtersPanel.right
+    anchors.right: parent.right
+    anchors.bottom: actionBar.top
+    background-color: #1a1a1a
+    border-width: 0
+    padding: 8
+    focusable: false
+
+  VerticalScrollBar
+    id: offersScrollBar
+    anchors.top: offers.top
+    anchors.bottom: offers.bottom
+    anchors.right: offers.right
+    step: 70
+    pixels-scroll: true
+
+  Panel
+    id: emptyState
+    anchors.top: offers.top
+    anchors.left: offers.left
+    anchors.right: offers.right
+    anchors.bottom: offers.bottom
+    visible: false
+    background-color: #1a1a1acc
+
+    Label
+      text: 'No offers match your filters'
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 260
+      height: 16
+      text-align: center
+      color: #b6b6b6
+
+  TextList
+    id: history
+    vertical-scrollbar: historyScrollBar
+    anchors.top: headerBar.bottom
+    anchors.bottom: actionBar.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-bottom: 2
+    padding: 6
+    focusable: false
+    visible: false
+    background-color: #1a1a1a
+
+  VerticalScrollBar
+    id: historyScrollBar
+    anchors.top: history.top
+    anchors.bottom: history.bottom
+    anchors.right: history.right
+    step: 50
+    pixels-scroll: true
+    visible: false
+
+  Panel
+    id: actionBar
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: 34
+    background-color: #222222
+    border-width: 1 0 0 0
+    border-color: #474747
+
+  Button
+    id: backButton
+    !text: 'Back'
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    width: 88
+    height: 26
+    margin-left: 2
+    margin-bottom: 2
+    @onClick: modules.game_store.hideHistory()
+    visible: false
+
+  Button
+    id: historyButton
+    !text: 'History'
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    width: 88
+    height: 26
+    margin-left: 2
+    margin-bottom: 2
+    @onClick: modules.game_store.showHistory()
+
+  Button
+    id: buttonCancel
+    !text: 'Close'
+    width: 76
+    height: 26
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-right: 2
+    margin-bottom: 2
+    @onClick: modules.game_store.hide()
+
+  Button
+    id: purchaseButton
+    !text: 'Purchase'
+    width: 92
+    height: 26
+    margin-right: 6
+    margin-bottom: 2
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    enabled: false
+    @onClick: modules.game_store.purchase()
+
+  Button
+    id: giftButton
+    !text: 'Gift'
+    width: 64
+    height: 26
+    margin-right: 6
+    margin-bottom: 2
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    enabled: false
+    @onClick: modules.game_store.gift()
+ShopCategory < Panel
   height: 38
   focusable: true
   background-color: #0e171b00
