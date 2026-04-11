@@ -15,6 +15,7 @@ local giftWindow = nil
 
 local categories = nil
 local offers = {}
+local categoryTabsById = {}
 
 local selectedOffer = nil
 
@@ -22,6 +23,43 @@ local SORT_RECOMMENDED = "Recommended"
 local SORT_PRICE_ASC = "Price: Low to High"
 local SORT_PRICE_DESC = "Price: High to Low"
 local SORT_NAME_ASC = "Name: A-Z"
+
+local STORE_TAB_ORDER = {
+  "Featured",
+  "Utility",
+  "Items",
+  "Outfits",
+  "House Decoration",
+  "Premium & Points"
+}
+
+local categoryTabsByNormalized = {}
+
+local function normalizeCategoryName(name)
+  local text = (name or ""):lower()
+  text = text:gsub("&", "and")
+  text = text:gsub("[^%w]", "")
+  return text
+end
+
+local function isOfferOnSale(offer)
+  if not offer then
+    return false
+  end
+
+  if offer.sale == true then
+    return true
+  end
+
+  local oldPrice = tonumber(offer.oldPrice) or tonumber(offer.old_price) or 0
+  local price = tonumber(offer.price) or 0
+  if oldPrice > 0 and price > 0 and oldPrice > price then
+    return true
+  end
+
+  local discount = tonumber(offer.discount) or 0
+  return discount > 0
+end
 
 local function getFocusedCategoryId()
   if not gameStoreWindow then
@@ -60,9 +98,12 @@ local function filterAndSortOffers(categoryId)
   local source = offers[categoryId] or {}
   local result = {}
   local searchText = getSearchText()
+  local onSaleCheck = gameStoreWindow and gameStoreWindow:getChildById("onSaleCheck")
+  local onSaleOnly = onSaleCheck and onSaleCheck:isChecked() or false
   for _, offer in ipairs(source) do
     local title = (offer.title or ""):lower()
-    if searchText == "" or title:find(searchText, 1, true) then
+    local salePass = (not onSaleOnly) or isOfferOnSale(offer)
+    if salePass and (searchText == "" or title:find(searchText, 1, true)) then
       table.insert(result, offer)
     end
   end
@@ -91,6 +132,31 @@ local function filterAndSortOffers(categoryId)
   end
 
   return result
+end
+
+local function setActiveCategoryTab(categoryId)
+  for id, tab in pairs(categoryTabsById) do
+    tab:setChecked(id == categoryId)
+  end
+end
+
+local function createTabsSkeleton()
+  if not gameStoreWindow then
+    return
+  end
+
+  local tabsPanel = gameStoreWindow:getChildById("categoryTabs")
+  tabsPanel:destroyChildren()
+
+  categoryTabsById = {}
+  categoryTabsByNormalized = {}
+
+  for _, tabName in ipairs(STORE_TAB_ORDER) do
+    local tab = g_ui.createWidget("StoreTopTab", tabsPanel)
+    tab:setText(tabName)
+    tab:setEnabled(false)
+    categoryTabsByNormalized[normalizeCategoryName(tabName)] = tab
+  end
 end
 
 local function refreshCurrentCategoryOffers()
@@ -202,6 +268,14 @@ function create()
 
   connect(gameStoreWindow:getChildById("categories"), {onChildFocusChange = changeCategory})
   connect(gameStoreWindow:getChildById("offers"), {onChildFocusChange = offerFocus})
+  createTabsSkeleton()
+
+  local search = gameStoreWindow:getChildById("search")
+  if search then
+    search.onTextChange = function()
+      onSearch()
+    end
+  end
 
   local sortCombo = gameStoreWindow:getChildById("sortCombo")
   if sortCombo then
@@ -212,6 +286,13 @@ function create()
     sortCombo:addOption(SORT_NAME_ASC)
     sortCombo:setCurrentOption(SORT_RECOMMENDED, true)
     sortCombo.onOptionChange = function()
+      refreshCurrentCategoryOffers()
+    end
+  end
+
+  local onSaleCheck = gameStoreWindow:getChildById("onSaleCheck")
+  if onSaleCheck then
+    onSaleCheck.onCheckChange = function()
       refreshCurrentCategoryOffers()
     end
   end
@@ -232,6 +313,7 @@ function destroy()
     disconnect(gameStoreWindow:getChildById("categories"), {onChildFocusChange = changeCategory})
     disconnect(gameStoreWindow:getChildById("offers"), {onChildFocusChange = offerFocus})
     offersGrid = nil
+    categoryTabsById = {}
     gameStoreWindow:destroy()
     gameStoreWindow = nil
   end
@@ -249,6 +331,12 @@ end
 
 function onGameStoreFetchBase(data)
   categories = data.categories
+  offers = {}
+
+  local categoriesList = gameStoreWindow:getChildById("categories")
+  categoriesList:destroyChildren()
+  createTabsSkeleton()
+
   for i = 1, #categories do
     addCategory(categories[i], i == 1)
   end
@@ -257,14 +345,18 @@ end
 
 function onGameStoreFetchOffers(data)
   offers[data.category] = data.offers
-  if data.category == "Items" then
+  if not offersGrid then
     offersGrid = gameStoreWindow:recursiveGetChildById("offers")
-    gameStoreWindow:getChildById("categories"):getChildByIndex(1):focus()
-    refreshCurrentCategoryOffers()
-    return
   end
 
-  if offersGrid and getFocusedCategoryId() == data.category then
+  if not getFocusedCategoryId() then
+    local first = gameStoreWindow:getChildById("categories"):getChildByIndex(1)
+    if first then
+      first:focus()
+    end
+  end
+
+  if getFocusedCategoryId() == data.category then
     refreshCurrentCategoryOffers()
   end
 end
@@ -387,6 +479,7 @@ function changeCategory(widget, newCategory)
   end
 
   local id = newCategory:getId()
+  setActiveCategoryTab(id)
   offersGrid:destroyChildren()
   addOffers(filterAndSortOffers(id))
 
@@ -435,8 +528,23 @@ function addCategory(data, first)
   category:setId(data.title)
   category:getChildById("name"):setText(data.title)
 
+  local normalized = normalizeCategoryName(data.title)
+  local tab = categoryTabsByNormalized[normalized]
+  if not tab then
+    tab = g_ui.createWidget("StoreTopTab", gameStoreWindow:getChildById("categoryTabs"))
+    tab:setText(data.title)
+  end
+
+  tab:setEnabled(true)
+  tab.categoryId = data.title
+  tab.onClick = function()
+    category:focus()
+  end
+  categoryTabsById[data.title] = tab
+
   if first then
     updateTopPanel(data)
+    tab:setChecked(true)
   end
 end
 
@@ -447,10 +555,16 @@ function showHistory()
   gameStoreWindow:getChildById("offers"):hide()
   gameStoreWindow:getChildById("offersScrollBar"):hide()
   gameStoreWindow:getChildById("topPanel"):hide()
+  gameStoreWindow:getChildById("categoryTabs"):hide()
   gameStoreWindow:getChildById("categories"):hide()
+  gameStoreWindow:getChildById("categoriesLabel"):hide()
+  gameStoreWindow:getChildById("filtersPanel"):hide()
   gameStoreWindow:getChildById("infoPanel"):hide()
   gameStoreWindow:getChildById("search"):hide()
   gameStoreWindow:getChildById("searchLabel"):hide()
+  gameStoreWindow:getChildById("sortLabel"):hide()
+  gameStoreWindow:getChildById("sortCombo"):hide()
+  gameStoreWindow:getChildById("onSaleCheck"):hide()
 
   gameStoreWindow:getChildById("historyScrollBar"):show()
   gameStoreWindow:getChildById("history"):show()
@@ -468,10 +582,16 @@ function hideHistory()
   gameStoreWindow:getChildById("offers"):show()
   gameStoreWindow:getChildById("offersScrollBar"):show()
   gameStoreWindow:getChildById("topPanel"):show()
+  gameStoreWindow:getChildById("categoryTabs"):show()
   gameStoreWindow:getChildById("categories"):show()
+  gameStoreWindow:getChildById("categoriesLabel"):show()
+  gameStoreWindow:getChildById("filtersPanel"):show()
   gameStoreWindow:getChildById("infoPanel"):show()
   gameStoreWindow:getChildById("search"):show()
   gameStoreWindow:getChildById("searchLabel"):show()
+  gameStoreWindow:getChildById("sortLabel"):show()
+  gameStoreWindow:getChildById("sortCombo"):show()
+  gameStoreWindow:getChildById("onSaleCheck"):show()
 
   gameStoreWindow:getChildById("historyScrollBar"):hide()
   gameStoreWindow:getChildById("history"):hide()
@@ -497,6 +617,11 @@ function addOffers(offerData)
     local priceLabel = panel:recursiveGetChildById("offerPrice")
     local price = comma_value(offer.price)
     priceLabel:setText(string.format(priceLabel.baseText, price))
+
+    local saleLabel = panel:getChildById("offerSale")
+    if saleLabel then
+      saleLabel:setVisible(isOfferOnSale(offer))
+    end
 
     local offerTypePanel = panel:getChildById("offerTypePanel")
     if offer.type == "item" then

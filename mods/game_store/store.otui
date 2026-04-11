@@ -1,19 +1,31 @@
 ShopCategory < Panel
-  height: 18
+  height: 20
   focusable: true
-  background: alpha
+  background-color: #1b1b1bcc
+  border-width: 1
+  border-color: #353535
 
   $focus:
-    background: #99999999
-  
+    background-color: #2b2b2bcc
+    border-color: #8a8a8a
+
   Label
     id: name
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    margin-left: 3
-    margin-top: 2 
+    margin-left: 8
+    margin-top: 2
+
+StoreTopTab < Button
+  height: 22
+  width: 90
+  checkable: true
+  text-align: center
+
+  $checked:
+    color: #f1f1f1
 
 CategoryIconSprite < UISprite
   id: categoryItem
@@ -58,6 +70,22 @@ OfferWidget < MiniPanel
 
   Label
     id: offerNameHidden
+    visible: false
+
+  Label
+    id: offerSale
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 1
+    margin-left: 1
+    width: 40
+    height: 14
+    background-color: #6f1d1d
+    border-width: 1
+    border-color: #b73c3c
+    color: #ffdf72
+    text-align: center
+    text: SALE
     visible: false
 
   Panel
@@ -115,7 +143,7 @@ MainWindow
     id: infoPanel
     anchors.top: parent.top
     anchors.left: parent.left
-    width: 170
+    width: 172
     height: 54
     margin-top: 4
     padding: 5
@@ -127,7 +155,7 @@ MainWindow
       text-auto-resize: true
       font: terminus-14px-bold
       anchors.horizontalCenter: parent.horizontalCenter
-    
+
     Button
       id: buyPoints
       anchors.left: parent.left
@@ -138,26 +166,105 @@ MainWindow
       color: #28db00
       @onClick: modules.game_store.buyPoints()
 
-  TextList    
-    id: categories
+  FlatPanel
+    id: filtersPanel
     anchors.top: infoPanel.bottom
     anchors.left: infoPanel.left
-    anchors.right: infoPanel.right
     anchors.bottom: historyButton.top
+    width: 172
     margin-top: 8
     margin-bottom: 8
+    padding: 4
+
+  Label
+    id: categoriesLabel
+    text: Categories
+    anchors.top: filtersPanel.top
+    anchors.left: filtersPanel.left
+    margin-top: 4
+    margin-left: 4
+
+  TextList
+    id: categories
+    anchors.top: categoriesLabel.bottom
+    anchors.left: filtersPanel.left
+    anchors.right: filtersPanel.right
+    height: 178
+    margin-top: 4
     padding: 1
     focusable: false
 
+  Label
+    id: searchLabel
+    text: Search
+    anchors.top: categories.bottom
+    anchors.left: filtersPanel.left
+    margin-top: 8
+    margin-left: 4
+    text-align: left
+    text-auto-resize: true
+
+  TextEdit
+    id: search
+    anchors.top: searchLabel.bottom
+    anchors.left: filtersPanel.left
+    anchors.right: filtersPanel.right
+    height: 18
+    margin-top: 4
+    margin-left: 4
+    margin-right: 4
+    @onKeyPress: modules.game_store.onSearch()
+
+  Label
+    id: sortLabel
+    text: Sort
+    anchors.top: search.bottom
+    anchors.left: filtersPanel.left
+    margin-top: 8
+    margin-left: 4
+    text-align: left
+    text-auto-resize: true
+
+  ComboBox
+    id: sortCombo
+    anchors.top: sortLabel.bottom
+    anchors.left: filtersPanel.left
+    anchors.right: filtersPanel.right
+    height: 18
+    margin-top: 4
+    margin-left: 4
+    margin-right: 4
+
+  CheckBox
+    id: onSaleCheck
+    !text: 'On Sale'
+    anchors.top: sortCombo.bottom
+    anchors.left: filtersPanel.left
+    margin-top: 8
+    margin-left: 4
+
   FlatPanel
-    id: topPanel
+    id: categoryTabs
     anchors.left: infoPanel.right
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.bottom: infoPanel.bottom
-    margin-top: 4
+    height: 26
     margin-left: 8
+    margin-top: 4
+    layout:
+      type: horizontalBox
+      spacing: 4
+
+  FlatPanel
+    id: topPanel
+    anchors.left: categoryTabs.left
+    anchors.right: categoryTabs.right
+    anchors.top: categoryTabs.bottom
+    height: 58
+    margin-top: 6
     padding: 5
+    image-source: /images/ui/store_large
+    image-border: 1
 
     Panel
       id: categoryItemBg
@@ -187,7 +294,7 @@ MainWindow
       text-auto-resize: true
       text-wrap: true
       color: #ffffff
-  
+
   ScrollablePanel
     id: offers
     layout:
@@ -214,7 +321,7 @@ MainWindow
     step: 64
     pixels-scroll: true
 
-  TextList    
+  TextList
     id: history
     vertical-scrollbar: historyScrollBar
     anchors.top: parent.top
@@ -253,38 +360,6 @@ MainWindow
     anchors.bottom: parent.bottom
     height: 20
     @onClick: modules.game_store.showHistory()
-
-  Label
-    id: searchLabel
-    text: Search
-    anchors.left: offers.left
-    anchors.verticalCenter: historyButton.verticalCenter
-    text-align: left
-    text-auto-resize: true
-
-  TextEdit
-    id: search
-    anchors.left: searchLabel.right
-    anchors.verticalCenter: searchLabel.verticalCenter
-    width: 160
-    margin-left: 6
-    @onKeyPress: modules.game_store.onSearch()
-
-  Label
-    id: sortLabel
-    text: Sort
-    anchors.left: search.right
-    anchors.verticalCenter: search.verticalCenter
-    margin-left: 8
-    text-align: left
-    text-auto-resize: true
-
-  ComboBox
-    id: sortCombo
-    anchors.left: sortLabel.right
-    anchors.verticalCenter: sortLabel.verticalCenter
-    width: 135
-    margin-left: 6
 
   Button
     id: buttonCancel
