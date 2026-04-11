@@ -23,6 +23,48 @@ local SORT_PRICE_ASC = "Price: Low to High"
 local SORT_PRICE_DESC = "Price: High to Low"
 local SORT_NAME_ASC = "Name: A-Z"
 
+local function trimText(text)
+  if not text then
+    return ""
+  end
+  return text:match("^%s*(.-)%s*$")
+end
+
+local function getOfferTypeLabel(offer)
+  local offerType = (offer and offer.type) or ""
+  if offerType == "item" then
+    local count = tonumber(offer.count) or 1
+    if count > 1 then
+      return string.format("Item x%d", count)
+    end
+    return "Item"
+  elseif offerType == "outfit" then
+    return "Outfit"
+  elseif offerType == "mount" then
+    return "Mount"
+  end
+  return "Offer"
+end
+
+local function getOfferSalePercent(offer)
+  if not offer then
+    return nil
+  end
+
+  local discount = tonumber(offer.discount)
+  if discount and discount > 0 then
+    return math.floor(discount)
+  end
+
+  local oldPrice = tonumber(offer.oldPrice) or tonumber(offer.old_price) or 0
+  local price = tonumber(offer.price) or 0
+  if oldPrice > 0 and price > 0 and oldPrice > price then
+    return math.floor(((oldPrice - price) / oldPrice) * 100)
+  end
+
+  return nil
+end
+
 local function isOfferOnSale(offer)
   if not offer then
     return false
@@ -124,8 +166,20 @@ local function refreshCurrentCategoryOffers()
     return
   end
 
+  local filtered = filterAndSortOffers(categoryId)
   offersGrid:destroyChildren()
-  addOffers(filterAndSortOffers(categoryId))
+  addOffers(filtered)
+
+  local infoLabel = gameStoreWindow and gameStoreWindow:getChildById("resultsInfo")
+  if infoLabel then
+    local offerWord = #filtered == 1 and "offer" or "offers"
+    infoLabel:setText(string.format("%d %s", #filtered, offerWord))
+  end
+
+  local emptyState = gameStoreWindow and gameStoreWindow:getChildById("emptyState")
+  if emptyState then
+    emptyState:setVisible(#filtered == 0)
+  end
 end
 
 function init()
@@ -382,13 +436,23 @@ function gift()
   end
 
   giftWindow = g_ui.displayUI("gift")
+  local targetName = giftWindow and giftWindow:getChildById("targetName")
+  if targetName then
+    targetName:focus()
+  end
 end
 
 function confirmGift()
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     local targetName = giftWindow:getChildById("targetName")
-    selectedOffer.target = targetName:getText()
+    local cleanedName = trimText(targetName:getText())
+    if cleanedName == "" then
+      displayInfoBox("Gift", "Please enter a valid player name.")
+      return
+    end
+
+    selectedOffer.target = cleanedName
     protocolGame:sendExtendedOpcode(GAME_STORE_CODE, json.encode({action = "gift", data = selectedOffer}))
     targetName = nil
     giftWindow:destroy()
@@ -447,8 +511,7 @@ function changeCategory(widget, newCategory)
   end
 
   local id = newCategory:getId()
-  offersGrid:destroyChildren()
-  addOffers(filterAndSortOffers(id))
+  refreshCurrentCategoryOffers()
 
   local category = nil
   for i = 1, #categories do
@@ -520,6 +583,8 @@ function showHistory()
   sw("sortLabel",       false)
   sw("sortCombo",       false)
   sw("onSaleCheck",     false)
+  sw("topPanel",        false)
+  sw("emptyState",      false)
   sw("categories",      false)
   sw("categoriesLabel", false)
   sw("filtersPanel",    false)
@@ -550,6 +615,7 @@ function hideHistory()
   sw("sortLabel",       true)
   sw("sortCombo",       true)
   sw("onSaleCheck",     true)
+  sw("topPanel",        true)
   sw("categories",      true)
   sw("categoriesLabel", true)
   sw("filtersPanel",    true)
@@ -579,7 +645,7 @@ function addOffers(offerData)
     if nameLabel then
       local displayTitle = offer.title
       if displayTitle:len() > 18 then
-        displayTitle = displayTitle:sub(1, 17) .. "…"
+        displayTitle = displayTitle:sub(1, 17) .. "..."
       end
       nameLabel:setText(displayTitle)
     end
@@ -590,7 +656,18 @@ function addOffers(offerData)
 
     local saleLabel = panel:getChildById("offerSale")
     if saleLabel then
-      saleLabel:setVisible(isOfferOnSale(offer))
+      local salePercent = getOfferSalePercent(offer)
+      if salePercent and salePercent > 0 then
+        saleLabel:setText(string.format("-%d%%", salePercent))
+        saleLabel:setVisible(true)
+      else
+        saleLabel:setVisible(isOfferOnSale(offer))
+      end
+    end
+
+    local metaLabel = panel:getChildById("offerMeta")
+    if metaLabel then
+      metaLabel:setText(getOfferTypeLabel(offer))
     end
 
     local offerTypePanel = panel:getChildById("offerTypePanel")
@@ -943,7 +1020,13 @@ function show()
   if not gameStoreWindow or not gameStoreButton then
     return
   end
-  gameStoreWindow:getChildById("categories"):getChildByIndex(1):focus()
+  local cats = gameStoreWindow:getChildById("categories")
+  if cats then
+    local first = cats:getChildByIndex(1)
+    if first then
+      first:focus()
+    end
+  end
   hideHistory()
   gameStoreWindow:show()
   gameStoreWindow:raise()

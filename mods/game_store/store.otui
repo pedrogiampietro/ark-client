@@ -1,44 +1,25 @@
-// ══════════════════════════════════════════════════════════════
-//  Game Store — Redesign (Mehah-pattern compliant)
-//
-//  Rules followed from source research:
-//  - Filter widgets are DIRECT children of MainWindow (no nesting)
-//    so getChildById() works without recursive lookup
-//  - No anchors on children inside layout-managed containers
-//  - Vertical category nav (reliable focus/event system)
-//  - Horizontal filter bar above grid via sibling-anchor chaining
-//
-//  Palette:
-//    deep    #080814    surface  #0d0d1e    raised   #131326
-//    bdr     #1c1c3a    focus    #7755cc    gold     #d4a843
-//    green   #4dff8c    muted    #50507a    dim      #303060
-//    salebg  #2e0d36    salebdr  #8822aa    saletxt  #e880ff
-// ══════════════════════════════════════════════════════════════
-
-// ── Category nav row (vertical sidebar) ───────────────────────
 ShopCategory < Panel
-  height: 32
+  height: 34
   focusable: true
-  background-color: #09091a00
+  background-color: #0a0a1a00
   border-width: 0 0 1 0
-  border-color: #13133000
+  border-color: #15153344
 
   $focus:
-    background-color: #1e1544cc
-    border-color: #141434
+    background-color: #23124ecc
+    border-color: #3a2874
 
   $hover !focus:
-    background-color: #10103355
+    background-color: #12123388
 
   Label
     id: name
     anchors.fill: parent
     margin-left: 16
-    margin-top: 8
-    color: #50508a
+    margin-top: 9
+    color: #60609a
     text-align: left
 
-// ── Category icon types ────────────────────────────────────────
 CategoryIconSprite < UISprite
   id: categoryItem
   anchors.fill: parent
@@ -52,63 +33,58 @@ CategoryIconCreature < UICreature
   id: categoryItem
   anchors.fill: parent
 
-// ── Offer card ─────────────────────────────────────────────────
 OfferWidget < Panel
   focusable: true
-  size: 120 140
-  background-color: #0d0d1e
+  size: 132 158
+  background-color: #101022
   border-width: 1
-  border-color: #1c1c3a
-  margin-left: 4
-  margin-top: 4
+  border-color: #1e1e44
+  margin-left: 5
+  margin-top: 5
   phantom: false
   @onDoubleClick: modules.game_store.purchaseDouble(self)
 
   $focus:
-    background-color: #16093a
-    border-color: #7755cc
+    background-color: #1b1140
+    border-color: #8a63f0
 
   $hover !focus:
-    background-color: #111130
-    border-color: #282852
+    background-color: #151534
+    border-color: #313166
 
-  // Hidden label — full title for purchase/gift logic
   Label
     id: offerNameHidden
     visible: false
 
-  // Sale badge — top-right corner
   Label
     id: offerSale
     anchors.top: parent.top
     anchors.right: parent.right
     margin-top: 4
     margin-right: 4
-    width: 34
-    height: 13
-    background-color: #2e0d36
+    width: 40
+    height: 14
+    background-color: #351144
     border-width: 1
-    border-color: #8822aa
-    color: #e880ff
+    border-color: #aa39d1
+    color: #f39dff
     text-align: center
     text: SALE
     visible: false
 
-  // Artwork / icon area
   Panel
     id: offerTypePanel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 86
-    background-color: #080816
+    height: 92
+    background-color: #090913
     border-width: 0 0 1 0
-    border-color: #18183a
+    border-color: #20204d
     margin-top: 2
     margin-left: 2
     margin-right: 2
 
-  // Item name (below icon)
   Label
     id: offerName
     anchors.top: offerTypePanel.bottom
@@ -116,12 +92,21 @@ OfferWidget < Panel
     anchors.right: parent.right
     height: 16
     text-align: center
-    color: #a0a0cc
+    color: #d6d6ee
     margin-top: 4
-    margin-left: 3
-    margin-right: 3
+    margin-left: 4
+    margin-right: 4
 
-  // Price (pinned to bottom)
+  Label
+    id: offerMeta
+    anchors.top: offerName.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 14
+    text-align: center
+    color: #6e6ea8
+    margin-top: 1
+
   Label
     id: offerPrice
     anchors.bottom: parent.bottom
@@ -129,15 +114,14 @@ OfferWidget < Panel
     anchors.right: parent.right
     height: 18
     &baseText: '%s points'
-    color: #4dff8c
+    color: #67f1a3
     text-align: center
     font: terminus-14px-bold
-    margin-bottom: 4
+    margin-bottom: 5
 
-// ── Offer icon helpers ─────────────────────────────────────────
 OfferIconItem < UIItem
   id: offerIcon
-  size: 32 32
+  size: 34 34
   padding: 1
   anchors.centerIn: parent
   virtual: true
@@ -149,155 +133,142 @@ OfferIconCreature < UICreature
   anchors.centerIn: parent
   phantom: true
 
-// ── History row ────────────────────────────────────────────────
 HistoryLabel < Label
-  height: 22
+  height: 24
   focusable: true
   background: alpha
-  color: #8888b8
-  margin-left: 6
+  color: #8e8ec0
+  margin-left: 8
 
   $focus:
-    background: #1c1a3a
-    color: #c0a8ff
+    background: #261c52
+    color: #dfccff
 
-// ══════════════════════════════════════════════════════════════
-//  Main Window  830 × 522
-//
-//  Visual zones (all DIRECT children of storeWindow):
-//
-//  ┌─────────────────────────────────────────────────────┐
-//  │  headerBar  (full width, 62px)                      │
-//  ├────────────┬──────────────────────────────────────── │
-//  │ filtersPanel│  filterBar  (30px)                    │
-//  │ (sidebar   ├──────────────────────────────────────── │
-//  │  176px)    │  offers  (ScrollablePanel)             │
-//  │            │                                         │
-//  ├────────────┴────────────────────────────────────────┤
-//  │  action buttons  (bottom, 26px)                     │
-//  └─────────────────────────────────────────────────────┘
-// ══════════════════════════════════════════════════════════════
 MainWindow
   id: storeWindow
   !text: 'Game Store'
-  size: 830 522
+  size: 900 550
   @onEscape: modules.game_store.hide()
 
-  // ── HEADER BAR ─────────────────────────────────────────
+  Panel
+    id: backdrop
+    anchors.fill: parent
+    background-color: #070712
+
   Panel
     id: headerBar
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 62
-    background-color: #0d0d1e
+    height: 72
+    background-color: #101022
     border-width: 0 0 1 0
-    border-color: #26146a
+    border-color: #2e2160
 
-    // Branding — left side
     Label
       text: GAME STORE
       anchors.top: parent.top
       anchors.left: parent.left
-      height: 26
-      margin-top: 10
+      height: 24
+      margin-top: 12
       margin-left: 16
       font: terminus-14px-bold
-      color: #d4a843
+      color: #f0c86d
 
     Label
-      text: Browse and purchase exclusive items for your character
+      text: Explore premium content and boost your adventure
       anchors.top: prev.bottom
       anchors.left: parent.left
       height: 14
       margin-left: 16
-      margin-top: 2
-      color: #30306a
+      margin-top: 3
+      color: #5a5a93
 
-    // Wallet — right side
     Panel
       id: infoPanel
       anchors.right: parent.right
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      width: 188
-      background-color: #09091a
+      width: 228
+      background-color: #0a0a1a
       border-width: 0 0 0 1
-      border-color: #1c1c3a
-      padding: 8
+      border-color: #1f1f45
+      padding: 10
+
+      Label
+        text: WALLET
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        text-align: right
+        color: #6f6fae
+        height: 13
 
       Label
         id: points
-        anchors.top: parent.top
+        anchors.top: prev.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         &baseText: 'Balance: %s'
         text-auto-resize: false
         text-align: right
         font: terminus-14px-bold
-        color: #dcdcec
+        color: #e4e4f7
         height: 22
+        margin-top: 2
 
       Button
         id: buyPoints
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: 108
-        height: 20
-        !text: '+ Get Coins'
-        color: #4dff8c
+        width: 126
+        height: 22
+        !text: '+ Buy Coins'
+        color: #67f1a3
         @onClick: modules.game_store.buyPoints()
 
-  // ── LEFT SIDEBAR — background panel ────────────────────
-  //  (All category widgets are siblings that visually
-  //   overlap this panel — original Mehah pattern)
   Panel
     id: filtersPanel
     anchors.top: headerBar.bottom
     anchors.left: parent.left
-    anchors.bottom: historyButton.top
-    width: 174
-    background-color: #09091a
+    anchors.bottom: actionBar.top
+    width: 188
+    background-color: #0b0b1b
     border-width: 0 1 0 0
-    border-color: #191936
+    border-color: #1b1b3c
 
-  // "CATEGORIES" section label
   Label
     id: categoriesLabel
     text: CATEGORIES
     anchors.top: filtersPanel.top
     anchors.left: filtersPanel.left
-    width: 174
+    width: 188
     height: 18
-    margin-top: 8
+    margin-top: 10
     margin-left: 12
-    color: #7755cc
+    color: #8f72e5
     font: terminus-14px-bold
 
-  // Vertical category list (reliable TextList approach)
   TextList
     id: categories
     anchors.top: categoriesLabel.bottom
     anchors.left: filtersPanel.left
     anchors.right: filtersPanel.right
     anchors.bottom: historyButton.top
-    margin-top: 2
+    margin-top: 3
     focusable: false
-    background-color: #09091a00
+    background-color: #0b0b1b00
 
-  // ── FILTER BAR — above grid, right of sidebar ──────────
-  //  (Background panel — filter widgets are siblings below)
   Panel
     id: filterBar
     anchors.top: headerBar.bottom
     anchors.left: filtersPanel.right
     anchors.right: parent.right
-    height: 30
-    background-color: #0c0c1e
+    height: 36
+    background-color: #111127
     border-width: 0 0 1 0
-    border-color: #191936
+    border-color: #222248
 
-  // Search input (direct child of storeWindow, overlaps filterBar)
   Label
     id: searchLabel
     text: Search
@@ -305,8 +276,8 @@ MainWindow
     anchors.left: filterBar.left
     width: 44
     height: 14
-    margin-left: 10
-    color: #34346a
+    margin-left: 12
+    color: #6e6ea8
     font: terminus-14px-bold
     text-auto-resize: false
 
@@ -314,12 +285,11 @@ MainWindow
     id: search
     anchors.verticalCenter: filterBar.verticalCenter
     anchors.left: searchLabel.right
-    width: 154
-    height: 20
-    margin-left: 4
+    width: 178
+    height: 22
+    margin-left: 5
     @onKeyPress: modules.game_store.onSearch()
 
-  // Sort combo (direct child of storeWindow, overlaps filterBar)
   Label
     id: sortLabel
     text: Sort
@@ -327,8 +297,8 @@ MainWindow
     anchors.left: search.right
     width: 30
     height: 14
-    margin-left: 12
-    color: #34346a
+    margin-left: 14
+    color: #6e6ea8
     font: terminus-14px-bold
     text-auto-resize: false
 
@@ -336,35 +306,88 @@ MainWindow
     id: sortCombo
     anchors.verticalCenter: filterBar.verticalCenter
     anchors.left: sortLabel.right
-    width: 138
-    height: 20
-    margin-left: 4
+    width: 162
+    height: 22
+    margin-left: 5
 
-  // On Sale filter (direct child of storeWindow, overlaps filterBar)
   CheckBox
     id: onSaleCheck
-    !text: 'On Sale'
+    !text: 'On Sale Only'
     anchors.verticalCenter: filterBar.verticalCenter
     anchors.left: sortCombo.right
     margin-left: 14
-    color: #7070a0
+    color: #9a8ad0
 
-  // ── OFFERS GRID ────────────────────────────────────────
+  Panel
+    id: topPanel
+    anchors.top: filterBar.bottom
+    anchors.left: filtersPanel.right
+    anchors.right: parent.right
+    height: 78
+    background-color: #0c0c20
+    border-width: 0 0 1 0
+    border-color: #1d1d42
+
+    Panel
+      id: categoryItemBg
+      anchors.left: parent.left
+      anchors.top: parent.top
+      width: 62
+      height: 62
+      margin-left: 12
+      margin-top: 8
+      background-color: #090913
+      border-width: 1
+      border-color: #272756
+
+    Label
+      id: selectedCategory
+      anchors.left: categoryItemBg.right
+      anchors.top: parent.top
+      margin-left: 10
+      margin-top: 14
+      width: 280
+      height: 18
+      color: #f0f0ff
+      font: terminus-14px-bold
+
+    Label
+      id: categoryDescription
+      anchors.top: selectedCategory.bottom
+      anchors.left: selectedCategory.left
+      anchors.right: parent.right
+      margin-top: 2
+      margin-right: 16
+      height: 14
+      color: #7070aa
+
+    Label
+      id: resultsInfo
+      anchors.right: parent.right
+      anchors.top: parent.top
+      width: 190
+      height: 18
+      margin-top: 14
+      margin-right: 16
+      text-align: right
+      color: #67f1a3
+      font: terminus-14px-bold
+
   ScrollablePanel
     id: offers
     layout:
       type: grid
-      cell-size: 120 140
+      cell-size: 132 158
       flow: true
-      cell-spacing: 4
+      cell-spacing: 6
     vertical-scrollbar: offersScrollBar
-    anchors.top: filterBar.bottom
+    anchors.top: topPanel.bottom
     anchors.left: filtersPanel.right
     anchors.right: parent.right
-    anchors.bottom: historyButton.top
-    background-color: #07071200
+    anchors.bottom: actionBar.top
+    background-color: #090916
     border-width: 0
-    padding: 4
+    padding: 8
     focusable: false
 
   VerticalScrollBar
@@ -372,22 +395,39 @@ MainWindow
     anchors.top: offers.top
     anchors.bottom: offers.bottom
     anchors.right: offers.right
-    step: 74
+    step: 84
     pixels-scroll: true
 
-  // ── HISTORY VIEW (hidden by default) ───────────────────
+  Panel
+    id: emptyState
+    anchors.top: offers.top
+    anchors.left: offers.left
+    anchors.right: offers.right
+    anchors.bottom: offers.bottom
+    visible: false
+    background-color: #090916cc
+
+    Label
+      text: 'No offers match your filters'
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 260
+      height: 16
+      text-align: center
+      color: #b6b6df
+
   TextList
     id: history
     vertical-scrollbar: historyScrollBar
     anchors.top: headerBar.bottom
-    anchors.bottom: historyButton.top
+    anchors.bottom: actionBar.top
     anchors.left: parent.left
     anchors.right: parent.right
     margin-bottom: 2
     padding: 6
     focusable: false
     visible: false
-    background-color: #07071200
+    background-color: #090916
 
   VerticalScrollBar
     id: historyScrollBar
@@ -398,25 +438,25 @@ MainWindow
     pixels-scroll: true
     visible: false
 
-  // ── BOTTOM ACTION BUTTONS ───────────────────────────────
-  //  Thin background bar
   Panel
     id: actionBar
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    height: 28
-    background-color: #0a0a1a
+    height: 34
+    background-color: #0b0b1b
     border-width: 1 0 0 0
-    border-color: #191936
+    border-color: #1d1d40
 
   Button
     id: backButton
     !text: 'Back'
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    width: 82
-    height: 26
+    width: 88
+    height: 28
+    margin-left: 2
+    margin-bottom: 2
     @onClick: modules.game_store.hideHistory()
     visible: false
 
@@ -425,25 +465,30 @@ MainWindow
     !text: 'History'
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    width: 82
-    height: 26
+    width: 88
+    height: 28
+    margin-left: 2
+    margin-bottom: 2
     @onClick: modules.game_store.showHistory()
 
   Button
     id: buttonCancel
     !text: 'Close'
-    width: 72
-    height: 26
+    width: 76
+    height: 28
     anchors.right: parent.right
     anchors.bottom: parent.bottom
+    margin-right: 2
+    margin-bottom: 2
     @onClick: modules.game_store.hide()
 
   Button
     id: purchaseButton
     !text: 'Purchase'
-    width: 82
-    height: 26
+    width: 92
+    height: 28
     margin-right: 6
+    margin-bottom: 2
     anchors.right: prev.left
     anchors.bottom: parent.bottom
     enabled: false
@@ -452,9 +497,10 @@ MainWindow
   Button
     id: giftButton
     !text: 'Gift'
-    width: 58
-    height: 26
+    width: 64
+    height: 28
     margin-right: 6
+    margin-bottom: 2
     anchors.right: prev.left
     anchors.bottom: parent.bottom
     enabled: false

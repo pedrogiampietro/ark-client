@@ -1,37 +1,54 @@
-// ══════════════════════════════════════════════
-//  Gift Dialog — Send item to another player
-// ══════════════════════════════════════════════
 MainWindow
-  size: 270 138
+  size: 320 168
   !text: 'Send as Gift'
   @onEnter: modules.game_store.confirmGift()
 
+  Panel
+    anchors.fill: parent
+    background-color: #0b0b1a
+    border-width: 1
+    border-color: #242451
+
   Label
-    text: 'Enter the recipient player name:'
+    text: 'Recipient Character'
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     height: 18
-    text-align: center
-    color: #8888b8
-    margin-top: 8
+    text-align: left
+    color: #cfcff2
+    margin-top: 14
+    margin-left: 14
+
+  Label
+    text: 'Type the exact name to deliver this gift safely.'
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 14
+    text-align: left
+    color: #68689b
+    margin-top: 2
+    margin-left: 14
 
   TextEdit
     id: targetName
     anchors.top: prev.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 20
-    margin-top: 6
-    margin-left: 10
-    margin-right: 10
+    height: 22
+    margin-top: 8
+    margin-left: 14
+    margin-right: 14
 
   Button
     anchors.bottom: parent.bottom
     anchors.right: parent.right
-    !text: 'Confirm'
-    width: 84
-    margin-right: 10
+    !text: 'Send Gift'
+    width: 96
+    height: 26
+    margin-right: 14
+    margin-bottom: 10
     @onClick: modules.game_store.confirmGift()
 
   Button
@@ -39,5 +56,7 @@ MainWindow
     anchors.left: parent.left
     !text: 'Cancel'
     width: 84
-    margin-left: 10
+    height: 26
+    margin-left: 14
+    margin-bottom: 10
     @onClick: modules.game_store.cancelGift()
