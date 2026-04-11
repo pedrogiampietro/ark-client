@@ -20,6 +20,7 @@ local containerPanels = {}
 
 -- Debounce
 local inventoryRequestEvent = nil
+local containerRequestEvents = {}
 
 function init()
   ProtocolGame.registerExtendedOpcode(RARITY_OPCODE, onRarityData)
@@ -27,6 +28,8 @@ function init()
   connect(Container, {
     onOpen = onRarityContainerOpen,
     onClose = onRarityContainerClose,
+    onAddItem = onRarityContainerAdd,
+    onRemoveItem = onRarityContainerRemove,
     onUpdateItem = onRarityContainerUpdate,
     onSizeChange = onRarityContainerSizeChange
   })
@@ -47,6 +50,8 @@ function terminate()
   disconnect(Container, {
     onOpen = onRarityContainerOpen,
     onClose = onRarityContainerClose,
+    onAddItem = onRarityContainerAdd,
+    onRemoveItem = onRarityContainerRemove,
     onUpdateItem = onRarityContainerUpdate,
     onSizeChange = onRarityContainerSizeChange
   })
@@ -65,12 +70,21 @@ function terminate()
     inventoryRequestEvent = nil
   end
 
+  for containerId, event in pairs(containerRequestEvents) do
+    removeEvent(event)
+    containerRequestEvents[containerId] = nil
+  end
+
   containerRarities = {}
   inventoryRarities = {}
   containerPanels = {}
 end
 
 function onRarityGameEnd()
+  for containerId, event in pairs(containerRequestEvents) do
+    removeEvent(event)
+    containerRequestEvents[containerId] = nil
+  end
   containerRarities = {}
   inventoryRarities = {}
   containerPanels = {}
@@ -187,6 +201,31 @@ function applyContainerRarities(containerId)
   end
 end
 
+function resetContainerRarityFrames(containerId)
+  local panel = findContainerPanel(containerId)
+  if not panel then return end
+
+  local children = panel:getChildren()
+  for i = 1, #children do
+    local itemWidget = children[i]
+    if itemWidget then
+      applyRarityFrame(itemWidget, 0)
+    end
+  end
+end
+
+function requestContainerRarityDebounced(containerId, delay)
+  if containerRequestEvents[containerId] then
+    removeEvent(containerRequestEvents[containerId])
+    containerRequestEvents[containerId] = nil
+  end
+
+  containerRequestEvents[containerId] = scheduleEvent(function()
+    containerRequestEvents[containerId] = nil
+    requestContainerRarity(containerId)
+  end, delay or 100)
+end
+
 function applyAllContainerRarities()
   for containerId, _ in pairs(containerRarities) do
     applyContainerRarities(containerId)
@@ -300,31 +339,37 @@ function onContainerItemUpdated(container)
     containerPanels[id] = container.itemsPanel
   end
 
-  -- Re-apply cached rarity immediately (like inventory does after style reset)
-  scheduleEvent(function()
-    applyContainerRarities(id)
-  end, 10)
-
-  -- Request fresh data
-  scheduleEvent(function()
-    requestContainerRarity(id)
-  end, 200)
+  -- Do not re-apply stale slot cache after reorder; clear and wait for fresh server data.
+  resetContainerRarityFrames(id)
+  requestContainerRarityDebounced(id, 80)
 end
 
 function onRarityContainerClose(container)
   local id = container:getId()
+  if containerRequestEvents[id] then
+    removeEvent(containerRequestEvents[id])
+    containerRequestEvents[id] = nil
+  end
   containerRarities[id] = nil
   containerPanels[id] = nil
 end
 
+function onRarityContainerAdd(container, slot, item)
+  onContainerItemUpdated(container)
+end
+
+function onRarityContainerRemove(container, slot, item)
+  onContainerItemUpdated(container)
+end
+
 function onRarityContainerUpdate(container, slot, item, oldItem)
-  -- containers.lua now calls onContainerItemUpdated directly
-  -- this is kept as backup
+  -- Backup in case other modules bypass containers.lua helpers.
+  onContainerItemUpdated(container)
 end
 
 function onRarityContainerSizeChange(container, size)
-  -- containers.lua now calls onContainerItemUpdated via refreshContainerItems
-  -- this is kept as backup
+  -- Backup in case other modules bypass containers.lua helpers.
+  onContainerItemUpdated(container)
 end
 
 function onRarityInventoryChange(player, slot, item, oldItem)
