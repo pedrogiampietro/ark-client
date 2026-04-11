@@ -42,15 +42,19 @@ MiniPanel < Panel
 
 OfferWidget < MiniPanel
   focusable: true
+  size: 126 122
   border-width: 1
-  border-color: alpha
-  margin-left: 5
-  margin-top: 5
+  border-color: #343434
+  margin-left: 4
+  margin-top: 4
   phantom: false
   @onDoubleClick: modules.game_store.purchaseDouble(self)
 
   $focus:
-    border-color: #ffffff
+    border-color: #c69a3a
+
+  $hover !focus:
+    border-color: #7c7c7c
 
   Label
     id: offerNameHidden
@@ -62,7 +66,7 @@ OfferWidget < MiniPanel
     anchors.bottom: next.top
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 4
+    margin-top: 2
     margin-bottom: 3
 
   Label
@@ -70,7 +74,7 @@ OfferWidget < MiniPanel
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 20
+    height: 18
     image-source: /images/ui/item
     image-border: 2
     &baseText: '%s points'
@@ -104,16 +108,16 @@ HistoryLabel < Label
 MainWindow
   id: storeWindow
   !text: 'Game Store'
-  size: 840 500
+  size: 760 460
   @onEscape: modules.game_store.hide()
 
   FlatPanel
     id: infoPanel
     anchors.top: parent.top
     anchors.left: parent.left
-    width: 180
-    height: 60
-    margin-top: 5
+    width: 170
+    height: 54
+    margin-top: 4
     padding: 5
 
     Label
@@ -129,6 +133,7 @@ MainWindow
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
+      height: 18
       !text: 'Get Points'
       color: #28db00
       @onClick: modules.game_store.buyPoints()
@@ -139,8 +144,8 @@ MainWindow
     anchors.left: infoPanel.left
     anchors.right: infoPanel.right
     anchors.bottom: historyButton.top
-    margin-top: 10
-    margin-bottom: 10
+    margin-top: 8
+    margin-bottom: 8
     padding: 1
     focusable: false
 
@@ -150,13 +155,13 @@ MainWindow
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.bottom: infoPanel.bottom
-    margin-top: 5
-    margin-left: 10
+    margin-top: 4
+    margin-left: 8
     padding: 5
 
     Panel
       id: categoryItemBg
-      width: 48
+      width: 40
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
@@ -168,7 +173,7 @@ MainWindow
       anchors.left: prev.right
       anchors.right: parent.right
       margin-left: 5
-      height: 18
+      height: 16
       !text: 'Potions'
       font: terminus-14px-bold
       text-offset: 1 -2
@@ -187,9 +192,9 @@ MainWindow
     id: offers
     layout:
       type: grid
-      cell-size: 150 150
+      cell-size: 126 122
       flow: true
-      cell-spacing: 1
+      cell-spacing: 4
     vertical-scrollbar: offersScrollBar
     anchors.top: topPanel.bottom
     anchors.left: topPanel.left
@@ -198,7 +203,7 @@ MainWindow
     image-source: /images/ui/panel_flat
     image-border: 1
     padding: 1
-    margin-top: 10
+    margin-top: 8
     focusable: false
 
   VerticalScrollBar
@@ -206,7 +211,7 @@ MainWindow
     anchors.top: offers.top
     anchors.bottom: offers.bottom
     anchors.right: offers.right
-    step: 50
+    step: 64
     pixels-scroll: true
 
   TextList    
@@ -236,7 +241,7 @@ MainWindow
     !text: 'Back'
     anchors.left: infoPanel.left
     anchors.bottom: parent.bottom
-    width: 96
+    width: 82
     @onClick: modules.game_store.hideHistory()
     visible: false
 
@@ -246,6 +251,7 @@ MainWindow
     anchors.left: infoPanel.left
     anchors.right: infoPanel.right
     anchors.bottom: parent.bottom
+    height: 20
     @onClick: modules.game_store.showHistory()
 
   Label
@@ -260,14 +266,30 @@ MainWindow
     id: search
     anchors.left: searchLabel.right
     anchors.verticalCenter: searchLabel.verticalCenter
-    width: 120
-    margin-left: 8
+    width: 160
+    margin-left: 6
     @onKeyPress: modules.game_store.onSearch()
+
+  Label
+    id: sortLabel
+    text: Sort
+    anchors.left: search.right
+    anchors.verticalCenter: search.verticalCenter
+    margin-left: 8
+    text-align: left
+    text-auto-resize: true
+
+  ComboBox
+    id: sortCombo
+    anchors.left: sortLabel.right
+    anchors.verticalCenter: sortLabel.verticalCenter
+    width: 135
+    margin-left: 6
 
   Button
     id: buttonCancel
     !text: 'Close'
-    width: 64
+    width: 70
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     @onClick: modules.game_store.hide()
@@ -275,7 +297,7 @@ MainWindow
   Button
     id: purchaseButton
     !text: 'Purchase'
-    width: 72
+    width: 78
     margin-right: 10
     anchors.right: prev.left
     anchors.bottom: parent.bottom
@@ -285,7 +307,7 @@ MainWindow
   Button
     id: giftButton
     !text: 'Gift'
-    width: 72
+    width: 58
     margin-right: 10
     anchors.right: prev.left
     anchors.bottom: parent.bottom

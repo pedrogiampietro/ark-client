@@ -18,6 +18,94 @@ local offers = {}
 
 local selectedOffer = nil
 
+local SORT_RECOMMENDED = "Recommended"
+local SORT_PRICE_ASC = "Price: Low to High"
+local SORT_PRICE_DESC = "Price: High to Low"
+local SORT_NAME_ASC = "Name: A-Z"
+
+local function getFocusedCategoryId()
+  if not gameStoreWindow then
+    return nil
+  end
+  local focused = gameStoreWindow:getChildById("categories"):getFocusedChild()
+  if not focused then
+    return nil
+  end
+  return focused:getId()
+end
+
+local function getSortMode()
+  if not gameStoreWindow then
+    return SORT_RECOMMENDED
+  end
+  local combo = gameStoreWindow:getChildById("sortCombo")
+  if not combo then
+    return SORT_RECOMMENDED
+  end
+  return combo:getCurrentOption() or SORT_RECOMMENDED
+end
+
+local function getSearchText()
+  if not gameStoreWindow then
+    return ""
+  end
+  local search = gameStoreWindow:getChildById("search")
+  if not search then
+    return ""
+  end
+  return search:getText():lower()
+end
+
+local function filterAndSortOffers(categoryId)
+  local source = offers[categoryId] or {}
+  local result = {}
+  local searchText = getSearchText()
+  for _, offer in ipairs(source) do
+    local title = (offer.title or ""):lower()
+    if searchText == "" or title:find(searchText, 1, true) then
+      table.insert(result, offer)
+    end
+  end
+
+  local sortMode = getSortMode()
+  if sortMode ~= SORT_RECOMMENDED then
+    table.sort(result, function(a, b)
+      if sortMode == SORT_PRICE_ASC then
+        local ap = tonumber(a.price) or 0
+        local bp = tonumber(b.price) or 0
+        if ap == bp then
+          return (a.title or ""):lower() < (b.title or ""):lower()
+        end
+        return ap < bp
+      elseif sortMode == SORT_PRICE_DESC then
+        local ap = tonumber(a.price) or 0
+        local bp = tonumber(b.price) or 0
+        if ap == bp then
+          return (a.title or ""):lower() < (b.title or ""):lower()
+        end
+        return ap > bp
+      end
+
+      return (a.title or ""):lower() < (b.title or ""):lower()
+    end)
+  end
+
+  return result
+end
+
+local function refreshCurrentCategoryOffers()
+  if not offersGrid then
+    return
+  end
+  local categoryId = getFocusedCategoryId()
+  if not categoryId then
+    return
+  end
+
+  offersGrid:destroyChildren()
+  addOffers(filterAndSortOffers(categoryId))
+end
+
 function init()
   connect(
     g_game,
@@ -115,6 +203,19 @@ function create()
   connect(gameStoreWindow:getChildById("categories"), {onChildFocusChange = changeCategory})
   connect(gameStoreWindow:getChildById("offers"), {onChildFocusChange = offerFocus})
 
+  local sortCombo = gameStoreWindow:getChildById("sortCombo")
+  if sortCombo then
+    sortCombo:clearOptions()
+    sortCombo:addOption(SORT_RECOMMENDED)
+    sortCombo:addOption(SORT_PRICE_ASC)
+    sortCombo:addOption(SORT_PRICE_DESC)
+    sortCombo:addOption(SORT_NAME_ASC)
+    sortCombo:setCurrentOption(SORT_RECOMMENDED, true)
+    sortCombo.onOptionChange = function()
+      refreshCurrentCategoryOffers()
+    end
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(GAME_STORE_CODE, json.encode({action = "fetch", data = {}}))
@@ -158,8 +259,13 @@ function onGameStoreFetchOffers(data)
   offers[data.category] = data.offers
   if data.category == "Items" then
     offersGrid = gameStoreWindow:recursiveGetChildById("offers")
-    addOffers(offers)
     gameStoreWindow:getChildById("categories"):getChildByIndex(1):focus()
+    refreshCurrentCategoryOffers()
+    return
+  end
+
+  if offersGrid and getFocusedCategoryId() == data.category then
+    refreshCurrentCategoryOffers()
   end
 end
 
@@ -282,7 +388,7 @@ function changeCategory(widget, newCategory)
 
   local id = newCategory:getId()
   offersGrid:destroyChildren()
-  addOffers(offers[id])
+  addOffers(filterAndSortOffers(id))
 
   local category = nil
   for i = 1, #categories do
@@ -296,7 +402,6 @@ function changeCategory(widget, newCategory)
     updateTopPanel(category)
     gameStoreWindow:getChildById("purchaseButton"):disable()
     gameStoreWindow:getChildById("giftButton"):disable()
-    gameStoreWindow:getChildById("search"):setText("")
   end
 end
 
@@ -435,26 +540,7 @@ end
 function onSearch()
   scheduleEvent(
     function()
-      local searchWidget = gameStoreWindow:getChildById("search")
-      local text = searchWidget:getText()
-      if text:len() >= 1 then
-        local children = offersGrid:getChildCount()
-        for i = 1, children do
-          local child = offersGrid:getChildByIndex(i)
-          local offerName = child:getChildById("offerNameHidden"):getText():lower()
-          if offerName:find(text) then
-            child:show()
-          else
-            child:hide()
-          end
-        end
-      else
-        local children = offersGrid:getChildCount()
-        for i = 1, children do
-          local child = offersGrid:getChildByIndex(i)
-          child:show()
-        end
-      end
+      refreshCurrentCategoryOffers()
     end,
     50
   )
