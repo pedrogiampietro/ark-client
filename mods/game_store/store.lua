@@ -57,7 +57,7 @@ local function getSortMode()
   if not gameStoreWindow then
     return SORT_RECOMMENDED
   end
-  local combo = gameStoreWindow:recursiveGetChildById("sortCombo")
+  local combo = gameStoreWindow:getChildById("sortCombo")
   if not combo then
     return SORT_RECOMMENDED
   end
@@ -68,7 +68,7 @@ local function getSearchText()
   if not gameStoreWindow then
     return ""
   end
-  local search = gameStoreWindow:recursiveGetChildById("search")
+  local search = gameStoreWindow:getChildById("search")
   if not search then
     return ""
   end
@@ -79,7 +79,7 @@ local function filterAndSortOffers(categoryId)
   local source = offers[categoryId] or {}
   local result = {}
   local searchText = getSearchText()
-  local onSaleCheck = gameStoreWindow and gameStoreWindow:recursiveGetChildById("onSaleCheck")
+  local onSaleCheck = gameStoreWindow and gameStoreWindow:getChildById("onSaleCheck")
   local onSaleOnly = onSaleCheck and onSaleCheck:isChecked() or false
   for _, offer in ipairs(source) do
     local title = (offer.title or ""):lower()
@@ -225,14 +225,14 @@ function create()
   connect(gameStoreWindow:getChildById("categories"), {onChildFocusChange = changeCategory})
   connect(gameStoreWindow:getChildById("offers"), {onChildFocusChange = offerFocus})
 
-  local search = gameStoreWindow:recursiveGetChildById("search")
+  local search = gameStoreWindow:getChildById("search")
   if search then
     search.onTextChange = function()
       onSearch()
     end
   end
 
-  local sortCombo = gameStoreWindow:recursiveGetChildById("sortCombo")
+  local sortCombo = gameStoreWindow:getChildById("sortCombo")
   if sortCombo then
     sortCombo:clearOptions()
     sortCombo:addOption(SORT_RECOMMENDED)
@@ -245,7 +245,7 @@ function create()
     end
   end
 
-  local onSaleCheck = gameStoreWindow:recursiveGetChildById("onSaleCheck")
+  local onSaleCheck = gameStoreWindow:getChildById("onSaleCheck")
   if onSaleCheck then
     onSaleCheck.onCheckChange = function()
       refreshCurrentCategoryOffers()
@@ -500,51 +500,64 @@ function addCategory(data, first)
   end
 end
 
-local function setWidgetVisible(id, visible)
+-- Safe show/hide: silently skips if widget doesn't exist
+local function sw(id, show)
   local w = gameStoreWindow:getChildById(id)
   if not w then return end
-  if visible then w:show() else w:hide() end
+  if show then w:show() else w:hide() end
 end
 
 function showHistory()
-  -- hide main store elements
-  setWidgetVisible("historyButton", false)
-  setWidgetVisible("purchaseButton", false)
-  setWidgetVisible("giftButton", false)
-  setWidgetVisible("offers", false)
-  setWidgetVisible("offersScrollBar", false)
-  setWidgetVisible("categories", false)
-  setWidgetVisible("filtersPanel", false)
-  setWidgetVisible("actionBar", false)
+  -- hide store UI
+  sw("historyButton",   false)
+  sw("purchaseButton",  false)
+  sw("giftButton",      false)
+  sw("offers",          false)
+  sw("offersScrollBar", false)
+  sw("filterBar",       false)
+  sw("searchLabel",     false)
+  sw("search",          false)
+  sw("sortLabel",       false)
+  sw("sortCombo",       false)
+  sw("onSaleCheck",     false)
+  sw("categories",      false)
+  sw("categoriesLabel", false)
+  sw("filtersPanel",    false)
 
-  -- show history elements
-  setWidgetVisible("historyScrollBar", true)
-  setWidgetVisible("history", true)
-  setWidgetVisible("backButton", true)
+  -- show history UI
+  sw("history",         true)
+  sw("historyScrollBar",true)
+  sw("backButton",      true)
 
-  local purchaseButton = gameStoreWindow:getChildById("purchaseButton")
-  if purchaseButton then purchaseButton:disable() end
-  local giftButton = gameStoreWindow:getChildById("giftButton")
-  if giftButton then giftButton:disable() end
-  local offersGrid = gameStoreWindow:getChildById("offers")
-  if offersGrid then offersGrid:focusChild(nil) end
+  local pb = gameStoreWindow:getChildById("purchaseButton")
+  if pb then pb:disable() end
+  local gb = gameStoreWindow:getChildById("giftButton")
+  if gb then gb:disable() end
+  local og = gameStoreWindow:getChildById("offers")
+  if og then og:focusChild(nil) end
 end
 
 function hideHistory()
-  -- show main store elements
-  setWidgetVisible("historyButton", true)
-  setWidgetVisible("purchaseButton", true)
-  setWidgetVisible("giftButton", true)
-  setWidgetVisible("offers", true)
-  setWidgetVisible("offersScrollBar", true)
-  setWidgetVisible("categories", true)
-  setWidgetVisible("filtersPanel", true)
-  setWidgetVisible("actionBar", true)
+  -- show store UI
+  sw("historyButton",   true)
+  sw("purchaseButton",  true)
+  sw("giftButton",      true)
+  sw("offers",          true)
+  sw("offersScrollBar", true)
+  sw("filterBar",       true)
+  sw("searchLabel",     true)
+  sw("search",          true)
+  sw("sortLabel",       true)
+  sw("sortCombo",       true)
+  sw("onSaleCheck",     true)
+  sw("categories",      true)
+  sw("categoriesLabel", true)
+  sw("filtersPanel",    true)
 
-  -- hide history elements
-  setWidgetVisible("historyScrollBar", false)
-  setWidgetVisible("history", false)
-  setWidgetVisible("backButton", false)
+  -- hide history UI
+  sw("history",         false)
+  sw("historyScrollBar",false)
+  sw("backButton",      false)
 
   local cats = gameStoreWindow:getChildById("categories")
   if cats then
