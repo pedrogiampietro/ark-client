@@ -50,7 +50,6 @@ function destroy(container)
 end
 
 function refreshContainerItems(container)
-  g_logger.info(string.format('[CONTAINER_UI] refreshContainerItems cid=%d capacity=%d size=%d', container:getId(), container:getCapacity(), container:getSize()))
   for slot=0,container:getCapacity()-1 do
     local itemWidget = container.itemsPanel:getChildById('item' .. slot)
     itemWidget:setItem(container:getItem(slot))
@@ -110,7 +109,6 @@ function refreshContainerPages(container)
 end
 
 function onContainerOpen(container, previousContainer)
-  g_logger.info(string.format('[CONTAINER_UI] onContainerOpen cid=%d previous=%s', container:getId(), tostring(previousContainer ~= nil)))
   local containerWindow
   if previousContainer then
     containerWindow = previousContainer.window
@@ -228,13 +226,11 @@ end
 
 function onContainerChangeSize(container, size)
   if not container.window then return end
-  g_logger.info(string.format('[CONTAINER_UI] onContainerChangeSize cid=%d size=%d', container:getId(), size))
   refreshContainerItems(container)
 end
 
 function onContainerUpdateItem(container, slot, item, oldItem)
   if not container.window then return end
-  g_logger.info(string.format('[CONTAINER_UI] onContainerUpdateItem cid=%d slot=%d old=%s new=%s', container:getId(), slot, tostring(oldItem and oldItem:getId() or 0), tostring(item and item:getId() or 0)))
   local itemWidget = container.itemsPanel:getChildById('item' .. slot)
   itemWidget:setItem(item)
 end
