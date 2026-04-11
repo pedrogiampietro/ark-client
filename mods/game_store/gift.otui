@@ -5,9 +5,9 @@ MainWindow
 
   Panel
     anchors.fill: parent
-    background-color: #131922
+    background-color: #1c1814
     border-width: 1
-    border-color: #314053
+    border-color: #54483c
 
   Label
     text: 'Recipient Character'
@@ -27,7 +27,7 @@ MainWindow
     anchors.right: parent.right
     height: 14
     text-align: left
-    color: #8691a5
+    color: #a89b8a
     margin-top: 2
     margin-left: 14
 
@@ -40,10 +40,10 @@ MainWindow
     margin-top: 8
     margin-left: 14
     margin-right: 14
-    background-color: #111821
+    background-color: #1a1612
     border-width: 1
-    border-color: #374354
-    color: #e6ebf2
+    border-color: #54483c
+    color: #efe4d6
 
   Button
     anchors.bottom: parent.bottom

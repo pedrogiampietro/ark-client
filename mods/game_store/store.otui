@@ -1,23 +1,23 @@
 ShopCategory < Panel
   height: 34
   focusable: true
-  background-color: #11161e00
+  background-color: #15131100
   border-width: 0 0 1 0
-  border-color: #2a303944
+  border-color: #3b332b44
 
   $focus:
-    background-color: #2a313ecc
-    border-color: #4f5f78
+    background-color: #3a3026cc
+    border-color: #8b7458
 
   $hover !focus:
-    background-color: #232a3688
+    background-color: #2f282188
 
   Label
     id: name
     anchors.fill: parent
     margin-left: 16
     margin-top: 9
-    color: #8691a5
+    color: #aa9f91
     text-align: left
 
 CategoryIconSprite < UISprite
@@ -36,21 +36,21 @@ CategoryIconCreature < UICreature
 OfferWidget < Panel
   focusable: true
   size: 132 158
-  background-color: #171c25
+  background-color: #211c17
   border-width: 1
-  border-color: #2f3846
+  border-color: #4a3f34
   margin-left: 5
   margin-top: 5
   phantom: false
   @onDoubleClick: modules.game_store.purchaseDouble(self)
 
   $focus:
-    background-color: #253041
-    border-color: #8ea4c2
+    background-color: #3b3228
+    border-color: #b79367
 
   $hover !focus:
-    background-color: #202734
-    border-color: #455264
+    background-color: #2d2721
+    border-color: #6a5a4b
 
   Label
     id: offerNameHidden
@@ -64,10 +64,10 @@ OfferWidget < Panel
     margin-right: 4
     width: 40
     height: 14
-    background-color: #3a1f24
+    background-color: #3d221f
     border-width: 1
-    border-color: #a35a67
-    color: #ffd0d7
+    border-color: #b36a5f
+    color: #ffd7c7
     text-align: center
     text: SALE
     visible: false
@@ -78,9 +78,9 @@ OfferWidget < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     height: 92
-    background-color: #10151d
+    background-color: #191511
     border-width: 0 0 1 0
-    border-color: #2b3342
+    border-color: #433930
     margin-top: 2
     margin-left: 2
     margin-right: 2
@@ -92,7 +92,7 @@ OfferWidget < Panel
     anchors.right: parent.right
     height: 16
     text-align: center
-    color: #e5e9ef
+    color: #eee3d5
     margin-top: 4
     margin-left: 4
     margin-right: 4
@@ -104,7 +104,7 @@ OfferWidget < Panel
     anchors.right: parent.right
     height: 14
     text-align: center
-    color: #8b94a8
+    color: #9d8f80
     margin-top: 1
 
   Label
@@ -114,7 +114,7 @@ OfferWidget < Panel
     anchors.right: parent.right
     height: 18
     &baseText: '%s points'
-    color: #93d8ac
+    color: #a7d38f
     text-align: center
     font: terminus-14px-bold
     margin-bottom: 5
@@ -137,12 +137,12 @@ HistoryLabel < Label
   height: 24
   focusable: true
   background: alpha
-  color: #9ca7bb
+  color: #a99d8d
   margin-left: 8
 
   $focus:
-    background: #2b3342
-    color: #ebe4d0
+    background: #3a3027
+    color: #f0e3cd
 
 MainWindow
   id: storeWindow
@@ -153,7 +153,7 @@ MainWindow
   Panel
     id: backdrop
     anchors.fill: parent
-    background-color: #0f141b
+    background-color: #161310
 
   Panel
     id: headerBar
@@ -161,9 +161,9 @@ MainWindow
     anchors.left: parent.left
     anchors.right: parent.right
     height: 72
-    background-color: #171d27
+    background-color: #211c17
     border-width: 0 0 1 0
-    border-color: #2f3a49
+    border-color: #4a3f34
 
     Label
       text: GAME STORE
@@ -173,7 +173,7 @@ MainWindow
       margin-top: 12
       margin-left: 16
       font: terminus-14px-bold
-      color: #d7b676
+      color: #d5b07a
 
     Label
       text: Explore premium content and boost your adventure
@@ -182,7 +182,7 @@ MainWindow
       height: 14
       margin-left: 16
       margin-top: 3
-      color: #8791a5
+      color: #9a8f82
 
     Panel
       id: infoPanel
@@ -190,9 +190,9 @@ MainWindow
       anchors.top: parent.top
       anchors.bottom: parent.bottom
       width: 228
-      background-color: #131922
+      background-color: #1c1814
       border-width: 0 0 0 1
-      border-color: #2f3a49
+      border-color: #4a3f34
       padding: 10
 
       Label
@@ -201,7 +201,7 @@ MainWindow
         anchors.left: parent.left
         anchors.right: parent.right
         text-align: right
-        color: #7f8ea8
+        color: #a79987
         height: 13
 
       Label
@@ -213,7 +213,7 @@ MainWindow
         text-auto-resize: false
         text-align: right
         font: terminus-14px-bold
-        color: #f0f2f5
+        color: #f3eadf
         height: 22
         margin-top: 2
 
@@ -224,7 +224,7 @@ MainWindow
         width: 126
         height: 22
         !text: '+ Buy Coins'
-        color: #93d8ac
+        color: #a7d38f
         @onClick: modules.game_store.buyPoints()
 
   Panel
@@ -233,9 +233,9 @@ MainWindow
     anchors.left: parent.left
     anchors.bottom: actionBar.top
     width: 188
-    background-color: #141a23
+    background-color: #1c1814
     border-width: 0 1 0 0
-    border-color: #2a3442
+    border-color: #443a31
 
   Label
     id: categoriesLabel
@@ -246,7 +246,7 @@ MainWindow
     height: 18
     margin-top: 10
     margin-left: 12
-    color: #c8ab71
+    color: #cfa76d
     font: terminus-14px-bold
 
   TextList
@@ -257,7 +257,7 @@ MainWindow
     anchors.bottom: historyButton.top
     margin-top: 3
     focusable: false
-    background-color: #141a2300
+    background-color: #1c181400
 
   Panel
     id: filterBar
@@ -265,9 +265,9 @@ MainWindow
     anchors.left: filtersPanel.right
     anchors.right: parent.right
     height: 36
-    background-color: #1a212c
+    background-color: #26201b
     border-width: 0 0 1 0
-    border-color: #2d3847
+    border-color: #4b4035
 
   Label
     id: searchLabel
@@ -277,7 +277,7 @@ MainWindow
     width: 44
     height: 14
     margin-left: 12
-    color: #8793a8
+    color: #a79a89
     font: terminus-14px-bold
     text-auto-resize: false
 
@@ -288,10 +288,10 @@ MainWindow
     width: 178
     height: 22
     margin-left: 5
-    background-color: #121923
+    background-color: #1a1612
     border-width: 1
-    border-color: #374354
-    color: #e6ebf2
+    border-color: #54483c
+    color: #efe4d6
     @onKeyPress: modules.game_store.onSearch()
 
   Label
@@ -302,7 +302,7 @@ MainWindow
     width: 30
     height: 14
     margin-left: 14
-    color: #8793a8
+    color: #a79a89
     font: terminus-14px-bold
     text-auto-resize: false
 
@@ -313,10 +313,10 @@ MainWindow
     width: 162
     height: 22
     margin-left: 5
-    background-color: #121923
+    background-color: #1a1612
     border-width: 1
-    border-color: #374354
-    color: #e6ebf2
+    border-color: #54483c
+    color: #efe4d6
 
   CheckBox
     id: onSaleCheck
@@ -324,7 +324,7 @@ MainWindow
     anchors.verticalCenter: filterBar.verticalCenter
     anchors.left: sortCombo.right
     margin-left: 14
-    color: #9ca8bd
+    color: #b1a391
 
   Panel
     id: topPanel
@@ -332,9 +332,9 @@ MainWindow
     anchors.left: filtersPanel.right
     anchors.right: parent.right
     height: 78
-    background-color: #1a202a
+    background-color: #2a231d
     border-width: 0 0 1 0
-    border-color: #2f3b4a
+    border-color: #4f4338
 
     Panel
       id: categoryItemBg
@@ -344,9 +344,9 @@ MainWindow
       height: 62
       margin-left: 12
       margin-top: 8
-      background-color: #10151d
+      background-color: #1a1612
       border-width: 1
-      border-color: #3b4758
+      border-color: #5b4d3f
 
     Label
       id: selectedCategory
@@ -356,7 +356,7 @@ MainWindow
       margin-top: 14
       width: 280
       height: 18
-      color: #ece7d8
+      color: #f0e4d3
       font: terminus-14px-bold
 
     Label
@@ -367,7 +367,7 @@ MainWindow
       margin-top: 2
       margin-right: 16
       height: 14
-      color: #8d97ab
+      color: #a59887
 
     Label
       id: resultsInfo
@@ -378,7 +378,7 @@ MainWindow
       margin-top: 14
       margin-right: 16
       text-align: right
-      color: #93d8ac
+      color: #a7d38f
       font: terminus-14px-bold
 
   ScrollablePanel
@@ -393,7 +393,7 @@ MainWindow
     anchors.left: filtersPanel.right
     anchors.right: parent.right
     anchors.bottom: actionBar.top
-    background-color: #121821
+    background-color: #1a1612
     border-width: 0
     padding: 8
     focusable: false
@@ -413,7 +413,7 @@ MainWindow
     anchors.right: offers.right
     anchors.bottom: offers.bottom
     visible: false
-    background-color: #121821cc
+    background-color: #1a1612cc
 
     Label
       text: 'No offers match your filters'
@@ -422,7 +422,7 @@ MainWindow
       width: 260
       height: 16
       text-align: center
-      color: #b6c0d2
+      color: #c1b5a3
 
   TextList
     id: history
@@ -435,7 +435,7 @@ MainWindow
     padding: 6
     focusable: false
     visible: false
-    background-color: #121821
+    background-color: #1a1612
 
   VerticalScrollBar
     id: historyScrollBar
@@ -452,9 +452,9 @@ MainWindow
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     height: 34
-    background-color: #171d27
+    background-color: #211c17
     border-width: 1 0 0 0
-    border-color: #2f3a49
+    border-color: #4a3f34
 
   Button
     id: backButton
