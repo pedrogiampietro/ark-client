@@ -45,9 +45,9 @@ ForgeFragmentSlot < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 3
-    height: 18
+    height: 14
     text-align: center
-    text-wrap: true
+    text-wrap: false
     text-auto-resize: true
     font: verdana-11px-antialised
     color: #bcbcbc
@@ -95,9 +95,9 @@ ForgeAttrSlot < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 4
-    height: 20
+    height: 14
     text-align: center
-    text-wrap: true
+    text-wrap: false
     text-auto-resize: true
     font: verdana-11px-antialised
     color: #bcbcbc
