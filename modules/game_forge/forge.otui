@@ -448,22 +448,42 @@ ForgeClassificationTab < Panel
       anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 6
-      background-color: #232323
+      background-color: #0f1419
       border-width: 1
-      border-color: #575757
+      border-color: #2f5a66
+
+      Panel
+        id: classActionGlowTop
+        height: 1
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-left: 8
+        margin-right: 8
+        background-color: #4fd4ff
+
+      Panel
+        id: classActionGlowBottom
+        height: 1
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-left: 8
+        margin-right: 8
+        background-color: #1d3a45
 
       // ── Left: fragment slots ──────────────────────────────
       Panel
         id: classSlotsGroup
-        width: 196
-        height: 120
+        width: 190
+        height: 116
         anchors.top: parent.top
         anchors.left: parent.left
         margin-left: 10
         margin-top: 6
-        background-color: #1e1e1e
+        background-color: #0b1014
         border-width: 1
-        border-color: #4f4f4f
+        border-color: #315967
 
         ForgeFragmentSlot
           id: classTierRuneSlot
@@ -482,8 +502,8 @@ ForgeClassificationTab < Panel
       // ── Vertical separator ────────────────────────────────
       UIWidget
         id: classSlotSep
-        width: 1
-        background-color: #5a5a5a
+        width: 2
+        background-color: #2e8ca8
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: classSlotsGroup.right
@@ -502,33 +522,34 @@ ForgeClassificationTab < Panel
         margin-right: 10
         margin-top: 6
         margin-bottom: 6
-        background-color: #1c1c1c
+        background-color: #0a1014
+        border-color: #2b5663
 
         // Top row: +20% toggle and chance
         Panel
           id: classBonusRow
-          height: 44
+          height: 40
           anchors.top: parent.top
           anchors.left: parent.left
           anchors.right: parent.right
           margin-top: 6
-          margin-left: 8
-          margin-right: 8
-          background-color: #171717
+          margin-left: 10
+          margin-right: 10
+          background-color: #111a20
           border-width: 1
-          border-color: #4a4a4a
+          border-color: #2f5d6b
 
           // +20% button
           UIWidget
             id: classBonusButton
-            size: 40 40
+            size: 34 34
             image-source: /images/ui/20
             image-clip: 0 0 66 66
-            image-size: 40 40
+            image-size: 34 34
             image-color: #cccccc
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            margin-left: 3
+            margin-left: 5
 
             $on:
               image-clip: 66 0 66 66
@@ -540,30 +561,31 @@ ForgeClassificationTab < Panel
           // Bonus extra cost (shows +Xcc when bonus active)
           Panel
             id: classBonusCostRow
-            width: 72
-            height: 20
+            width: 84
+            height: 24
             anchors.left: classBonusButton.right
             anchors.verticalCenter: classBonusButton.verticalCenter
-            margin-left: 6
-            background-color: #111111
+            margin-left: 8
+            background-color: #0a1116
             border-width: 1
-            border-color: #4a4a4a
+            border-color: #2f5d6b
 
             UIWidget
               image-source: /images/ui/crystal_coin
-              image-size: 14 14
-              size: 14 14
+              image-size: 16 16
+              size: 16 16
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
+              margin-left: 3
 
             Label
               id: classBonusCostLabel
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
-              margin-left: 18
-              width: 46
+              margin-left: 24
+              width: 54
               font: verdana-11px-antialised
-              color: #a0a000
+              color: #7ed7ff
 
           // Arrow
           UIWidget
@@ -574,26 +596,27 @@ ForgeClassificationTab < Panel
             anchors.left: classBonusCostRow.right
             anchors.verticalCenter: classBonusButton.verticalCenter
             margin-left: 6
+            image-color: #42b7d9
             phantom: false
 
           // Chance %
           Panel
             id: classChancePanel
-            width: 132
-            height: 36
+            width: 146
+            height: 30
             anchors.right: parent.right
             anchors.verticalCenter: classBonusButton.verticalCenter
-            margin-right: 2
-            background-color: #181818
+            margin-right: 4
+            background-color: #0b141a
             border-width: 1
-            border-color: #4f4f4f
+            border-color: #347589
 
             Label
               id: classChanceLabel
               anchors.fill: parent
               text-align: center
               font: verdana-11px-antialised
-              color: #d7d7d7
+              color: #76ffb8
               text-wrap: true
 
         // Bottom row: cost pill + forge button (centered together)
@@ -605,42 +628,42 @@ ForgeClassificationTab < Panel
           anchors.bottom: parent.bottom
           margin-top: 6
           margin-bottom: 6
-          background-color: #151515
+          background-color: #0b1115
           border-width: 1
-          border-color: #3f3f3f
+          border-color: #2b5562
 
           // Centered wrapper holds both cost pill and forge button
           Panel
             id: classForgeCenter
-            width: 256
-            height: 60
+            width: 242
+            height: 56
             anchors.centerIn: parent
 
             // Cost pill — same height as forge button
             Panel
               id: classCostPill
-              width: 132
-              height: 58
+              width: 122
+              height: 52
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
-              background-color: #171717
+              background-color: #0a1015
               border-width: 1
-              border-color: #4f4f4f
+              border-color: #2f5d6b
 
               Label
                 !text: tr('Forge Cost')
                 anchors.left: parent.left
                 anchors.top: parent.top
                 margin-left: 10
-                margin-top: 6
+                margin-top: 5
                 font: verdana-11px-antialised
-                color: #c0c0c0
+                color: #9bb1ba
 
               UIWidget
                 id: classCostCoin
-                size: 24 24
+                size: 22 22
                 image-source: /images/ui/crystal_coin
-                image-size: 24 24
+                image-size: 22 22
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 margin-left: 10
@@ -653,53 +676,58 @@ ForgeClassificationTab < Panel
                 anchors.right: parent.right
                 margin-left: 5
                 margin-right: 6
-                height: 22
+                height: 20
                 font: verdana-11px-antialised
-                color: #ffd700
+                color: #7ed7ff
                 text-align: left
 
             // Forge button — right side of center wrapper
             UIButton
               id: classForgeButton
-              size: 116 60
-              image-source: /images/game/imbuing/imbue_green
+              size: 112 56
+              image-source: /images/game/imbuing/imbue_empty
               image-clip: 0 0 128 66
               anchors.right: parent.right
               anchors.verticalCenter: parent.verticalCenter
               enabled: false
-              image-color: #95d3a2
+              image-color: #47d8ff
 
               $pressed:
                 image-clip: 0 66 128 66
 
               $disabled:
-                image-color: #3a5544
+                image-color: #284653
 
     // Status label
-    Label
-      id: classMaterialLabel
-      text-align: center
-      anchors.left: parent.left
-      anchors.right: parent.right
+    Panel
+      id: classMaterialStatus
+      width: 328
+      height: 18
+      anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottom: classProgressBar.top
       margin-bottom: 4
-      margin-left: 16
-      margin-right: 16
-      font: verdana-11px-antialised
-      color: #d0d0d0
-      text-wrap: true
-      height: 16
+      background-color: #0a1217
+      border-width: 1
+      border-color: #2d5b69
+
+      Label
+        id: classMaterialLabel
+        text-align: center
+        anchors.fill: parent
+        font: verdana-11px-antialised
+        color: #d0d0d0
+        text-wrap: true
 
     ProgressBar
       id: classProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
-      margin-left: 92
-      margin-right: 92
+      margin-left: 98
+      margin-right: 98
       margin-bottom: 6
       height: 10
-      background-color: #4a8d45
+      background-color: #2f7084
       visible: false
 
 
@@ -1257,22 +1285,42 @@ ForgeToolsTab < Panel
       anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 6
-      background-color: #232323
+      background-color: #0f1419
       border-width: 1
-      border-color: #575757
+      border-color: #2f5a66
+
+      Panel
+        id: toolsActionGlowTop
+        height: 1
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-left: 8
+        margin-right: 8
+        background-color: #4fd4ff
+
+      Panel
+        id: toolsActionGlowBottom
+        height: 1
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-left: 8
+        margin-right: 8
+        background-color: #1d3a45
 
       // ── Left: fragment slots ──────────────────────────────
       Panel
         id: toolsSlotsGroup
-        width: 196
-        height: 120
+        width: 190
+        height: 116
         anchors.top: parent.top
         anchors.left: parent.left
         margin-left: 10
         margin-top: 6
-        background-color: #1e1e1e
+        background-color: #0b1014
         border-width: 1
-        border-color: #4f4f4f
+        border-color: #315967
 
         ForgeFragmentSlot
           id: toolsUpgradeRuneSlot
@@ -1291,8 +1339,8 @@ ForgeToolsTab < Panel
       // ── Vertical separator ────────────────────────────────
       UIWidget
         id: toolsSlotSep
-        width: 1
-        background-color: #5a5a5a
+        width: 2
+        background-color: #2e8ca8
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: toolsSlotsGroup.right
@@ -1311,32 +1359,33 @@ ForgeToolsTab < Panel
         margin-right: 10
         margin-top: 6
         margin-bottom: 6
-        background-color: #1c1c1c
+        background-color: #0a1014
+        border-color: #2b5663
 
         // Top row: +20% toggle and chance
         Panel
           id: toolsBonusRow
-          height: 44
+          height: 40
           anchors.top: parent.top
           anchors.left: parent.left
           anchors.right: parent.right
           margin-top: 6
-          margin-left: 8
-          margin-right: 8
-          background-color: #171717
+          margin-left: 10
+          margin-right: 10
+          background-color: #111a20
           border-width: 1
-          border-color: #4a4a4a
+          border-color: #2f5d6b
 
           UIWidget
             id: toolsBonusButton
-            size: 40 40
+            size: 34 34
             image-source: /images/ui/20
             image-clip: 0 0 66 66
-            image-size: 40 40
+            image-size: 34 34
             image-color: #cccccc
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            margin-left: 3
+            margin-left: 5
 
             $on:
               image-clip: 66 0 66 66
@@ -1347,30 +1396,31 @@ ForgeToolsTab < Panel
 
           Panel
             id: toolsBonusCostRow
-            width: 72
-            height: 20
+            width: 84
+            height: 24
             anchors.left: toolsBonusButton.right
             anchors.verticalCenter: toolsBonusButton.verticalCenter
-            margin-left: 6
-            background-color: #111111
+            margin-left: 8
+            background-color: #0a1116
             border-width: 1
-            border-color: #4a4a4a
+            border-color: #2f5d6b
 
             UIWidget
               image-source: /images/ui/crystal_coin
-              image-size: 14 14
-              size: 14 14
+              image-size: 16 16
+              size: 16 16
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
+              margin-left: 3
 
             Label
               id: toolsBonusCostLabel
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
-              margin-left: 18
-              width: 46
+              margin-left: 24
+              width: 54
               font: verdana-11px-antialised
-              color: #a0a000
+              color: #7ed7ff
 
           UIWidget
             id: toolsForgeArrow
@@ -1380,25 +1430,26 @@ ForgeToolsTab < Panel
             anchors.left: toolsBonusCostRow.right
             anchors.verticalCenter: toolsBonusButton.verticalCenter
             margin-left: 6
+            image-color: #42b7d9
             phantom: false
 
           Panel
             id: toolsChancePanel
-            width: 132
-            height: 36
+            width: 146
+            height: 30
             anchors.right: parent.right
             anchors.verticalCenter: toolsBonusButton.verticalCenter
-            margin-right: 2
-            background-color: #181818
+            margin-right: 4
+            background-color: #0b141a
             border-width: 1
-            border-color: #4f4f4f
+            border-color: #347589
 
             Label
               id: toolsChanceLabel
               anchors.fill: parent
               text-align: center
               font: verdana-11px-antialised
-              color: #d7d7d7
+              color: #76ffb8
               text-wrap: true
 
         Panel
@@ -1409,40 +1460,40 @@ ForgeToolsTab < Panel
           anchors.bottom: parent.bottom
           margin-top: 6
           margin-bottom: 6
-          background-color: #151515
+          background-color: #0b1115
           border-width: 1
-          border-color: #3f3f3f
+          border-color: #2b5562
 
           Panel
             id: toolsForgeCenter
-            width: 256
-            height: 60
+            width: 242
+            height: 56
             anchors.centerIn: parent
 
             Panel
               id: toolsCostPill
-              width: 132
-              height: 58
+              width: 122
+              height: 52
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
-              background-color: #171717
+              background-color: #0a1015
               border-width: 1
-              border-color: #4f4f4f
+              border-color: #2f5d6b
 
               Label
                 !text: tr('Forge Cost')
                 anchors.left: parent.left
                 anchors.top: parent.top
                 margin-left: 10
-                margin-top: 6
+                margin-top: 5
                 font: verdana-11px-antialised
-                color: #c0c0c0
+                color: #9bb1ba
 
               UIWidget
                 id: toolsCostCoin
-                size: 24 24
+                size: 22 22
                 image-source: /images/ui/crystal_coin
-                image-size: 24 24
+                image-size: 22 22
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 margin-left: 10
@@ -1455,51 +1506,56 @@ ForgeToolsTab < Panel
                 anchors.right: parent.right
                 margin-left: 5
                 margin-right: 6
-                height: 22
+                height: 20
                 font: verdana-11px-antialised
-                color: #ffd700
+                color: #7ed7ff
                 text-align: left
 
             UIButton
               id: toolsForgeButton
-              size: 116 60
-              image-source: /images/game/imbuing/imbue_green
+              size: 112 56
+              image-source: /images/game/imbuing/imbue_empty
               image-clip: 0 0 128 66
               anchors.right: parent.right
               anchors.verticalCenter: parent.verticalCenter
               enabled: false
-              image-color: #95d3a2
+              image-color: #47d8ff
 
               $pressed:
                 image-clip: 0 66 128 66
 
               $disabled:
-                image-color: #3a5544
+                image-color: #284653
 
-    Label
-      id: toolsMaterialLabel
-      text-align: center
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.bottom: toolsProgressBar.top
-      margin-bottom: 4
-      margin-left: 16
-      margin-right: 16
-      font: verdana-11px-antialised
-      color: #d0d0d0
-      text-wrap: true
-      height: 16
+      Panel
+        id: toolsMaterialStatus
+        width: 328
+        height: 18
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: toolsProgressBar.top
+        margin-bottom: 4
+        background-color: #0a1217
+        border-width: 1
+        border-color: #2d5b69
+
+        Label
+          id: toolsMaterialLabel
+          text-align: center
+          anchors.fill: parent
+          font: verdana-11px-antialised
+          color: #d0d0d0
+          text-wrap: true
 
     ProgressBar
       id: toolsProgressBar
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
-      margin-left: 92
-      margin-right: 92
+      margin-left: 98
+      margin-right: 98
       margin-bottom: 6
       height: 10
-      background-color: #4a8d45
+      background-color: #2f7084
       visible: false
 
 
