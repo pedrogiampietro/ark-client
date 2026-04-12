@@ -217,6 +217,29 @@ local function getClassMaterialName(itemId, fallback)
   return fallback or ('Item ' .. tostring(itemId or 0))
 end
 
+local function compactSlotLabel(labelText)
+  if not labelText then
+    return nil
+  end
+
+  if labelText == 'Eldritch Catalyst' then
+    return 'Catalyst'
+  end
+
+  if #labelText <= 12 then
+    return labelText
+  end
+
+  local short = labelText
+  short = short:gsub('Fragment', 'Frag.')
+  short = short:gsub('Protection', 'Protect.')
+
+  if #short > 12 then
+    short = short:sub(1, 11) .. '.'
+  end
+  return short
+end
+
 local function updateForgeBalance(gold)
   if not forgeWindow then return end
   local balanceLabel = forgeWindow:recursiveGetChildById('forgeBalanceLabel')
@@ -256,7 +279,7 @@ local function setupRuneSlot(tab, slotId, runeId, count, total, labelText)
   local nameLabel = slot:recursiveGetChildById('runeLabel')
   if nameLabel then
     if labelText then
-      nameLabel:setText(labelText)
+      nameLabel:setText(compactSlotLabel(labelText))
       nameLabel:setVisible(true)
     else
       nameLabel:setVisible(false)
