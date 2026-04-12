@@ -696,8 +696,8 @@ ForgeClassificationTab < Panel
             // Cost strip on left
             Panel
               id: classCostPill
-              width: 104
-              height: 38
+              width: 84
+              height: 44
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
               background-color: #0b171f
@@ -1528,8 +1528,8 @@ ForgeToolsTab < Panel
 
             Panel
               id: toolsCostPill
-              width: 122
-              height: 52
+              width: 112
+              height: 56
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
               background-color: #0a1015
