@@ -44,6 +44,12 @@ local FORGE_RUNES = {
 
 local FORGE_FRAGMENT_COST = 100 -- fragments required per action
 
+local CLASS_MATERIAL_NAMES = {
+  [5110] = 'Pink Fragment',
+  [5109] = 'Pink Orb',
+  [5142] = 'Eldritch Catalyst',
+}
+
 -- Orbs are protection items (1 orb protects against downgrade)
 local PROTECTION_RUNES = {
   TIER    = { id = 5109, name = 'Pink Orb' },    -- protects tier
@@ -202,6 +208,13 @@ local function splitStr(str, sep)
     table.insert(result, part)
   end
   return result
+end
+
+local function getClassMaterialName(itemId, fallback)
+  if itemId and CLASS_MATERIAL_NAMES[itemId] then
+    return CLASS_MATERIAL_NAMES[itemId]
+  end
+  return fallback or ('Item ' .. tostring(itemId or 0))
 end
 
 local function updateForgeBalance(gold)
@@ -459,6 +472,14 @@ function updateClassInfo(data)
   local canForge = data.canForge or false
   local hasRune = data.hasRune or false
 
+  local classRuneItemId = data.classRuneItemId or FORGE_RUNES.TIER_UP.id
+  local classRuneRequired = data.classRuneRequired or FORGE_FRAGMENT_COST
+  local classCatalystItemId = data.classCatalystItemId or 5142
+  local classCatalystRequired = data.classCatalystRequired or 1
+
+  local classRuneName = getClassMaterialName(classRuneItemId, FORGE_RUNES.TIER_UP.name)
+  local classCatalystName = getClassMaterialName(classCatalystItemId, 'Eldritch Catalyst')
+
   classCostData = {
     cost = data.cost or 0,
     bonusCost = data.bonusCost or 0,
@@ -495,13 +516,22 @@ function updateClassInfo(data)
     end
   end
 
-  setupRuneSlot(tab, 'classTierRuneSlot', FORGE_RUNES.TIER_UP.id, data.runeCount or 0, FORGE_FRAGMENT_COST, FORGE_RUNES.TIER_UP.name)
-  setupRuneSlot(tab, 'classProtRuneSlot', PROTECTION_RUNES.TIER.id, data.protectionCount or 0, 1, PROTECTION_RUNES.TIER.name)
+  setupRuneSlot(tab, 'classTierRuneSlot', classRuneItemId, data.runeCount or 0, classRuneRequired, classRuneName)
+  setupRuneSlot(tab, 'classProtRuneSlot', classCatalystItemId, data.protectionCount or 0, classCatalystRequired, classCatalystName)
 
   local matLabel = tab:recursiveGetChildById('classMaterialLabel')
   if matLabel then
     if not hasRune then
-      matLabel:setText(FORGE_RUNES.TIER_UP.name .. ' [' .. tr('Missing') .. ']')
+      local missing = {}
+      if (data.runeCount or 0) < classRuneRequired then
+        table.insert(missing, classRuneName)
+      end
+      if (data.protectionCount or 0) < classCatalystRequired then
+        table.insert(missing, classCatalystName)
+      end
+
+      local missingText = #missing > 0 and table.concat(missing, ' + ') or tr('Materials')
+      matLabel:setText(missingText .. ' [' .. tr('Missing') .. ']')
       matLabel:setColor('#ff3333')
     else
       matLabel:setText('')
@@ -1138,7 +1168,7 @@ end
 function onForgeData(protocol, opcode, buffer)
   if not buffer or #buffer == 0 then return end
 
-  -- CLASS_INFO:currentTier,nextTier,chance,canForge,hasRune,cost,bonusCost,playerGold,runeCount,protectionCount
+  -- CLASS_INFO:currentTier,nextTier,chance,canForge,hasRune,cost,bonusCost,playerGold,runeCount,catalystCount,runeItemId,runeRequired,catalystItemId,catalystRequired
   if buffer:sub(1, 11) == 'CLASS_INFO:' then
     local parts = splitStr(buffer:sub(12), ',')
     if #parts >= 5 then
@@ -1152,7 +1182,11 @@ function onForgeData(protocol, opcode, buffer)
         bonusCost = tonumber(parts[7]) or 0,
         playerGold = tonumber(parts[8]) or 0,
         runeCount = tonumber(parts[9]) or 0,
-        protectionCount = tonumber(parts[10]) or 0
+        protectionCount = tonumber(parts[10]) or 0,
+        classRuneItemId = tonumber(parts[11]) or FORGE_RUNES.TIER_UP.id,
+        classRuneRequired = tonumber(parts[12]) or FORGE_FRAGMENT_COST,
+        classCatalystItemId = tonumber(parts[13]) or 5142,
+        classCatalystRequired = tonumber(parts[14]) or 1,
       })
     end
 
