@@ -5,6 +5,7 @@ local LogColors = { [LogDebug] = 'pink',
                     [LogError] = 'red' }
 local MaxLogLines = 128
 local MaxHistory = 1000
+local TERMINAL_HOTKEY = 'Ctrl+Alt+Shift+Y'
 
 local oldenv = getfenv(0)
 setfenv(0, _G)
@@ -140,9 +141,10 @@ function init()
 
   terminalWindow.onDoubleClick = popWindow
 
-  terminalButton = modules.client_topmenu.addLeftButton('terminalButton', tr('Terminal') .. ' (Ctrl + T)', '/images/topbuttons/terminal', toggle)
+  terminalButton = modules.client_topmenu.addLeftButton('terminalButton', tr('Terminal'), '/images/topbuttons/terminal', toggle)
   terminalButton:setOn(false)
-  g_keyboard.bindKeyDown('Ctrl+T', toggle)
+  terminalButton:hide()
+  g_keyboard.bindKeyDown(TERMINAL_HOTKEY, toggle)
 
   commandHistory = g_settings.getList('terminal-history')
 
@@ -195,7 +197,7 @@ function terminate()
   }
   g_settings.setNode('terminal-window', settings)
 
-  g_keyboard.unbindKeyDown('Ctrl+T')
+  g_keyboard.unbindKeyDown(TERMINAL_HOTKEY)
   g_logger.setOnLog(nil)
   terminalWindow:destroy()
   terminalButton:destroy()
@@ -204,7 +206,7 @@ function terminate()
 end
 
 function hideButton()
-  --terminalButton:hide()
+  terminalButton:hide()
 end
 
 function popWindow()
@@ -266,8 +268,8 @@ function hide()
 end
 
 function disable()
-  --terminalButton:hide()
-  g_keyboard.unbindKeyDown('Ctrl+T')
+  terminalButton:hide()
+  g_keyboard.unbindKeyDown(TERMINAL_HOTKEY)
   disabled = true
 end
 
